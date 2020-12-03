@@ -1,0 +1,61 @@
+---
+title: "SDM Workflow for COCA I"
+author: "Andrew Allyn"
+date: "12/1/2020"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+        collapsed: FALSE
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, quiet = TRUE)
+```
+
+```{r, echo  = FALSE, align = "right", height = 44}
+# Logo
+#knitr::include_graphics("~/GitHub/gmRi/inst/stylesheets/gmri_logo.png")
+# Access GMRI CSS Style
+gmRi::insert_gmri_header(header_file = "gmri_logo_header.html")
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+## Overview
+
+## Preliminaries
+A few things before the work begins. First, getting the gmRi library, which has our function for generating paths to folders on Box. Second, sourcing some functions that we need. I'm sure there is a better way of doing this.
+```{r}
+library(here)
+library(gmRi)
+os_use<- .Platform$OS.type
+source(here::here("/scratch/aja/scripts", "library_check_func.R"))
+source(here::here("/scratch/aja/scripts", "trawl_dat_prep_func.R"))
+```
+
+## The Workflow
+### Processing raw NOAA NEFSC data
+**Input** = File path to raw NOAA NEFSC trawl .Rdata file  
+**Output** = A tidy data set, where each row is a unique tow-species observation  
+The first step for the workflow is to process the raw NOAA NEFSC data, which is usually provided by email, and output a "tidy" data set that has one row per observation, where the observation is defined as a unique tow/trawl - species biomass caught. To complete this processing, I use the "trawl_dat_prep_func.R" file. This is good in some ways, but bad in others (some hard wiring of columns by column numeric ID) that means it could easily break as the trawl survey data are updated. 
+```{r, hide = TRUE}
+survdat_path<- paste(shared.path(os.use = os_use, group = "root", folder = "RES Data/NMFS_trawl/"), "Survdat_Nye_allseason.Rdata", sep = "")
+nefsc_dat<- nefsc_trawl_prep(survdat_path = survdat_path, out_path = here::here("/scratch/aja/data/"))
+```
+
+### Collecting model covariates
+**Input**  
+- The tidy data set created by processing function  
+- Raster stack?  
+
+**Output**  
+- Tidy data set with columns for each of the model covariates  
+
+The second step for the workflow is to extract covariates of interest at each of the unique tow locations within the tidy trawl data set ("trawl_dat"). I've done this a couple different ways. At one point, this was part of the trawl data processing. Now, though, trying to use a specific environmental data extraction function. A few things to note about this extraction workflow. To start, we are usually interested in some combination of static covariates (e.g., depth) and dynamic covariates (e.g., SST or BT). Additionally, we are many times interested in including dynamic covariates across different space/time scales. For example, we may want a seasonal average SST AND annual minimum SST. What this all means is that this isn't a simple extraction -- we can't just read in an existing depth raster and then stack on a seasonal SST layer, because this seasonal SST layer doesn't exist. So, we either have to create this layer ourselves or we need different functions depending on if we are extracting static or dynamic covariates at point locations. I *think* the easiest approach is different functions? The other important thing to note is that any work with the dynamic covariates first involves gathering those data. A good example of this is the NOAA OISST product. This is available through any number of THREDDS or ERDDAP servers and is commonly stored as yearly (or daily) files. To get a full spatio-temporal time series of the data, we have to create it. There's a slew of different approaches for doing this -- ODP has theirs, and I think Adam, Matt and I all have our own process, too. It would be great if this was something that was automated and all of us knew right where the most recent, collated global OISST data were. 
+
+Back to the workflow and focusing on a "dynamic" covariate extraction function. Ideally, this function would connect to GMRI's updated copy of the dynamic covariate data on an ERDAPP server and then require input of the spatial points for the extraction and some indication of the time (and space?) scale to complete the extraction. In other words: I want to extract monthly average OISST at these tow locations, or I want to extract annual average OISST at these tow locations. 
+
+```{r, echo = FALSE}
+gmRi::insert_gmri_footer(footer_file = "aallyn_gmri_footer.html")
+```
