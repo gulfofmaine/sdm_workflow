@@ -1588,7 +1588,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">SDM Workflow for COCA I</h1>
 <h4 class="author">Andrew Allyn</h4>
-<h4 class="date">12/1/2020</h4>
+<h4 class="date">03 December, 2020</h4>
 
 </div>
 
@@ -1790,49 +1790,73 @@ a {
 
 
 </style></p>
-<div id="overview" class="section level1">
-<h1>Overview</h1>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 </div>
-<div id="preliminaries" class="section level1">
-<h1>Preliminaries</h1>
+<div id="preliminaries" class="section level2">
+<h2>Preliminaries</h2>
 <p>A few things before the work begins. First, getting the gmRi library, which has our function for generating paths to folders on Box. Second, sourcing some functions that we need. I’m sure there is a better way of doing this.</p>
-<pre class="r"><code>library(here)</code></pre>
-<pre><code>## here() starts at /Users/aallyn/GitHub/sdm_workflow</code></pre>
-<pre class="r"><code>library(gmRi)
+<pre class="r"><code>library(here)
+library(gmRi)
+library(tidyverse)
+library(sf)
+library(raster)
+library(conflicted)
+filter&lt;- dplyr::filter
+select&lt;- dplyr::select
+extract&lt;- raster::extract
 os_use&lt;- .Platform$OS.type
 source(here::here(&quot;/scratch/aja/scripts&quot;, &quot;library_check_func.R&quot;))
-source(here::here(&quot;/scratch/aja/scripts&quot;, &quot;trawl_dat_prep_func.R&quot;))</code></pre>
+source(here::here(&quot;/scratch/aja/scripts&quot;, &quot;nefsc_trawl_prep_func.R&quot;))
+source(here::here(&quot;/scratch/aja/scripts&quot;, &quot;static_extract_func.R&quot;))</code></pre>
 </div>
-<div id="the-workflow" class="section level1">
-<h1>The Workflow</h1>
-<div id="processing-raw-noaa-nefsc-data" class="section level2">
-<h2>Processing raw NOAA NEFSC data</h2>
-<p><strong>Input</strong> = File path to raw NOAA NEFSC trawl .Rdata file<br />
-<strong>Output</strong> = A tidy data set, where each row is a unique tow-species observation<br />
-The first step for the workflow is to process the raw NOAA NEFSC data, which is usually provided by email, and output a “tidy” data set that has one row per observation, where the observation is defined as a unique tow/trawl - species biomass caught. To complete this processing, I use the “trawl_dat_prep_func.R” file. This is good in some ways, but bad in others (some hard wiring of columns by column numeric ID) that means it could easily break as the trawl survey data are updated.</p>
-<pre class="r"><code>survdat_path&lt;- paste(shared.path(os.use = os_use, group = &quot;root&quot;, folder = &quot;RES Data/NMFS_trawl/&quot;), &quot;Survdat_Nye_allseason.Rdata&quot;, sep = &quot;&quot;)
-trawl_dat&lt;- trawl_dat_prep(survdat_path = survdat_path, out_path = here::here(&quot;/scratch/aja/data/&quot;))</code></pre>
-<pre><code>## Loading required package: tidyverse</code></pre>
-<pre><code>## ── Attaching packages ────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
-<pre><code>## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-## ✓ tibble  3.0.3     ✓ dplyr   1.0.2
-## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-## ✓ readr   1.3.1     ✓ forcats 0.5.0</code></pre>
-<pre><code>## ── Conflicts ───────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre><code>## `summarise()` regrouping output by &#39;ID&#39; (override with `.groups` argument)</code></pre>
-<pre><code>## Joining, by = c(&quot;ID&quot;, &quot;SVSPP&quot;)</code></pre>
-</div>
-<div id="collecting-model-covariates" class="section level2">
-<h2>Collecting model covariates</h2>
+<div id="the-workflow" class="section level2">
+<h2>The Workflow</h2>
+<div id="processing-raw-noaa-nefsc-data" class="section level3">
+<h3>Processing raw NOAA NEFSC data</h3>
+<p>The first step for the workflow is to process the raw NOAA NEFSC data, which is usually provided by email, and output a “tidy” data set that has one row per observation, where the observation is defined as a unique tow/trawl - species biomass caught. To complete this processing, I use the “trawl_dat_prep_func.R” file. This is good in some ways, but bad in others (some hard wiring of columns by column numeric ID) that means it could easily break as the trawl survey data are updated.</p>
 <p><strong>Input</strong><br />
-- The tidy data set created by processing function<br />
-- Raster stack?</p>
++ File path to raw NOAA NEFSC trawl .Rdata file.</p>
 <p><strong>Output</strong><br />
-- Tidy data set with columns for each of the model covariates</p>
-<p>The second step for the workflow is to extract covariates of interest at each of the unique tow locations within the tidy trawl data set (“trawl_dat”). I’ve done this a couple different ways. At one point, this was part of the trawl data processing. Now, though, trying to use a specific environmental data extraction function. A few things to note about this extraction workflow. To start, we are usually interested in some combination of static covariates (e.g., depth) and dynamic covariates (e.g., SST or BT). Additionally, we are many times interested in including dynamic covariates across different space/time scales. For example, we may want a seasonal average SST AND annual minimum SST. What this all means is that this isn’t a simple extraction – we can’t just read in an existing depth raster and then stack on a seasonal SST layer, because this seasonal SST layer doesn’t exist. So, we either have to create this layer ourselves or we need different functions depending on if we are extracting static or dynamic covariates at point locations. I <em>think</em> the easiest approach is different functions? The other important thing to note is that any work with the dynamic covariates first involves gathering those data. A good example of this is the NOAA OISST product. This is available through any number of THREDDS or ERDDAP servers and is commonly stored as yearly (or daily) files. To get a full spatio-temporal time series of the data, we have to create it. There’s a slew of different approaches for doing this – ODP has theirs, and I think Adam, Matt and I all have our own process, too. It would be great if this was something that was automated and all of us knew right where the most recent, collated global OISST data were.</p>
++ A tidy data set, where each row is a unique tow-species observation.</p>
+<p><strong>Other arguments</strong><br />
++ out_path = Path to where we want to save the new file.</p>
+<pre class="r"><code>survdat_path&lt;- paste(shared.path(os.use = os_use, group = &quot;root&quot;, folder = &quot;RES Data/NMFS_trawl/&quot;), &quot;Survdat_Nye_allseason.Rdata&quot;, sep = &quot;&quot;)
+nefsc_dat&lt;- nefsc_trawl_prep(survdat_path = survdat_path, out_path = here::here(&quot;/scratch/aja/data/&quot;))</code></pre>
+</div>
+<div id="collecting-model-covariates" class="section level3">
+<h3>Collecting model covariates</h3>
+<p>The second step for the workflow is to extract covariates of interest at each of the unique tow locations within the tidy trawl data set (“nefsc_dat”). I’ve done this a couple different ways. At one point, I had this baked right into the trawl data processing code. Now, though, I am trying to use a specific environmental data extraction function. A few things to note about this extraction workflow before getting to the function or functions. To start, we are usually interested in some combination of static covariates (e.g., depth) and dynamic covariates (e.g., SST or BT). Additionally, we are many times interested in including dynamic covariates across different spatial or temporal scales. For example, we may want a seasonal average SST AND an annual minimum SST at each trawl location. What this all means is that this isn’t a simple extraction – we can’t just read in an existing depth raster and then stack on a seasonal SST layer. For one thing, this “seasonal” SST layer doesn’t exist, and even if it did, what about if we wanted to use some other temporal scale? So, we either have to create these layers ourselves or we need different functions depending on if we are extracting static or dynamic covariates at point locations. I <em>think</em> the easiest approach is different functions? The other important thing to note is that any work with the dynamic covariates first involves gathering those data. A good example of this is the NOAA OISST product. This is available through any number of THREDDS or ERDDAP servers and is commonly stored as yearly (or daily) files. To get a full spatio-temporal time series of the data, we have to create it. There’s a slew of different approaches for doing this – ODP has theirs, and I think Adam, Matt and I all have our own process, too. It would be great if this was something that was automated and all of us knew right where the most recent, collated global OISST data were. With that dream goal in mind, going to think about a static extraction function and a dynamic extraction function that each use raster data and spatial points as input.</p>
+<div id="static-covariate-extraction" class="section level4">
+<h4>Static covariate extraction</h4>
+<p>Within the “extracting covariates” workflow step, focusing on the static covariates first. This is a really straightforward process and just amounts to overlaying our data, represented as spatial points, onto a raster stack, with each layer in the stack representing a static variable of interest (e.g., depth, habitat type). I’m trying to think of how this function might be expanded and the only other thing I can think of is if we wanted to collect information over different spatial scales than the input raster stack <strong>which have to be of the same spatial extent and scale</strong>. Something to think about for potential function improvements down the road.</p>
+<p><strong>Input</strong><br />
++ rast_stack = A raster stack of covariates. + sf_points = A sf spatial points object with the locations where we want to extract covariate values.</p>
+<p><strong>Output</strong><br />
++ A tidy data set, where each row is a unique tow-species observation with additional columns for each of the covariate values.</p>
+<p><strong>Other Arguments</strong><br />
++ stack_names = A vector of the names of each of these covariates.<br />
++ out_path = Path to where we want to save the new file, which includes the prepped trawl data with appended columns for each of the covariates.<br />
++ new_file_name = Name for new file. Default is NULL, which will override the <code>model_dat.rds</code> file saved during the processing step.</p>
+<pre class="r"><code># Which static covariate values do we want to include? Provide each of them as a layer in a raster stack
+cov_stack&lt;- raster::stack(paste(shared.path(os.use = os_use, group = &quot;root&quot;, folder = &quot;RES Data/Shapefiles/&quot;), &quot;NEShelf_Etopo1_bathy.tiff&quot;, sep = &quot;&quot;))
+
+# Convert trawl data to sf spatial points
+nefsc_sf&lt;- st_as_sf(nefsc_dat, coords = c(&quot;DECDEG_BEGLON&quot;, &quot;DECDEG_BEGLAT&quot;), crs = 4326, remove = FALSE)
+
+# Run static extraction function
+nefsc_dat&lt;- static_extract(rast_stack = cov_stack, stack_names = &quot;DEPTH&quot;, sf_points = nefsc_sf, out_path = here::here(&quot;/scratch/aja/data/&quot;), new_file_name = NULL)</code></pre>
+</div>
+<div id="dynamic-covariate-extraction" class="section level4">
+<h4>Dynamic covariate extraction</h4>
 <p>Back to the workflow and focusing on a “dynamic” covariate extraction function. Ideally, this function would connect to GMRI’s updated copy of the dynamic covariate data on an ERDAPP server and then require input of the spatial points for the extraction and some indication of the time (and space?) scale to complete the extraction. In other words: I want to extract monthly average OISST at these tow locations, or I want to extract annual average OISST at these tow locations.</p>
+<p><strong>Input</strong><br />
++ rast_ts_stack = A raster stack of one covariate variable, where each layer represents a different time step.<br />
++ t_summ = A numeric value or character string that indicates what temporal resolution should be used in summarizing the covariate values. If numeric, the function will simply summarize the values in the raster stack from the matching period back <code>t_summ</code> numeric time steps. For example, if the <code>rast_ts_stack</code> provided daily values and <code>t_summ = 90</code>, the function would calculate a 90 day average, where the 90-day window would either be leading up to and including the day of observation, saddled around the observation, or include the day of the observation and 89 days into the future. If a character string, should be one of “monthly”, “seasonal”, or “annual”. These options are built into the function to provide a bit easier specification to quickly calculate the monthly/seasonal/annual summaries of the raster stack values. When used, this automatically defines <code>t_position = saddle</code>. + t_position = A character vector of either “prior”, “saddle”, or “future”. + sf_points = A sf spatial points object with the locations where we want to extract covariate values.</p>
+<p><strong>Output</strong><br />
++ A tidy data set, where each row is a unique tow-species observation and that has an appended column with the dynamic covariate value.</p>
+<p><strong>Other Arguments</strong><br />
++ stack_names = A character string specifying the name for the dynamic covariate column. + out_path = Path to where we want to save the new file, which includes the prepped trawl data with appended columns for the new covariate. + new_file_name = Name for new file. Default is NULL, which will override the <code>model_dat.rds</code> file saved during the processing step.</p>
 <!DOCTYPE html>
 <!---- Rmarkdown Custom Footer for Author Details - Modify personal info as needed ------>
 
@@ -1875,6 +1899,7 @@ trawl_dat&lt;- trawl_dat_prep(survdat_path = survdat_path, out_path = here::here
 <!--- End Custom Footer --->
 
 </html>
+</div>
 </div>
 </div>
 
