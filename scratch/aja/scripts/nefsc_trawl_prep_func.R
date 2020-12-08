@@ -100,9 +100,9 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
   dat$PRESENCE<- ifelse(dat$SUM_BIOMASS > 0, 1, dat$SUM_BIOMASS) # Create presence/absence vector based on sum biomass
   dat$LOG_BIOMASS<- log(dat$SUM_BIOMASS+1)
   
-  # Return and write out processed file -----------------------------------------------------------
-  return(dat)
+  # Write it out and return it -----------------------------------------------------------
   saveRDS(dat, file = paste(out_path, "model_dat.rds", sep = ""))
+  return(dat)
   
   #########
   ## End
