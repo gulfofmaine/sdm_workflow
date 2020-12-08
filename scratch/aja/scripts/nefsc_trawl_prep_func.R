@@ -31,7 +31,7 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
   }
   
   # Load libraries, using library_check to download if it is missing
-  libraries_needed<- c("tidyverse", "gmRi")
+  libraries_needed<- c("dtplyr", "gmRi")
   library_check(libraries_needed)
   
   # For debugging
@@ -44,13 +44,14 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
   load(survdat_path)
   
   # Data cleaning -----------------------------------------------------------
-  dat<- survdat %>%
+  dat<- as_tibble(survdat) %>%
     # We won't need all of the columns available in the raw survey data
-    dplyr::select(ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, CATCHSEX, BIOMASS, AVGDEPTH, ABUNDANCE, LENGTH, NUMLEN) %>%
+    select(ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, CATCHSEX, BIOMASS, AVGDEPTH, ABUNDANCE, LENGTH, NUMLEN) %>%
     # Filtering out some strata which are in Canadian waters, as well as those more recently part of the NOAA SEFSC seasonal surveys
     filter(STRATUM >= 01010 & STRATUM <= 01760) %>%
     filter(STRATUM != 1310 & STRATUM != 1320 & STRATUM != 1330 & STRATUM != 1350 &
              STRATUM != 1410 & STRATUM != 1420 & STRATUM != 1490) %>%
+    # Filter seasons -- might want to remove this?
     filter(SEASON == "SPRING" | SEASON == "FALL") %>%
     # Some work with biomass as there are occasionally issues with biomass and abundance 
     mutate(BIOMASS = ifelse(is.na(BIOMASS) == TRUE & ABUNDANCE > 0, 0.01, BIOMASS)) %>% 
@@ -60,9 +61,9 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
     filter(!is.na(BIOMASS),
            !is.na(ABUNDANCE)) %>%
     # Keep distinct rows, ignoring duplicated rows for catch sex of different lengths
-    distinct(ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, CATCHSEX, .keep_all = TRUE) %>%
+    distinct(ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, CATCHSEX, .keep_all = TRUE) %>%
     # Now, aggregate to get our total abundance and biomass by tow-species
-    group_by(., ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, AVGDEPTH) %>%
+    group_by(., ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, AVGDEPTH) %>%
     summarize(., "SUM_BIOMASS" = sum(BIOMASS, na.rm = TRUE),
               "SUM_ABUNDANCE" = sum(ABUNDANCE, na.rm = TRUE))
   
@@ -76,13 +77,13 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
   # Add in "tow" information based on ID to the null data frame 
   tow_info<- dat %>%
     ungroup() %>%
-    select(., ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, AVGDEPTH) %>%
+    select(., ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, AVGDEPTH) %>%
     distinct() %>% 
     filter(., ID %in% null_dat$ID)
   null_dat_join<- null_dat %>%
     left_join(., tow_info, by = c("ID" = "ID")) %>%
-    select(., ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, AVGDEPTH, SUM_BIOMASS, SUM_ABUNDANCE) %>%
-    group_by(ID, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME)
+    select(., ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME, AVGDEPTH, SUM_BIOMASS, SUM_ABUNDANCE) %>%
+    group_by(ID, EST_DAY, EST_YEAR, EST_MONTH, SEASON, STRATUM, DECDEG_BEGLAT, DECDEG_BEGLON, COMNAME)
   
   # Keep the rows from null_dat that are NOT in the original data set -- these would be the rows we want to add to impute absences
   null_dat_add<- anti_join(null_dat_join, dat, by = c("ID" = "ID", "COMNAME" = "COMNAME"))
@@ -90,6 +91,10 @@ nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/N
   # Full join with the presence data
   dat<- dat %>%
     full_join(., null_dat_add)
+  
+  # Create a date column
+  dat<- dat %>%
+    mutate(., EST_DATE = as.Date(paste(EST_YEAR, str_pad(EST_MONTH, 2, side = "left", pad = "0"), str_pad(EST_DAY, 2, side = "left", pad = "0"), sep = "-")))
   
   # One final addition, adding in a PRESENCE column and a LOG.BIOMASS column
   dat$PRESENCE<- ifelse(dat$SUM_BIOMASS > 0, 1, dat$SUM_BIOMASS) # Create presence/absence vector based on sum biomass
