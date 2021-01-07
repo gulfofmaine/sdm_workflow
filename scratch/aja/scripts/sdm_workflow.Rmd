@@ -38,6 +38,7 @@ library(lubridate)
 library(sf)
 library(raster)
 library(conflicted)
+library(mgcv)
 filter<- dplyr::filter
 select<- dplyr::select
 extract<- raster::extract
@@ -45,6 +46,7 @@ os_use<- .Platform$OS.type
 source(here::here("/scratch/aja/scripts", "library_check_func.R"))
 source(here::here("/scratch/aja/scripts", "nefsc_trawl_prep_func.R"))
 source(here::here("/scratch/aja/scripts", "static_extract_func.R"))
+source(here::here("/scratch/aja/scripts", "dynamic_extract_func.R"))
 ```
 
 ## The Workflow
@@ -69,7 +71,7 @@ nefsc_dat<- nefsc_trawl_prep(survdat_path = survdat_path, out_path = here::here(
 The second step for the workflow is to extract covariates of interest at each of the unique tow locations within the tidy trawl data set (`nefsc_dat`). I've done this a couple different ways. At one point, I had this baked right into the trawl data processing code. Now, though, I am trying to use a specific environmental data extraction function. A few things to note about this extraction workflow before getting to the function or functions. To start, we are usually interested in some combination of static covariates (e.g., depth) and dynamic covariates (e.g., SST or BT). Additionally, many times we are interested in including dynamic covariates across different spatial or temporal scales. For example, we may want a seasonal average SST AND an annual minimum SST at each trawl location. What this all means is that this isn't a simple extraction -- we can't just read in an existing depth raster and then stack on a seasonal SST layer. For one thing, this "seasonal" SST layer doesn't exist, and even if it did, what about if we wanted to use some other temporal scale? So, we either have to create these layers ourselves or we need different functions depending on if we are extracting static or dynamic covariates at point locations. I *think* the easiest approach is different functions? The other important thing to note is that any work with the dynamic covariates first involves gathering those data. A good example of this is the NOAA OISST product. This is available through any number of THREDDS or ERDDAP servers and is commonly stored as yearly (or daily) files. To get a full spatio-temporal time series of the data, we have to create it. There's a slew of different approaches for doing this -- ODP has theirs, and I think Adam, Matt and I all have our own process, too. It would be great if this was something that was automated and all of us knew right where the most recent, collated global OISST data were. With that dream goal in mind, going to think about a static extraction function and a dynamic extraction function that each use raster data and spatial points as input.
 
 #### Static covariate extraction
-Within the "collecting covariates" workflow step, focusing on the static covariates first. This is a really straightforward process and just amounts to overlaying our data, represented as spatial points, onto a raster stack, with each layer in the stack representing a static variable of interest (e.g., depth, habitat type). I'm trying to think of how this function might be expanded and the only other thing I can think of is if we wanted to collect information over different spatial scales than the input raster stack **which have to be of the same spatial extent and scale**. Something to think about for potential function improvements down the road.  
+Within the "collecting covariates" workflow step, I'll focus on the static covariates first. This is a really straightforward process and just amounts to overlaying our data, represented as spatial points, onto a raster stack, with each layer in the stack representing a static variable of interest (e.g., depth, habitat type). I'm trying to think of how this function might be expanded and the only other thing I can think of is if we wanted to collect information over different spatial scales than the input raster stack **which have to be of the same spatial extent and scale**. Something to think about for potential function improvements down the road.  
 
 **Input**  
     +  rast_stack = A raster stack of covariates.
@@ -99,7 +101,7 @@ trawl_covs<- static_extract(rast_stack = cov_stack, stack_names = "DEPTH", sf_po
 ```
 
 #### Dynamic covariate extraction
-Next are the dynamic covariates. As discussed above, these are a bit trickier because of the different temporal (and potentially spatial) sclaes folks might be interested in summarizing covariate values over, and also because we generally have to compile these on our own. For now, I'm going to again pretend like these dynamic covariate data were updated regularly and stored somewhere easily accessible for all functions to work from. With this extraction function, I am sure there are improvements that we can make! The trick will be making sure the function is still relatively understandable and simple to execute, while also being flexible enough to accommodate different situations that is actually useful. 
+Next are the dynamic covariates. As discussed above, these are a bit trickier because of the different temporal (and potentially spatial) scales folks might be interested in summarizing covariate values over, and also because we generally have to compile these on our own. For now, I'm going to again pretend like these dynamic covariate data were updated regularly and stored somewhere easily accessible for all functions to work from. With this extraction function, I am sure there are improvements that we can make! The trick will be making sure the function is still relatively understandable and simple to execute, while also being flexible enough to accommodate different situations that is actually useful. 
 
 **Input**  
     +  rast_ts_stack = A raster stack of one covariate variable, where each layer represents a different time step.  
@@ -116,7 +118,7 @@ Next are the dynamic covariates. As discussed above, these are a bit trickier be
     +  out_path = Path to where we want to save the new file, which includes the prepped trawl data with appended columns for the new covariate. 
     +  new_file_name = Name for new file. Default is NULL, which will override the `model_dat.rds` file saved during the processing step.
 
-```{r}
+```{r, eval = eval.use}
 # OISST stack
 oisst_stack<- raster::stack(paste(shared.path(os.use = os_use, group = "root", folder = "RES Data/OISST/"), "ThroughFeb2020.grd", sep = ""))
 # Annoyingly, dates not preserved...
@@ -124,7 +126,159 @@ oisst_dates<- seq(from = ymd('1981-09-01'), to = ymd('1981-09-01') + nlayers(ois
 names(oisst_stack)<- oisst_dates
 
 # Run function, getting seasonal mean temps at each tow location
-trawl_covs<- dynamic_extract(rast_ts_stack = oisst_stack, stack_name = "SST", t_summ = "seasonal", t_position = NULL, sf_points = trawl_sf, out_path = here::here("/scratch/aja/data/"), df_sf = "sf", new_file_name = NULL)
+trawl_covs<- dynamic_2d_extract(rast_ts_stack = oisst_stack, stack_name = "SST", t_summ = "seasonal", t_position = NULL, sf_points = trawl_sf, out_path = here::here("/scratch/aja/data/"), df_sf = "sf", new_file_name = NULL)
+```
+
+#### Covariate extraction wrap-up
+After extracting the covariate values, we can then take a look at some quick summaries to make sure everything "worked." 
+```{r, eval = eval.use}
+# Take a look at the covariate values
+summary(trawl_covs)
+
+# There are some NAs with the SST_seasonal covariate. Do these make sense given dates of the tows and the dates of available SST data (1981 ish-present)?
+trawl_sst_nas<- trawl_covs %>%
+  filter(., is.na(SST_seasonal))
+summary(trawl_sst_nas)
+
+# Some, but not all. What about the ones that are within the data range...
+trawl_sst_check<- trawl_sst_nas %>%
+  filter(., EST_DATE >= as.Date("1982-01-01"))
+
+# Where are these?
+os.use<- "unix"
+res_dat_path<- shared.path(os = os.use, group = "RES Data")
+land<- st_read(paste(res_dat_path, "Shapefiles/ne_50m_land/ne_50m_land.shp", sep = "")) 
+
+# Visualize
+xlim<- c(-76, -65) 
+ylim<- c(35, 45)
+
+na_plot<- ggplot() +
+  geom_sf(data = land, fill = "#f6f6f6", color = "light gray") +
+  geom_sf(data = trawl_sst_check) +
+  coord_sf(xlim, ylim, expand = FALSE) +    
+  xlab("") +
+  ylab("") +
+  theme_bw()
+na_plot
+
+# These points are certainly "coastal", but doesn't seem to make that much sense given the footprint of the OISST data.
+sst_foot<- as.data.frame(oisst_stack[[1]], xy = TRUE)
+names(sst_foot)[3]<- "sst"
+
+na_sst_plot<- ggplot() +
+  geom_tile(data = sst_foot, aes(x = x, y = y, fill = sst)) +
+  scale_fill_viridis_c() +
+  geom_sf(data = land, fill = "#f6f6f6", color = "light gray") +
+  geom_sf(data = trawl_sst_check) +
+  coord_sf(xlim, ylim, expand = FALSE) +    
+  xlab("") +
+  ylab("") +
+  theme_bw()
+na_sst_plot
+
+# Welp, looks like that is actually what is going on. One option would be to just interpolate SST at these locations given SST at neighboring points on the same day/season.
+time_match<- trawl_covs %>%
+  filter(., Season_Match %in% trawl_sst_check$Season_Match)
+
+for(i in seq_along(trawl_sst_check$Season_Match)){
+  time_match_temp<- time_match %>%
+    filter(., Season_Match == trawl_sst_check$Season_Match[i]) %>%
+    # Drop NAs -- other wise, we will wind up keeping our exact point
+    filter(., !is.na(SST_seasonal))
+  nearest_out<- st_nearest_feature(trawl_sst_check[i,], time_match_temp)
+  trawl_sst_check$SST_seasonal[i]<- time_match_temp$SST_seasonal[nearest_out]
+}
+
+# Okay, back together with the "non-NA"s...
+trawl_sst_comp<- trawl_covs %>%
+  filter(., !is.na(SST_seasonal)) %>%
+  rbind(., trawl_sst_check)
+summary(trawl_sst_comp)
+```
+
+So far, we have only covered the static and dynamic covariates that have one "level", where we can simply overlay the points on the raster layers to get the values. There are some examples where we will actually be working with dynamic covariates that have multiple "levels." A great example is bottom temperature and the Simple Ocean Data Assimilation product. With this product, there are 50 different "levels" or modeled depth layers. At any given location, while there are going to be 50 different potential levels, there may only be modeled temperatures for a subset of those levels depending on how deep the model domain thinks the ocean is at that location. For instance, a shallow spot might only have a temperature at the "surface" (level = 1) and the second subsequent model level (level = 2). We will likely want to have a function that can handle this -- maybe building from the `dynamic_extract` function with an added "level" argument, where the user could provide a vector of levels to extract. 
+
+### Fitting a "basic" species distribution model
+#### Setting up model data set
+First things first, need to bring the covariates over with the full observation data set as for the extraction components we were only with unique tows (a combination of `EST_DATE`, `DECDEG_BEGLON` and `DECDEG_BEGLAT`).
+```{r, eval = eval.use}
+# Covariate data
+summary(trawl_sst_comp)
+
+# Observation data
+summary(nefsc_dat)
+
+# Convert to data frame and then join based on EST_DATE, DECDEG_BEBLON, DECDEG_BEGLAT
+str(nefsc_dat)
+str(trawl_sst_comp)
+
+trawl_sst_comp<- trawl_sst_comp %>%
+  st_drop_geometry()
+
+mod_dat<- nefsc_dat %>%
+  ungroup() %>%
+  left_join(., trawl_sst_comp, by = c("EST_DATE" = "EST_DATE", "DECDEG_BEGLON" = "DECDEG_BEGLON", "DECDEG_BEGLAT" = "DECDEG_BEGLAT"))
+```
+
+#### Model fitting
+Things get a bit complicated during this step given the number of different species in the data set and then the number of different approaches that folks may want to try. So, rather than spending a whole lot of time thinking about a function (or functions) for this section, I think the best path forward might instead be thinking about the general guidelines for any function (or functions) that could be plugged into this step in the workflow. To start, we can think about the basic of what the input to a given function would be and then what we would want to have as an output. Focusing on these pieces, I think would then allow folks to explore their own model approaches, while ensuring that the function integrates with the overall workflow.
+
+**Model fitting input** 
+At a bare minimum, any function within this section should be able to take in a spatio-temporal data set, where each row is an observation describing the occurrence of a species at a given location at a given time. I *think* the function will also want some flexibility, where the user can specify the model formula as an argument to the fitting function rather than having a model formula hard-wired into the fitting function.
+
+**Model fitting output**
+We will likely have similar issues with the model fitting output as the model fitting input step. I am not really sure what the best way forward is? Certainly, there are common fitted model objects that are regularly handled by existing functions. For example, `predict` can handle generalized linear models, generalized additive models, random forests, etc. For others though, specifically the VAST modeling framework, there is not a pre-built `predict` style function. For now, I guess I would think that the requirements for the output would be that the returned model fit object either needs to be easily incorporated into existing functions OR come with associated functions that support making statistical inferences from the fitted models, including extracting parameter estimates/uncertainty, hypothesis testing, model selection and model prediction. 
+
+**Model fitting example function -- seasonal two-stage delta log normal generalized additive model**
+To keep things simple, just going to use the species distribution modeling approach that we used in the COCA I project. The two-stage delta generalized additive model (GAM) has been widely used in other marine fish distribution modeling studies and has several advantages. First, the two stage approach models presence/absence and then models the log positive biomass observations, and this structure accommodates situations where the number of absence observations exceeds those expected from traditional “count” distributions (e.g., Poisson, tweedie). Second, the additive modeling framework requires no a priori assumptions about the functional relationships between the response (species presence/absence and biomass) and predictor variables, allowing for non-linear relationships. For each species, we will fit seasonally-independent models (e.g., a spring and a fall model). 
+
+Before jumping into fitting the model for a given species-season data set, there's one remaining question of **how to efficiently apply the same model across multiple species-seasons?** In the COCA I project, I ended up doing this leveraging the `map` style functions of the `purrr` library. I am open to hearing what others think about this process. Personally, I think it makes things rather easy to "see" and then it also sets up a nice workflow where subsequent inference functions (e.g., parameter estimates, hypothesis testing, model selection and model prediction) can also be implemented in a similar way. This results in an object that has multiple rows, one for each season-species modeled, and then subsequent columns for that species-season's data, the fitted model object, model predictions, etc. 
+
+*Creating nested dataframe*
+```{r, eval = eval.use}
+# Created a nested dataframe, grouped by season and species.
+mod_dat_nest<- mod_dat %>%
+  group_by(., COMNAME, SEASON) %>%
+  nest()
+
+# This results in a LOT of unique data sets to model (956 to be exact). Rather than dealing with all of those, let's reduce it down a bit and just look at two: Atlantic cod and Haddock
+spp_keep<- c("ATLANTIC COD", "HADDOCK")
+mod_dat_use<- mod_dat_nest %>%
+  filter(., COMNAME %in% spp_keep)
+```
+
+*Two-stage delta log normal GAM fitting function*
+```{r, eval = eval.use}
+# A function to fit the two stage GAM. With these two stage models, we need to fit and save both the presence/absence first stage of the model AND the second log positive biomass stage of the model. 
+gam_fit<- function(df, mod_formula, response){
+  if(FALSE){
+    df = mod_dat_use$data[[1]]
+    mod_formula = "PRESENCE ~ s(AVGDEPTH, fx = FALSE, bs = 'cs') + s(SST_seasonal, fx = FALSE, bs = 'cs')"
+    response = "Presence"
+  }
+  formula_use<- as.formula(mod_formula)
+  if(response == "Presence"){
+    gam_out<- gam(formula_use, drop.unused.levels = T, data = df, family = binomial(link = logit), select = TRUE)
+    return(gam_out)
+  } 
+  
+  if(response == "Biomass"){
+    gam_out<- gam(formula_use, drop.unused.levels = T, data = df, family = gaussian, select = TRUE)
+    return(gam_out)
+  }
+}
+
+# Now, map this function to the different species-season data sets. Do this using "possibly", so that the function is tried and returns NA if for some reason the function returns an error (for example, because there aren't adequate data to fit the model)
+mod_dat_use<- mod_dat_use %>%
+    mutate(., "mod_fitted_p" = pmap(list(df = data, mod_formula = list("PRESENCE ~ s(AVGDEPTH, fx = FALSE, bs = 'cs') + s(SST_seasonal, fx = FALSE, bs = 'cs')"), response = list("Presence")), possibly(gam_fit, NA)),
+           "mod_fitted_b" = pmap(list(df = data, mod_formula = list("LOG_BIOMASS ~ s(AVGDEPTH, fx = FALSE, bs = 'cs') + s(SST_seasonal, fx = FALSE, bs = 'cs')"), response = list("Biomass")), possibly(gam_fit, NA)))
+
+# Check that things "worked" -- should have a GAM model object for each of the species-seasons and model stage columns
+mod_dat_use
+
+# Look at one
+summary(mod_dat_use$mod_fitted_b[[3]])
 ```
 
 
