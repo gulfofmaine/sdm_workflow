@@ -26,9 +26,8 @@ path_BT = os.path.join(path, "BottomT/tmpOriginalGrid/")
 path_AllDepths = path + "RawTmpFiles/"+"thetao*"+ModelName+"*.nc"
 ncAllBTFiles = glob.glob(path_AllDepths)
 
-for f in range(len(ncAllBTFiles)):
-    base_filename = os.path.basename(ncAllBTFiles[f])
-    fileName = ncAllBTFiles[f]
+for filename in ncAllBTFiles:
+    base_filename = os.path.basename(filename)
     temp_ds = xr.open_dataset(fileName)
     bottom_400 = temp_ds.isel(lev=slice(0,18))
     temp_array = bottom_400['thetao']
@@ -44,10 +43,10 @@ for f in range(len(ncAllBTFiles)):
 
 ncBTFiles = glob.glob(os.path.join(path, "BottomT/tmpOriginalGrid/thetao*.nc"))
 
-for ff in range(len(ncBTFiles)):
+for filename in ncBTFiles:
     gridfi = os.path.join(path, "TestFiles/tempbot400_Omon_CanESM5_ssp585_r1i1p2f1_gn_202001-209912.nc.1x1.nc")
-    base_filename = os.path.basename(ncBTFiles[ff])
-    filein = ncBTFiles[ff]
+    base_filename = os.path.basename(ilename)
+    filein = ilename
     fileout = "".join([path, "BottomT/tmpStd1x1grid/"'1x1_', base_filename])
     cdo.remapdis(gridfi,  input=filein, output=fileout, options='-f nc')
     os.remove(filein)
@@ -75,10 +74,10 @@ for file in ncBTstdGrd:
 path_SST = path + "SST/RawTmpFiles/tos*"+ModelName+"*.nc"
 ncTOSFiles = glob.glob(path_SST)
 
-for ff in range(len(ncTOSFiles)):
+for filename in ncTOSFiles:
     gridfi = os.path.join(path, "TestFiles/tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc")
-    base_filename = os.path.basename(ncTOSFiles[ff])
-    filein = ncTOSFiles[ff]
+    base_filename = os.path.basename(filename)
+    filein = filename
     fileout = "".join([path, "SST/tmpStd1x1grid/"'1x1_', base_filename])
     cdo.remapdis(gridfi,  input=filein, output=fileout, options='-f nc')
     os.remove(filein)

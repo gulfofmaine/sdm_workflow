@@ -10,7 +10,7 @@ def path_switch_unix(x, folder, user_name):
         'NSF OKN': "".join(["/Users/", user_name, "/Box/NSF OKN Demo Data/", folder]),
         'root': "".join(["/Users/", user_name, "/Box/", folder])
     }
-    return (paths.get(x, "".join(default)))
+    return paths.get(x, "".join(default))
 
 
 def path_switch_windows(x, folder, user_name):
@@ -22,7 +22,7 @@ def path_switch_windows(x, folder, user_name):
         'NSF OKN': "".join(["C:/Users/", user_name, "/Box/NSF OKN Demo Data/", folder]),
         'root': "".join(["C:/Users/", user_name, "/Box/", folder])
     }
-    return (paths.get(x, "".join(default)))
+    return paths.get(x, "".join(default))
 
 
 def shared_path(os_use="unix",
@@ -38,7 +38,7 @@ def shared_path(os_use="unix",
     else:
         print("OS not recognized")
 
-    return (path_out)
+    return path_out
 
 
 def find_deepest_depth_indices(ds):
@@ -75,4 +75,4 @@ def nameFile(base_filename, Scenario):
     else:
         print("not recognized")
 
-    return (base_filename)
+    return base_filename
