@@ -59,6 +59,24 @@ def find_deepest_depth_indices(ds):
 
     return depth_indices
 
+def find_deepest_depth_indices_lat_lon(ds):
+    # First get the vertical True/False of valid values
+    idx = ds["thetao"].isel(time=0).isnull()
+    idx_vals = idx.values
+    # Create the initial final array to store indices (integer type)
+    depth_indices = np.zeros((len(idx.lat), len(idx.lon))).astype(int)
+
+    # Now find the deepest depth where values are True and store in indices array
+    for i in range(len(ds.lon.values)):
+        for j in range(len(ds.lat.values)):
+            located = np.where(idx_vals[:, j, i] == False)
+            try:
+                depth_indices[j, i] = int(located[-1][-1])
+            except IndexError:
+                depth_indices[j, i] = 1
+
+    return depth_indices
+
 # Eventually try to remove the nested for loop using .map
 # dask (with xarray) has implicit parallelism
 # numba can take a for loop and create a parallel process with @numba.jit
