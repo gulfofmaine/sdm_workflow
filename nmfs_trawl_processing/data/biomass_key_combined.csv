@@ -1,0 +1,806 @@
+source,svspp,comname,scientific_name,spec_class,hare_group,fishery,season,catchsex,b,a,ln_a,units,related_species,related_a,related_b,related_ln_a,wigleymin,wigleymax,wigleyvalue
+fishbase,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,NA,NA,3.08,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,SPRING,0,3.2036,8.289673287731616e-6,-11.7005,NA,NA,NA,NA,NA,3,47,t
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,SPRING,1,3.1151,1.0755428006371726e-5,-11.4401,NA,NA,NA,NA,NA,6,44,t
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,SPRING,2,3.2297,7.72305922310378e-6,-11.7713,NA,NA,NA,NA,NA,7,47,t
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,FALL,0,3.2036,8.289673287731616e-6,-11.7005,NA,NA,NA,NA,NA,3,47,t
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,FALL,1,3.1151,1.0755428006371726e-5,-11.4401,NA,NA,NA,NA,NA,6,44,t
+wigley,155,acadian redfish,sebastes fasciatus,dem,groundfish,nc,FALL,2,3.2297,7.72305922310378e-6,-11.7713,NA,NA,NA,NA,NA,7,47,t
+fishbase,NA,african pompano,NA,NA,reef,NA,NA,NA,2.85,0.02188,-3.8221823014283567,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,albacore,NA,NA,pelagic,NA,NA,NA,2.98,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,033,alewife,alosa pseudoharengus,pel,diadromous,com,NA,NA,3,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,033,alewife,alosa pseudoharengus,pel,diadromous,com,SPRING,0,3.6716,1.534202278934922e-6,-13.3875,NA,NA,NA,NA,NA,10,27,t
+wigley,033,alewife,alosa pseudoharengus,pel,diadromous,com,FALL,0,3.6716,1.534202278934922e-6,-13.3875,NA,NA,NA,NA,NA,10,27,t
+fishbase,165,alligatorfish,aspidophoroides monopterygius,dem,groundfish,nc,NA,NA,3.07,0.00339,-5.686925357589778,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,almaco jack,NA,NA,reef,NA,NA,NA,2.97,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,384,american eel,anguilla rostrata,dem,diadromous,com,NA,NA,3.18,8.9e-4,-7.024289095238089,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,102,american plaice,hippoglossoides platessoides,gf,groundfish,com,NA,NA,3.1,0.0055,-5.2030071867437115,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,102,american plaice,hippoglossoides platessoides,gf,groundfish,com,SPRING,0,3.3125,2.728659759225391e-6,-12.8117,NA,NA,NA,NA,NA,5,62,t
+wigley,102,american plaice,hippoglossoides platessoides,gf,groundfish,com,SPRING,1,3.279,3.000294822374252e-6,-12.7168,NA,NA,NA,NA,NA,6,48,t
+wigley,102,american plaice,hippoglossoides platessoides,gf,groundfish,com,SPRING,2,3.3641,2.303455894318265e-6,-12.9811,NA,NA,NA,NA,NA,7,62,t
+wigley,102,american plaice,hippoglossoides platessoides,gf,groundfish,com,FALL,0,3.3062,2.904643193967569e-6,-12.7492,NA,NA,NA,NA,NA,3,65,t
+fishbase,734,american sand lance,ammodytes americanus,dem,groundfish,nc,NA,NA,3.13,0.00219,-6.123853735153728,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,035,american shad,alosa sapidissima,pel,diadromous,com,NA,NA,2.99,0.00661,-5.019171625118542,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,035,american shad,alosa sapidissima,pel,diadromous,com,SPRING,0,3.2207,5.353821248269188e-6,-12.1377,NA,NA,NA,NA,NA,8,53,t
+wigley,035,american shad,alosa sapidissima,pel,diadromous,com,FALL,0,3.2207,5.353821248269188e-6,-12.1377,NA,NA,NA,NA,NA,8,53,t
+fishbase,NA,anchovy uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,anglefin whiff,NA,NA,groundfish,NA,NA,NA,3.14,0.00724,-4.928134072584512,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,arctic eelpout,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,arctic eualid,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,173,armored searobin,peristedion miniatum,dem,groundfish,nc,NA,NA,3.14,0.0055,-5.2030071867437115,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,016,atlantic angel shark,squatina dumeril,NA,elasmobranch,NA,NA,NA,3.04,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,016,atlantic angel shark,squatina dumeril,NA,elasmobranch,NA,SPRING,0,2.9556,9.851370257686835e-6,-11.5279,NA,NA,NA,NA,NA,32,84,t
+wigley,016,atlantic angel shark,squatina dumeril,NA,elasmobranch,NA,FALL,0,3.142,5.140809503213611e-6,-12.1783,NA,NA,NA,NA,NA,35,120,t
+fishbase,046,atlantic argentine,argentina silus,pel,NA,nc,NA,NA,3.2,3.55e-4,-7.943392768488859,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,199,atlantic batfish,dibranchus atlanticus,dem,groundfish,nc,NA,NA,3.04,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,123,atlantic bonito,sarda sarda,pel,pelagic,nc,NA,NA,3.05,0.00813,-4.812194355422418,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic bumper,NA,NA,pelagic,NA,NA,NA,2.94,0.01288,-4.352079558305929,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,073,atlantic cod,gadus morhua,gf,groundfish,com,NA,NA,3.08,0.00692,-4.9733395093525585,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,073,atlantic cod,gadus morhua,gf,groundfish,com,SPRING,0,3.0606,7.65386353775018e-6,-11.7803,NA,NA,NA,NA,NA,4,141,t
+wigley,073,atlantic cod,gadus morhua,gf,groundfish,com,FALL,0,3.1262,6.1935631923065495e-6,-11.992,NA,NA,NA,NA,NA,4,120,t
+fishbase,136,atlantic croaker,micropogonias undulatus,dem,coastal,com,NA,NA,3.16,0.00871,-4.743283488117726,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,136,atlantic croaker,micropogonias undulatus,dem,coastal,com,SPRING,0,3.0924,9.181683337904703e-6,-11.5983,NA,NA,NA,NA,NA,6,44,f
+wigley,136,atlantic croaker,micropogonias undulatus,dem,coastal,com,FALL,0,3.0924,9.181683337904703e-6,-11.5983,NA,NA,NA,NA,NA,6,44,t
+fishbase,126,atlantic cutlassfish,trichiurus lepturus,dem,groundfish,nc,NA,NA,3.13,4.1e-4,-7.799353398265921,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic flyingfish,NA,NA,pelagic,NA,NA,NA,3.12,0.00427,-5.456141451741604,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic guitarfish,NA,NA,elasmobranch,NA,NA,NA,3.08,0.00316,-5.757183251383316,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,001,atlantic hagfish,myxine glutinosa,dem,groundfish,nc,NA,NA,3.03,0.00115,-6.767993336606978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,101,atlantic halibut,hippoglossus hippoglossus,gf,groundfish,com,NA,NA,3.13,0.00661,-5.019171625118542,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,101,atlantic halibut,hippoglossus hippoglossus,gf,groundfish,com,SPRING,0,3.2674,3.417846102104639e-6,-12.5865,NA,NA,NA,NA,NA,31,154,t
+wigley,101,atlantic halibut,hippoglossus hippoglossus,gf,groundfish,com,FALL,0,3.1904,5.125410185230431e-6,-12.1813,NA,NA,NA,NA,NA,8,97,t
+fishbase,032,atlantic herring,clupea harengus,pel,pelagic,com,NA,NA,3.09,0.00562,-5.181423615076537,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,SPRING,0,3.0314,7.525600122582011e-6,-11.7972,NA,NA,NA,NA,NA,5,37,t
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,FALL,0,2.9794,9.388734921174392e-6,-11.576,NA,NA,NA,NA,NA,4,34,t
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,SPRING,1,2.9545,9.692094546018017e-6,-11.5442,NA,NA,NA,NA,NA,10,37,t
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,FALL,1,2.9055,1.181666186501533e-5,-11.346,NA,NA,NA,NA,NA,10,34,t
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,SPRING,2,2.957,9.54016287307923e-6,-11.56,NA,NA,NA,NA,NA,10,34,t
+wigley,032,atlantic herring,clupea harengus,pel,pelagic,com,FALL,2,3.0065,8.676433507166936e-6,-11.6549,NA,NA,NA,NA,NA,11,34,t
+fishbase,121,atlantic mackerel,scomber scombrus,pel,pelagic,nc,NA,NA,3.05,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,121,atlantic mackerel,scomber scombrus,pel,pelagic,nc,SPRING,0,3.3119,3.1399615604937985e-6,-12.6713,NA,NA,NA,NA,NA,16,45,t
+wigley,121,atlantic mackerel,scomber scombrus,pel,pelagic,nc,SPRING,1,3.3305,2.9645064442341074e-6,-12.7288,NA,NA,NA,NA,NA,16,42,t
+wigley,121,atlantic mackerel,scomber scombrus,pel,pelagic,nc,SPRING,2,3.3006,3.247581475606419e-6,-12.6376,NA,NA,NA,NA,NA,16,45,t
+wigley,121,atlantic mackerel,scomber scombrus,pel,pelagic,nc,FALL,0,3.2615,4.216100117382223e-6,-12.3766,NA,NA,NA,NA,NA,12,42,t
+fishbase,036,atlantic menhaden,brevoortia tyrannus,pel,coastal,com,NA,NA,3.1,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic midshipman,NA,NA,groundfish,NA,NA,NA,3.15,0.00525,-5.249527202378605,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,132,atlantic moonfish,selene setapinnis,pel,reef,nc,NA,NA,2.93,0.01349,-4.305806608762473,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic needlefish,NA,NA,pelagic,NA,NA,NA,3.05,0.00129,-6.653113060608557,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic pomfret,NA,NA,reef,NA,NA,NA,3.01,0.01175,-4.443902038391969,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,894,atlantic salmon,salmo salar,pel,diadromous,nc,NA,NA,3.02,0.01047,-4.559241254099692,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,205,atlantic saury,scomberesox saurus,pel,pelagic,nc,NA,NA,3.1,0.00219,-6.123853735153728,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,NA,NA,3.02,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,SPRING,0,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,f
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,FALL,0,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,t
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,SPRING,1,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,f
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,FALL,1,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,f
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,SPRING,2,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,f
+wigley,360,atlantic sharpnose shark,rhizoprionodon terraenovae,NA,elasmobranch,NA,FALL,2,3.1069,2.6628861621990273e-6,-12.8361,NA,NA,NA,NA,NA,50,100,f
+fishbase,113,atlantic silverside,menidia menidia,pel,coastal,nc,NA,NA,3.08,0.00525,-5.249527202378605,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,262,atlantic soft pout,melanostigma atlanticum,pel,groundfish,nc,NA,NA,3.15,0.00363,-5.618522630705377,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,659,atlantic spadefish,chaetodipterus faber,NA,reef,NA,NA,NA,2.97,0.002818,-5.871727865505648,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,659,atlantic spadefish,chaetodipterus faber,NA,reef,NA,SPRING,0,2.938,3.920916646934972e-5,-10.1466,NA,NA,NA,NA,NA,22,43,t
+wigley,659,atlantic spadefish,chaetodipterus faber,NA,reef,NA,FALL,0,2.938,3.920916646934972e-5,-10.1466,NA,NA,NA,NA,NA,22,43,f
+fishbase,169,atlantic spiny lumpsucker,eumicrotremus spinosus,dem,groundfish,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,atlantic stingray,NA,NA,elasmobranch,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,380,atlantic sturgeon,acipenser oxyrhynchus,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,380,atlantic sturgeon,acipenser oxyrhynchus,NA,NA,NA,SPRING,0,3.4547,6.220782178145134e-7,-14.2902,NA,NA,NA,NA,NA,84,159,t
+wigley,380,atlantic sturgeon,acipenser oxyrhynchus,NA,NA,NA,FALL,0,3.4547,6.220782178145134e-7,-14.2902,NA,NA,NA,NA,NA,84,159,t
+fishbase,428,atlantic thread herring,opisthonema oglinum,NA,NA,NA,NA,NA,3.04,0.00871,-4.743283488117726,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,428,atlantic thread herring,opisthonema oglinum,NA,NA,NA,SPRING,0,3.7242,2.3094526720763917e-6,-12.9785,NA,NA,NA,NA,NA,5,18,f
+wigley,428,atlantic thread herring,opisthonema oglinum,NA,NA,NA,FALL,0,3.7242,2.3094526720763917e-6,-12.9785,NA,NA,NA,NA,NA,5,18,t
+fishbase,NA,atlantic tomcod,NA,NA,groundfish,NA,NA,NA,3.14,0.0038,-5.572754212249797,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,021,atlantic torpedo,torpedo nobiliana,el,elasmobranch,nc,NA,NA,2.96,0.0182,-4.006333684899388,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,021,atlantic torpedo,torpedo nobiliana,el,elasmobranch,nc,SPRING,0,3.8164,5.143818234945763e-7,-14.4803,NA,NA,NA,NA,NA,71,102,f
+wigley,021,atlantic torpedo,torpedo nobiliana,el,elasmobranch,nc,FALL,0,3.8164,5.143818234945763e-7,-14.4803,NA,NA,NA,NA,NA,71,102,t
+wigley,021,atlantic torpedo,torpedo nobiliana,el,elasmobranch,nc,SPRING,1,3.8164,5.143818234945763e-7,-14.4803,NA,NA,NA,NA,NA,71,102,f
+wigley,021,atlantic torpedo,torpedo nobiliana,el,elasmobranch,nc,FALL,1,3.8164,5.143818234945763e-7,-14.4803,NA,NA,NA,NA,NA,71,102,f
+fishbase,192,atlantic wolffish,anarhichas lupus,dem,groundfish,nc,NA,NA,3.19,0.00407,-5.504112279527633,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,192,atlantic wolffish,anarhichas lupus,dem,groundfish,nc,SPRING,0,3.1439,4.9377539309810945e-6,-12.2186,NA,NA,NA,NA,NA,24,107,t
+wigley,192,atlantic wolffish,anarhichas lupus,dem,groundfish,nc,FALL,0,3.1439,4.9377539309810945e-6,-12.2186,NA,NA,NA,NA,NA,24,107,t
+fishbase,NA,balloonfish,NA,NA,reef,NA,NA,NA,2.87,0.04365,-3.1315519966965257,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,banded butterflyfish,NA,NA,reef,NA,NA,NA,3.02,0.02239,-3.7991408483714735,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,banded drum,NA,NA,coastal,NA,NA,NA,3.07,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,204,banded rudderfish,seriola zonata,pel,reef,nc,NA,NA,2.94,0.01413,-4.259455082285701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bandtail puffer,NA,NA,reef,NA,NA,NA,2.87,0.01905,-3.960688177409427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bandtail searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bandtooth conger,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bank butterflyfish,NA,NA,reef,NA,NA,NA,3.01,0.02188,-3.8221823014283567,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bank cusk-eel,NA,NA,reef,NA,NA,NA,3.16,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bank sea bass,NA,NA,reef,NA,NA,NA,3.03,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bar jack,NA,NA,reef,NA,NA,NA,2.95,0.01585,-4.144585778658848,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,barbfish,NA,NA,reef,NA,NA,NA,3.01,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,022,barndoor skate,dipturus laevis,el,elasmobranch,com,NA,NA,3.24,0.00282,-5.871018394032115,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,022,barndoor skate,dipturus laevis,el,elasmobranch,com,SPRING,0,3.2919,1.6374015391633767e-6,-13.3224,NA,NA,NA,NA,NA,23,121,f
+wigley,022,barndoor skate,dipturus laevis,el,elasmobranch,com,FALL,0,3.2919,1.6374015391633767e-6,-13.3224,NA,NA,NA,NA,NA,23,121,t
+fishbase,NA,barracuda uncl,NA,NA,reef,NA,NA,NA,NA,0.008910000000000003,-4.720581037499419,NA,great barracuda,0.00891,2.92,-4.720581037499419,NA,NA,NA
+fishbase,NA,barracudina uncl,NA,NA,NA,NA,NA,NA,NA,0.0010200000000000003,-6.887952651685957,NA,cuban barracudina,0.00102,3.05,-6.887952651685957,NA,NA,NA
+fishbase,207,barrelfish,hyperoglyphe perciformis,pel,pelagic,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,basking shark,NA,NA,elasmobranch,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,basslet uncl,NA,NA,reef,NA,NA,NA,NA,0.011220000000000004,-4.490057378887586,NA,basslet,0.01122,3.06,-4.490057378887586,NA,NA,NA
+fishbase,NA,batfish uncl,NA,NA,groundfish,NA,NA,NA,NA,0.010000000000000004,-4.605170185988091,NA,atlantic batfish,0.01,3.04,-4.605170185988091,NA,NA,NA
+fishbase,043,bay anchovy,anchoa mitchilli,pel,coastal,nc,NA,NA,3.16,0.00525,-5.249527202378605,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bay whiff,NA,NA,coastal,NA,NA,NA,3.12,0.00631,-5.065619602429015,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,263,beardfish,polymixia lowei,dem,groundfish,nc,NA,NA,3.1,0.00851,-4.766513336396854,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,beardless codling,NA,NA,groundfish,NA,NA,NA,3.14,0.00363,-5.618522630705377,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,big roughy,NA,NA,reef,NA,NA,NA,3.07,0.01549,-4.16756062455336,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,134,bigeye,priacanthus arenatus,dem,reef,nc,NA,NA,2.9,0.01738,-4.052435159144891,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,144,bigeye,epigonus pandionis,dem,reef,nc,NA,NA,2.9,0.01738,-4.052435159144891,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,876,bigeye cigarfish,cubiceps pauciradiatus,pel,groundfish,nc,NA,NA,3.04,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,209,bigeye scad,selar crumenophthalmus,pel,reef,nc,NA,NA,2.98,0.01349,-4.305806608762473,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bigeye searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bigeye soldierfish,NA,NA,reef,NA,NA,NA,3.02,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bigeye thresher shark,NA,NA,elasmobranch,NA,NA,NA,2.91,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bighead searobin,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,black dogfish,NA,NA,elasmobranch,NA,NA,NA,3.07,0.00302,-5.802498447595359,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,black drum,NA,NA,coastal,NA,NA,NA,3.06,8.71e-4,-7.045868581111772,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,black gemfish,NA,NA,groundfish,NA,NA,NA,3.11,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,black grouper,NA,NA,reef,NA,NA,NA,3.05,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,141,black sea bass,centropristis striata,dem,reef,com,NA,NA,2.98,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,141,black sea bass,centropristis striata,dem,reef,com,SPRING,0,3.122,9.17342354036702e-6,-11.5992,NA,NA,NA,NA,NA,4,54,t
+wigley,141,black sea bass,centropristis striata,dem,reef,com,FALL,0,3.0225,1.3396728802845275e-5,-11.2205,NA,NA,NA,NA,NA,3,45,t
+wigley,141,black sea bass,centropristis striata,dem,reef,com,FALL,1,2.8679,2.1062844371566487e-5,-10.768,NA,NA,NA,NA,NA,6,44,t
+wigley,141,black sea bass,centropristis striata,dem,reef,com,FALL,2,2.9709,1.6185415483768323e-5,-11.0314,NA,NA,NA,NA,NA,5,45,t
+fishbase,NA,blackbar soldierfish,NA,NA,reef,NA,NA,NA,3.03,0.01413,-4.259455082285701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,156,blackbelly rosefish,helicolenus dactylopterus,dem,reef,nc,NA,NA,3.09,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,156,blackbelly rosefish,helicolenus dactylopterus,dem,reef,nc,SPRING,0,3.0512,1.4630531706760513e-5,-11.1324,NA,NA,NA,NA,NA,4,35,t
+wigley,156,blackbelly rosefish,helicolenus dactylopterus,dem,reef,nc,FALL,0,3.0512,1.4630531706760513e-5,-11.1324,NA,NA,NA,NA,NA,4,35,t
+fishbase,825,blackcheek tonguefish,symphurus plagiusa,dem,groundfish,nc,NA,NA,3.03,0.00776,-4.85877294478701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackear bass,NA,NA,reef,NA,NA,NA,3.03,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackedge moray,NA,NA,reef,NA,NA,NA,3.12,7.9e-4,-7.143477612503207,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackfin goosefish,NA,NA,groundfish,NA,NA,NA,3.02,0.011122,-4.498830150216765,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackline tilefish,NA,NA,groundfish,NA,NA,NA,3.11,0.00832,-4.78909302414902,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackmouth bass,NA,NA,groundfish,NA,NA,NA,3.02,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackmouthed alfonsin,NA,NA,NA,NA,NA,NA,3.05,0.01122,-4.490057378887586,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blacknose shark,NA,NA,elasmobranch,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blacktip shark,NA,NA,elasmobranch,NA,NA,NA,3.08,0.00468,-5.3644571690525815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blackwing searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blotched cusk-eel,NA,NA,groundfish,NA,NA,NA,3.16,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blue angelfish,NA,NA,reef,NA,NA,NA,2.88,0.03236,-3.430832186791846,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blue hake,NA,NA,groundfish,NA,NA,NA,3.26,0.00219,-6.123853735153728,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,129,blue runner,caranx crysos,pel,reef,nc,NA,NA,2.95,0.01738,-4.052435159144891,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blue tang,NA,NA,reef,NA,NA,NA,2.95,0.0257,-3.661264287080963,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,034,blueback herring,alosa aestivalis,pel,coastal,com,NA,NA,3.03,0.00832,-4.78909302414902,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,034,blueback herring,alosa aestivalis,pel,coastal,com,SPRING,0,3.2428,4.957544501458551e-6,-12.2146,NA,NA,NA,NA,NA,7,29,t
+wigley,034,blueback herring,alosa aestivalis,pel,coastal,com,FALL,0,3.2428,4.957544501458551e-6,-12.2146,NA,NA,NA,NA,NA,7,29,t
+fishbase,135,bluefish,pomatomus saltatrix,pel,coastal,com,NA,NA,2.98,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,135,bluefish,pomatomus saltatrix,pel,coastal,com,SPRING,0,2.804,2.5562094177093424e-5,-10.5744,NA,NA,NA,NA,NA,3,79,t
+wigley,135,bluefish,pomatomus saltatrix,pel,coastal,com,FALL,0,3.0548,1.086895497399152e-5,-11.4296,NA,NA,NA,NA,NA,4,80,t
+fishbase,NA,blueline tilefish,NA,NA,groundfish,NA,NA,NA,3.1,0.00631,-5.065619602429015,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,120,bluespotted cornetfish,fistularia tabacaria,pel,reef,nc,NA,NA,2.94,8.5e-4,-7.070274208479912,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bluespotted searobin,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,blunthead puffer,NA,NA,NA,NA,NA,NA,2.87,0.02455,-3.7070434247416073,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,018,bluntnose stingray,dasyatis say,NA,elasmobranch,NA,NA,NA,3.07,0.00676,-4.996732388927264,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,018,bluntnose stingray,dasyatis say,NA,elasmobranch,NA,SPRING,0,3.0527,2.653091237747017e-5,-10.5372,NA,NA,NA,NA,NA,39,103,t
+wigley,018,bluntnose stingray,dasyatis say,NA,elasmobranch,NA,FALL,0,3.2275,1.8923613958034838e-5,-10.8751,NA,NA,NA,NA,NA,18,104,t
+fishbase,228,boa dragonfish,stomias boa,pel,reef,nc,NA,NA,3.16,0.00117,-6.750751530172472,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,boarfish uncl,NA,NA,reef,NA,NA,NA,NA,0.02692,-3.61488577420561,NA,shortspine boarfish,0.02692,2.92,-3.61488577420561,NA,NA,NA
+fishbase,NA,bonnethead shark,NA,NA,elasmobranch,NA,NA,NA,3.1,0.002,-6.214608098422191,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,bristled longbeak,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,broad flounder,NA,NA,groundfish,NA,NA,NA,3.14,0.00724,-4.928134072584512,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,broadband dogfish,NA,NA,elasmobranch,NA,NA,NA,3.09,0.0038,-5.572754212249797,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,brown driftfish,NA,NA,NA,NA,NA,NA,2.94,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,112,buckler dory,zenopsis conchifera,pel,NA,nc,NA,NA,2.93,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,112,buckler dory,zenopsis conchifera,pel,NA,nc,SPRING,0,3.0387,1.1414797704962962e-5,-11.3806,NA,NA,NA,NA,NA,9,53,t
+wigley,112,buckler dory,zenopsis conchifera,pel,NA,nc,FALL,0,3.0387,1.1414797704962962e-5,-11.3806,NA,NA,NA,NA,NA,9,53,t
+fishbase,NA,bull pipefish,NA,NA,reef,NA,NA,NA,3.13,3.8e-4,-7.875339305243843,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,616,bulleye,cookeolus japonicus,dem,reef,nc,NA,NA,2.89,0.02138,-3.845299373385238,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,019,bullnose ray,myliobatis freminvillei,NA,elasmobranch,NA,NA,NA,3.09,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,019,bullnose ray,myliobatis freminvillei,NA,elasmobranch,NA,SPRING,0,3.2885,5.128999228378643e-6,-12.1806,NA,NA,NA,NA,NA,28,129,f
+wigley,019,bullnose ray,myliobatis freminvillei,NA,elasmobranch,NA,FALL,0,3.2885,5.128999228378643e-6,-12.1806,NA,NA,NA,NA,NA,28,129,t
+fishbase,131,butterfish,peprilus triacanthus,pel,coastal,nc,NA,NA,3.16,0.01288,-4.352079558305929,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,131,butterfish,peprilus triacanthus,pel,coastal,nc,SPRING,0,3.293,8.441082493981185e-6,-11.6824,NA,NA,NA,NA,NA,3,23,t
+wigley,131,butterfish,peprilus triacanthus,pel,coastal,nc,FALL,0,2.9225,2.4143388100739946e-5,-10.6315,NA,NA,NA,NA,NA,1,21,t
+wigley,131,butterfish,peprilus triacanthus,pel,coastal,nc,SPRING,1,3.293,8.441082493981185e-6,-11.6824,NA,NA,NA,NA,NA,3,23,f
+wigley,131,butterfish,peprilus triacanthus,pel,coastal,nc,FALL,1,2.9225,2.4143388100739946e-5,-10.6315,NA,NA,NA,NA,NA,1,21,f
+fishbase,NA,butterfish uncl,NA,NA,NA,NA,NA,NA,NA,0.012880000000000003,-4.352079558305929,NA,butterfish,0.01288,3.16,-4.352079558305929,NA,NA,NA
+fishbase,NA,butterflyfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,038,capelin,mallotus villosus,pel,pelagic,nc,NA,NA,3.19,0.0037200000000000002,-5.5940316106970815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,cardinal soldierfish,NA,NA,reef,NA,NA,NA,3.02,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,138,cardinalfish uncl,apogonidae,dem,NA,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,454,carolina hake,urophycis earlli,gf,coastal,nc,NA,NA,3.14,0.00676,-4.996732388927264,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,cero,NA,NA,pelagic,NA,NA,NA,3.01,0.00977,-4.628438812927445,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,NA,NA,3.14,0.00331,-5.710807089593166,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,SPRING,0,3.1282,2.4848456823547038e-6,-12.9053,NA,NA,NA,NA,NA,10,45,f
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,FALL,0,3.1282,2.4848456823547038e-6,-12.9053,NA,NA,NA,NA,NA,10,45,t
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,SPRING,1,2.9322,4.953084718610557e-6,-12.2155,NA,NA,NA,NA,NA,18,45,f
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,FALL,1,2.9322,4.953084718610557e-6,-12.2155,NA,NA,NA,NA,NA,18,45,t
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,SPRING,2,3.3321,1.2812171928090124e-6,-13.5677,NA,NA,NA,NA,NA,10,43,f
+wigley,014,chain dogfish,scyliorhinus retifer,el,elasmobranch,nc,FALL,2,3.3321,1.2812171928090124e-6,-13.5677,NA,NA,NA,NA,NA,10,43,t
+fishbase,NA,chain pipefish,NA,NA,reef,NA,NA,NA,3.13,3.8e-4,-7.875339305243843,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,channel flounder,NA,NA,groundfish,NA,NA,NA,3.1,0.00813,-4.812194355422418,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,124,chub mackerel,scomber japonicus,pel,pelagic,nc,NA,NA,3.06,7.59e-4,-7.183508780568644,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,024,clearnose skate,raja eglanteria,el,elasmobranch,com,NA,NA,3.25,0.00275,-5.896154367303657,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,SPRING,0,3.4235,9.485797224716116e-7,-13.8683,NA,NA,NA,NA,NA,22,71,t
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,FALL,0,3.4235,9.485797224716116e-7,-13.8683,NA,NA,NA,NA,NA,22,71,t
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,SPRING,1,3.4918,6.86815595978654e-7,-14.1912,NA,NA,NA,NA,NA,37,68,t
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,FALL,1,3.4918,6.86815595978654e-7,-14.1912,NA,NA,NA,NA,NA,37,68,t
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,SPRING,2,3.4291,9.56485698582146e-7,-13.86,NA,NA,NA,NA,NA,22,71,t
+wigley,024,clearnose skate,raja eglanteria,el,elasmobranch,com,FALL,2,3.4291,9.56485698582146e-7,-13.86,NA,NA,NA,NA,NA,22,71,t
+fishbase,NA,clinid uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,cobia,NA,NA,reef,NA,NA,NA,3.11,0.00479,-5.341224867559313,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,combtooth blenny uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,conejo,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,063,conger eel,conger oceanicus,dem,groundfish,nc,NA,NA,3.26,4.7e-4,-7.66277786326017,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,conger eel uncl,NA,NA,NA,NA,NA,NA,NA,4.699999999999998e-4,-7.66277786326017,NA,conger eel,4.7e-4,3.26,-7.66277786326017,NA,NA,NA
+fishbase,NA,cornetfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,cottonmouth jack,NA,NA,reef,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,270,cownose ray,rhinoptera bonasus,NA,elasmobranch,NA,NA,NA,2.98,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,270,cownose ray,rhinoptera bonasus,NA,elasmobranch,NA,SPRING,0,2.0958,4.0814012454938245e-4,-7.8039,NA,NA,NA,NA,NA,43,51,t
+wigley,270,cownose ray,rhinoptera bonasus,NA,elasmobranch,NA,FALL,0,3.2327,7.032980312117371e-6,-11.8649,NA,NA,NA,NA,NA,34,103,t
+fishbase,NA,creole wrasse,NA,NA,reef,NA,NA,NA,3.04,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,creole-fish,NA,NA,reef,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,crested blenny,NA,NA,coastal,NA,NA,NA,3,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,crested cusk-eel,NA,NA,coastal,NA,NA,NA,3.06,1.02e-4,-9.190537744680004,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,crevalle jack,NA,NA,reef,NA,NA,NA,2.92,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,cubbyu,NA,NA,reef,NA,NA,NA,3.09,0.00575,-5.158555424172878,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,176,cunner,tautogolabrus adspersus,dem,reef,nc,NA,NA,3.05,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,176,cunner,tautogolabrus adspersus,dem,reef,nc,SPRING,0,3.0162,1.5061029169187484e-5,-11.1034,NA,NA,NA,NA,NA,19,44,t
+wigley,176,cunner,tautogolabrus adspersus,dem,reef,nc,FALL,0,3.1311,1.1259481322892201e-5,-11.3943,NA,NA,NA,NA,NA,10,36,t
+fishbase,084,cusk,brosme brosme,gf,groundfish,nc,NA,NA,3.09,0.00708,-4.950481371276509,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,084,cusk,brosme brosme,gf,groundfish,nc,SPRING,0,3.1785,4.960519920695937e-6,-12.214,NA,NA,NA,NA,NA,6,95,t
+wigley,084,cusk,brosme brosme,gf,groundfish,nc,FALL,0,3.1785,4.960519920695937e-6,-12.214,NA,NA,NA,NA,NA,6,95,t
+fishbase,NA,cusk-eel uncl,NA,NA,NA,NA,NA,NA,NA,0.007079999999999998,-4.950481371276509,NA,cusk,0.00708,3.09,-4.950481371276509,NA,NA,NA
+fishbase,NA,damselfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,183,daubed shanny,lumpenus maculatus,dem,groundfish,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,158,deepbody boarfish,antigonia capros,dem,reef,nc,NA,NA,2.94,0.0302,-3.499913354601313,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,deepwater dab,NA,NA,groundfish,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,110,deepwater flounder,monolene sessilicauda,gf,groundfish,nc,NA,NA,3.08,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,doctorfish,NA,NA,reef,NA,NA,NA,2.95,0.02188,-3.8221823014283567,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dolphin,NA,NA,pelagic,NA,NA,NA,2.87,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dotterel filefish,NA,NA,reef,NA,NA,NA,2.92,0.02188,-3.8221823014283567,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,drum uncl,NA,NA,coastal,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dusky anchovy,NA,NA,coastal,NA,NA,NA,3.1,0.00501,-5.296319363885364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dusky flounder,NA,NA,groundfish,NA,NA,NA,3.09,0.00692,-4.9733395093525585,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dusky shark,NA,NA,elasmobranch,NA,NA,NA,3.09,0.00759,-4.880923687574598,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dwarf goatfish,NA,NA,groundfish,NA,NA,NA,3.13,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dwarf herring,NA,NA,reef,NA,NA,NA,3.25,0.00708,-4.950481371276509,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,dwarf sand perch,NA,NA,reef,NA,NA,NA,3.09,0.00912,-4.697285474895897,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,eel uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,eelpout uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,emerald parrotfish,NA,NA,reef,NA,NA,NA,3.08,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,escolar,NA,NA,NA,NA,NA,NA,2.99,0.01047,-4.559241254099692,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,etropus uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,eyed flounder,NA,NA,groundfish,NA,NA,NA,3.01,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,194,fawn cusk-eel,lepophidium profundorum,dem,groundfish,nc,NA,NA,3.16,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,194,fawn cusk-eel,lepophidium profundorum,dem,groundfish,nc,SPRING,0,3.2359,1.0856843852585204e-6,-13.7333,NA,NA,NA,NA,NA,13,28,t
+wigley,194,fawn cusk-eel,lepophidium profundorum,dem,groundfish,nc,FALL,0,3.2359,1.0856843852585204e-6,-13.7333,NA,NA,NA,NA,NA,13,28,t
+fishbase,NA,flamefish,NA,NA,reef,NA,NA,NA,3.09,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,flat anchovy,NA,NA,pelagic,NA,NA,NA,3.13,0.00525,-5.249527202378605,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,flat needlefish,NA,NA,reef,NA,NA,NA,3.11,8.3e-4,-7.09408485717363,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,florida pompano,NA,NA,coastal,NA,NA,NA,2.8,0.0166,-4.098352583619639,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,flounder uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,175,flying gurnard,dactylopterus volitans,dem,NA,nc,NA,NA,2.98,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,466,flying halfbeak,euleptorhamphus velox,pel,pelagic,nc,NA,NA,3.06,0.00102,-6.887952651685957,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,083,fourbeard rockling,enchelyopus cimbrius,gf,NA,nc,NA,NA,3.13,0.0033,-5.713832810509703,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,488,fourspine stickleback,apeltes quadricus,dem,coastal,nc,NA,NA,3.07,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,SPRING,0,3.1463,4.460721650395097e-6,-12.3202,NA,NA,NA,NA,NA,3,49,t
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,FALL,0,3.1463,4.460721650395097e-6,-12.3202,NA,NA,NA,NA,NA,3,49,t
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,SPRING,1,3.1239,4.7148191449274496e-6,-12.2648,NA,NA,NA,NA,NA,7,42,t
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,FALL,1,3.1239,4.7148191449274496e-6,-12.2648,NA,NA,NA,NA,NA,7,42,t
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,SPRING,2,3.2213,3.5208785902366213e-6,-12.5568,NA,NA,NA,NA,NA,11,49,t
+wigley,104,fourspot flounder,paralichthys oblongus,gf,groundfish,nc,FALL,2,3.2213,3.5208785902366213e-6,-12.5568,NA,NA,NA,NA,NA,11,49,t
+fishbase,NA,freckled soapfish,NA,NA,reef,NA,NA,NA,3.06,0.01122,-4.490057378887586,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,freckled stargazer,NA,NA,groundfish,NA,NA,NA,3.14,0.00457,-5.3882420740760235,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,frigate mackerel,NA,NA,pelagic,NA,NA,NA,3.06,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,fringed filefish,NA,NA,reef,NA,NA,NA,2.85,0.01413,-4.259455082285701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,fringed flounder,NA,NA,groundfish,NA,NA,NA,3.13,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gafftopsail catfish,NA,NA,coastal,NA,NA,NA,3.15,0.00692,-4.9733395093525585,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gag,NA,NA,reef,NA,NA,NA,3.03,0.01122,-4.490057378887586,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,galatheid uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gizzard shad,NA,NA,diadromous,NA,NA,NA,3.04,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,glacier lanternfish,NA,NA,NA,NA,NA,NA,3.11,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,556,glasseye snapper,priacanthus cruentatus,dem,reef,nc,NA,NA,2.89,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,goby flathead,NA,NA,groundfish,NA,NA,NA,3.08,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,goby uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,goldface tilefish,NA,NA,groundfish,NA,NA,NA,3.1,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,197,goosefish,lophius americanus,dem,groundfish,com,NA,NA,3,0.01479,-4.213804002259429,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,197,goosefish,lophius americanus,dem,groundfish,com,FALL,0,2.9227,2.230722368254809e-5,-10.7106,NA,NA,NA,NA,NA,5,98,t
+wigley,197,goosefish,lophius americanus,dem,groundfish,com,SPRING,0,2.9302,2.108813495612825e-5,-10.7668,NA,NA,NA,NA,NA,9,101,t
+wigley,197,goosefish,lophius americanus,dem,groundfish,com,SPRING,1,2.8696,2.611501817803136e-5,-10.553,NA,NA,NA,NA,NA,10,74,t
+wigley,197,goosefish,lophius americanus,dem,groundfish,com,SPRING,2,2.9608,1.9039400793993065e-5,-10.869,NA,NA,NA,NA,NA,11,101,t
+fishbase,NA,gray angelfish,NA,NA,reef,NA,NA,NA,2.9,0.03548,-3.338786121540758,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gray flounder,NA,NA,groundfish,NA,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,202,gray triggerfish,balistes capriscus,dem,reef,nc,NA,NA,2.89,0.02089,-3.868484703413663,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,great barracuda,NA,NA,reef,NA,NA,NA,2.92,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,great hammerhead shark,NA,NA,elasmobranch,NA,NA,NA,3.1,2.29e-4,-8.381788554410035,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,203,greater amberjack,seriola dumerili,NA,reef,NA,NA,NA,2.92,0.01622,-4.12151023029487,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,203,greater amberjack,seriola dumerili,NA,reef,NA,SPRING,0,2.7221,5.064854774702448e-5,-9.8906,NA,NA,NA,NA,NA,30,80,f
+wigley,203,greater amberjack,seriola dumerili,NA,reef,NA,FALL,0,2.7221,5.064854774702448e-5,-9.8906,NA,NA,NA,NA,NA,30,80,t
+fishbase,NA,greeneye uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,099,greenland halibut,reinhardtius hippoglossoides,gf,groundfish,nc,NA,NA,3.11,0.0049,-5.318520073865556,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,grenadier uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,166,grubby,myoxocephalus aenaeus,dem,groundfish,nc,NA,NA,3.11,0.00832,-4.78909302414902,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,grunt uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,guaguanche,NA,NA,pelagic,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gulf flounder,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,gulf kingfish,NA,NA,coastal,NA,NA,NA,3.04,0.00832,-4.78909302414902,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,109,gulf stream flounder,citharichthys arctifrons,gf,groundfish,nc,NA,NA,3.08,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,074,haddock,melanogrammus aeglefinus,gf,groundfish,com,NA,NA,3.08,0.00661,-5.019171625118542,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,074,haddock,melanogrammus aeglefinus,gf,groundfish,com,SPRING,0,3.0766,7.458173595976933e-6,-11.8062,NA,NA,NA,NA,NA,4,87,t
+wigley,074,haddock,melanogrammus aeglefinus,gf,groundfish,com,SPRING,1,3.0572,7.938390587812875e-6,-11.7438,NA,NA,NA,NA,NA,13,77,t
+wigley,074,haddock,melanogrammus aeglefinus,gf,groundfish,com,SPRING,2,3.0949,7.028761789613405e-6,-11.8655,NA,NA,NA,NA,NA,13,87,t
+wigley,074,haddock,melanogrammus aeglefinus,gf,groundfish,com,FALL,0,3.0888,7.4217179346685306e-6,-11.8111,NA,NA,NA,NA,NA,7,88,t
+fishbase,NA,hake uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hardhead catfish,NA,NA,coastal,NA,NA,NA,3.17,0.00759,-4.880923687574598,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,harvestfish,NA,NA,coastal,NA,NA,NA,2.99,0.01445,-4.237060864423696,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hatchetfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,headlightfish,NA,NA,NA,NA,NA,NA,3.03,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,headlightfish uncl,NA,NA,NA,NA,NA,NA,NA,0.00933,-4.674520264122885,NA,headlightfish,0.00933,3.03,-4.674520264122885,NA,NA,NA
+fishbase,NA,herring uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,037,hickory shad,alosa mediocris,pel,diadromous,com,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,high-hat,NA,NA,reef,NA,NA,NA,3.11,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,highfin scorpionfish,NA,NA,reef,NA,NA,NA,3.07,0.01072,-4.535644123339481,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hogchoker,NA,NA,coastal,NA,NA,NA,3.08,0.01259,-4.374852430925881,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hogfish,NA,NA,reef,NA,NA,NA,2.95,0.02239,-3.7991408483714735,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,honeycomb cowfish,NA,NA,reef,NA,NA,NA,2.83,0.02818,-3.569142772511603,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,honeycomb moray,NA,NA,reef,NA,NA,NA,3.09,9.5e-4,-6.959048573369688,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hookear sculpin uncl,NA,NA,groundfish,NA,NA,NA,NA,0.00832,-4.78909302414902,NA,arctic hookear sculpin,0.00832,3.11,-4.78909302414902,NA,NA,NA
+fishbase,054,horned lanternfish,ceratoscopelus maderensis,pel,NA,nc,NA,NA,3.09,0.00562,-5.181423615076537,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,horned searobin,NA,NA,groundfish,NA,NA,NA,2.99,0.01122,-4.490057378887586,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,horned whiff,NA,NA,groundfish,NA,NA,NA,3.14,0.00724,-4.928134072584512,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,horse-eye jack,NA,NA,reef,NA,NA,NA,2.92,0.01095,-4.514415822719627,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,houndfish,NA,NA,pelagic,NA,NA,NA,3.13,9.5e-4,-6.959048573369688,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,humboldts lanternfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,hunchback scorpionfish,NA,NA,reef,NA,NA,NA,3.01,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,167,inquiline snailfish,liparis inquilinus,dem,groundfish,nc,NA,NA,3.17,0.00457,-5.3882420740760235,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,inshore lizardfish,NA,NA,coastal,NA,NA,NA,3.17,0.00417,-5.479839243171427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,jack pompano uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,jackknife-fish,NA,NA,reef,NA,NA,NA,3.19,0.00724,-4.928134072584512,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,jambeau,NA,NA,NA,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,jolthead porgy,NA,NA,reef,NA,NA,NA,2.9,0.02818,-3.569142772511603,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,keelcheek bass,NA,NA,NA,NA,NA,NA,2.98,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,king mackerel,NA,NA,coastal,NA,NA,NA,3.01,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,knobbed porgy,NA,NA,reef,NA,NA,NA,2.92,0.0166,-4.098352583619639,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ladyfish,NA,NA,coastal,NA,NA,NA,2.98,0.00603,-5.111008268243043,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lancer stargazer,NA,NA,groundfish,NA,NA,NA,3.14,0.00457,-5.3882420740760235,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lane snapper,NA,NA,reef,NA,NA,NA,2.94,0.01479,-4.213804002259429,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lanternfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,largescale lizardfish,NA,NA,groundfish,NA,NA,NA,3.07,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,leatherjack,NA,NA,reef,NA,NA,NA,2.92,0.00692,-4.9733395093525585,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lefteye flounder uncl,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,leopard searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,leopard toadfish,NA,NA,reef,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lesser amberjack,NA,NA,reef,NA,NA,NA,2.95,0.01549,-4.16756062455336,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lesser electric ray,NA,NA,elasmobranch,NA,NA,NA,2.87,0.01047,-4.559241254099692,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lightfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lined seahorse,NA,NA,NA,NA,NA,NA,3,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ling uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,026,little skate,leucoraja erinacea,el,elasmobranch,com,NA,NA,3.1,0.00407,-5.504112279527633,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,SPRING,0,3.128,3.932638434356542e-6,-12.4462,NA,NA,NA,NA,NA,8,59,t
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,FALL,0,3.1567,3.365277943207599e-6,-12.602,NA,NA,NA,NA,NA,6,63,t
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,SPRING,1,3.0842,4.472781872824855e-6,-12.3175,NA,NA,NA,NA,NA,9,57,t
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,FALL,1,3.1247,3.6631028371194305e-6,-12.5172,NA,NA,NA,NA,NA,10,63,t
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,SPRING,2,3.1805,3.333459181170054e-6,-12.6115,NA,NA,NA,NA,NA,8,59,t
+wigley,026,little skate,leucoraja erinacea,el,elasmobranch,com,FALL,2,3.1872,3.0851817137238284e-6,-12.6889,NA,NA,NA,NA,NA,6,60,t
+fishbase,NA,little tunny,NA,NA,pelagic,NA,NA,NA,3.05,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,littlehead porgy,NA,NA,reef,NA,NA,NA,2.81,0.01413,-4.259455082285701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lizardfish uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,079,longfin hake,urophycis chesteri,gf,groundfish,nc,NA,NA,3.13,0.00347,-5.663600685023369,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longfin scorpionfish,NA,NA,reef,NA,NA,NA,3.01,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,163,longhorn sculpin,myoxocephalus octodecemspinosus,dem,groundfish,nc,NA,NA,3.13,0.00708,-4.950481371276509,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,163,longhorn sculpin,myoxocephalus octodecemspinosus,dem,groundfish,nc,SPRING,0,3.1067,7.247891202709194e-6,-11.8348,NA,NA,NA,NA,NA,5,37,t
+wigley,163,longhorn sculpin,myoxocephalus octodecemspinosus,dem,groundfish,nc,FALL,0,3.025,9.550662826155073e-6,-11.5589,NA,NA,NA,NA,NA,4,37,t
+wigley,163,longhorn sculpin,myoxocephalus octodecemspinosus,dem,groundfish,nc,FALL,1,3.0461,8.849053976224634e-6,-11.6352,NA,NA,NA,NA,NA,8,36,t
+wigley,163,longhorn sculpin,myoxocephalus octodecemspinosus,dem,groundfish,nc,FALL,2,3.08,8.02458984429109e-6,-11.733,NA,NA,NA,NA,NA,6,37,t
+fishbase,NA,longnose anchovy,NA,NA,NA,NA,NA,NA,3.1,0.00501,-5.296319363885364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,206,longnose batfish,ogcocephalus corniger,dem,groundfish,nc,NA,NA,2.96,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longnose cusk-eel,NA,NA,groundfish,NA,NA,NA,3.006,1.02e-4,-9.190537744680004,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,242,longnose greeneye,parasudis truculenta,dem,NA,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,093,longnose grenadier,coelorhynchus carminatus,gf,groundfish,nc,NA,NA,3.14,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longnose lancetfish,NA,NA,pelagic,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longsnout butterflyfish,NA,NA,reef,NA,NA,NA,3.01,0.02188,-3.8221823014283567,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longsnout seahorse,NA,NA,reef,NA,NA,NA,3,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longspine scorpionfish,NA,NA,reef,NA,NA,NA,3.03,0.01175,-4.443902038391969,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longspine snipefish,NA,NA,NA,NA,NA,NA,2.83,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longspine squirrelfish,NA,NA,reef,NA,NA,NA,2.89,0.01175,-4.443902038391969,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longtail skate,NA,NA,elasmobranch,NA,NA,NA,3.12,0.00501,-5.296319363885364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,longtooth anglemouth,NA,NA,NA,NA,NA,NA,3.07,0.00363,-5.618522630705377,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,133,lookdown,selene vomer,pel,NA,nc,NA,NA,2.95,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lophiiform uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,168,lumpfish,cyclopterus lumpus,dem,NA,nc,NA,NA,2.99,0.0309,-3.4769990950784373,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,lumpfish snailfish uncl,NA,NA,NA,NA,NA,NA,NA,0.0309,-3.4769990950784373,NA,lumpfish,0.0309,2.99,-3.4769990950784373,NA,NA,NA
+fishbase,NA,mackerel and tuna uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,208,mackerel scad,decapterus macarellus,pel,pelagic,nc,NA,NA,2.99,0.01349,-4.305806608762473,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,manta,NA,NA,elasmobranch,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,marbled puffer,NA,NA,reef,NA,NA,NA,2.88,0.02754,-3.5921157856816284,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,margined flyingfish,NA,NA,pelagic,NA,NA,NA,3.12,0.00427,-5.456141451741604,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,065,margined snake eel,ophichthus cruentifer,dem,NA,nc,NA,NA,2.9,0.00151,-6.495645628155304,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,091,marlin-spike,nezumia bairdi,gf,groundfish,nc,NA,NA,3.16,0.00224,-6.101279413115189,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,metallic codling,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,mexican searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,misty grouper,NA,NA,reef,NA,NA,NA,3.04,0.01349,-4.305806608762473,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,mojarra uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,869,mooneye cusk-eel,ophidion selenops,dem,reef,nc,NA,NA,NA,0.00102,-6.887952651685957,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,moray uncl,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,mottled cusk-eel,NA,NA,reef,NA,NA,NA,3.16,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,161,moustache sculpin,triglops murrayi,dem,groundfish,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,mutton snapper,NA,NA,reef,NA,NA,NA,2.97,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,naked goby,NA,NA,coastal,NA,NA,NA,3.1,0.00589,-5.134499281318642,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,naked sole,NA,NA,groundfish,NA,NA,NA,3.13,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,night shark,NA,NA,elasmobranch,NA,NA,NA,3.08,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,146,northern kingfish,menticirrhus saxatilis,NA,coastal,NA,NA,NA,3.01,0.00871,-4.743283488117726,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,146,northern kingfish,menticirrhus saxatilis,NA,coastal,NA,SPRING,0,3.2785,3.7626013175475464e-6,-12.4904,NA,NA,NA,NA,NA,24,29,f
+wigley,146,northern kingfish,menticirrhus saxatilis,NA,coastal,NA,FALL,0,3.2785,3.7626013175475464e-6,-12.4904,NA,NA,NA,NA,NA,24,29,t
+fishbase,116,northern pipefish,syngnathus fuscus,dem,coastal,nc,NA,NA,3.13,3.8e-4,-7.875339305243843,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,northern puffer,NA,NA,NA,NA,NA,NA,2.88,0.02754,-3.5921157856816284,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,181,northern sand lance,ammodytes dubius,dem,groundfish,nc,NA,NA,3.03,0.00229,-6.079203461415989,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,171,northern searobin,prionotus carolinus,dem,groundfish,nc,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,171,northern searobin,prionotus carolinus,dem,groundfish,nc,SPRING,0,3.4712,2.2644016638452873e-6,-12.9982,NA,NA,NA,NA,NA,21,34,t
+wigley,171,northern searobin,prionotus carolinus,dem,groundfish,nc,FALL,0,3.4712,2.2644016638452873e-6,-12.9982,NA,NA,NA,NA,NA,21,34,f
+fishbase,NA,northern sennet,NA,NA,reef,NA,NA,NA,2.91,0.00759,-4.880923687574598,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,northern stargazer,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,northern tonguefish,NA,NA,groundfish,NA,NA,NA,3.06,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,193,ocean pout,macrozoarces americanus,dem,groundfish,com,NA,NA,3.1,0.00398,-5.526473459685791,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,193,ocean pout,macrozoarces americanus,dem,groundfish,com,FALL,0,3.2995,1.3481193645836851e-6,-13.5168,NA,NA,NA,NA,NA,10,84,t
+wigley,193,ocean pout,macrozoarces americanus,dem,groundfish,com,SPRING,0,3.3459,1.1884032007909095e-6,-13.6429,NA,NA,NA,NA,NA,7,98,t
+wigley,193,ocean pout,macrozoarces americanus,dem,groundfish,com,SPRING,1,3.3592,1.13827112922526e-6,-13.686,NA,NA,NA,NA,NA,18,84,t
+wigley,193,ocean pout,macrozoarces americanus,dem,groundfish,com,SPRING,2,3.3442,1.1842510600730394e-6,-13.6464,NA,NA,NA,NA,NA,15,76,t
+fishbase,NA,ocean sunfish,NA,NA,pelagic,NA,NA,NA,3.02,0.02455,-3.7070434247416073,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ocean surgeon,NA,NA,reef,NA,NA,NA,2.91,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ocean triggerfish,NA,NA,reef,NA,NA,NA,2.9,0.02455,-3.7070434247416073,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ocellated flounder,NA,NA,groundfish,NA,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ocellated frogfish,NA,NA,groundfish,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,069,offshore hake,merluccius albidus,gf,groundfish,com,NA,NA,3.08,0.00617,-5.088056441064841,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,069,offshore hake,merluccius albidus,gf,groundfish,com,SPRING,0,3.1323,4.568160273880697e-6,-12.2964,NA,NA,NA,NA,NA,8,51,t
+wigley,069,offshore hake,merluccius albidus,gf,groundfish,com,FALL,0,3.1323,4.568160273880697e-6,-12.2964,NA,NA,NA,NA,NA,8,51,t
+fishbase,NA,offshore lizardfish,NA,NA,groundfish,NA,NA,NA,3.17,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,797,offshore tonguefish,symphurus civitatus,dem,groundfish,nc,NA,NA,3.06,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,832,orange filefish,aluterus schoepfi,pel,reef,nc,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,185,oyster toadfish,opsanus tau,dem,coastal,nc,NA,NA,3.07,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,palespotted eel,NA,NA,groundfish,NA,NA,NA,2.9,0.00151,-6.495645628155304,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,pancake batfish,NA,NA,groundfish,NA,NA,NA,2.96,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,paralichthys uncl,NA,NA,NA,NA,NA,NA,NA,0.00617,-5.088056441064841,NA,southern flounder,0.00617,3.18,-5.088056441064841,NA,NA,NA
+fishbase,NA,parrotfish uncl,NA,NA,NA,NA,NA,NA,NA,0.013800000000000005,-4.283086686818978,NA,stoplight parrotfish,0.0138,3.05,-4.283086686818978,NA,NA,NA
+fishbase,NA,peacock flounder,NA,NA,groundfish,NA,NA,NA,3.05,0.01072,-4.535644123339481,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,pearlfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,pearly razorfish,NA,NA,reef,NA,NA,NA,2.89,0.01288,-4.352079558305929,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,permit,NA,NA,reef,NA,NA,NA,2.84,0.02818,-3.569142772511603,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,142,pigfish,orthopristis chrysoptera,dem,NA,nc,NA,NA,3.01,0.0182,-4.006333684899388,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,576,pilotfish,naucrates ductor,pel,reef,nc,NA,NA,2.94,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,pinfish,NA,NA,coastal,NA,NA,NA,3.04,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,pipefish seahorse uncl,NA,NA,NA,NA,NA,NA,NA,0.004470000000000001,-5.410366870356659,NA,lined seahorse,0.00447,3,-5.410366870356659,NA,NA,NA
+fishbase,201,planehead filefish,monacanthus hispidus,dem,reef,nc,NA,NA,2.89,0.0182,-4.006333684899388,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,polka-dot cusk-eel,NA,NA,groundfish,NA,NA,NA,3.16,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,075,pollock,pollachius virens,gf,groundfish,com,NA,NA,3.06,0.00661,-5.019171625118542,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,075,pollock,pollachius virens,gf,groundfish,com,SPRING,0,3.1024,6.787689188616486e-6,-11.9004,NA,NA,NA,NA,NA,13,105,t
+wigley,075,pollock,pollachius virens,gf,groundfish,com,FALL,0,3.1151,7.2442681629432565e-6,-11.8353,NA,NA,NA,NA,NA,13,112,t
+fishbase,NA,pompano dolphin,NA,NA,pelagic,NA,NA,NA,2.98,0.0123,-4.398156016603766,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,porbeagle shark,NA,NA,elasmobranch,NA,NA,NA,3.03,0.01047,-4.559241254099692,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,porcupinefish,NA,NA,reef,NA,NA,NA,2.84,0.06761,-2.6939993778795506,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,porgy and pinfish uncl,NA,NA,NA,NA,NA,NA,NA,0.013800000000000005,-4.283086686818978,NA,pinfish,0.0138,3.04,-4.283086686818978,NA,NA,NA
+fishbase,NA,puddingwife,NA,NA,reef,NA,NA,NA,NA,9.329999999999997e-4,-6.977105357116931,NA,slippery dick,9.33e-4,3.06,-6.977105357116931,NA,NA,NA
+fishbase,NA,puffer uncl,NA,NA,NA,NA,NA,NA,NA,0.02754,-3.5921157856816284,NA,northern puffer,0.02754,2.88,-3.5921157856816284,NA,NA,NA
+fishbase,NA,queen angelfish,NA,NA,reef,NA,NA,NA,2.88,0.033236,-3.404121653179402,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,queen triggerfish,NA,NA,reef,NA,NA,NA,2.93,0.02884,-3.5459919665653885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,184,radiated shanny,ulvaria subbifurcata,dem,groundfish,nc,NA,NA,3.1,0.00407,-5.504112279527633,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,rainbow runner,NA,NA,reef,NA,NA,NA,2.85,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,045,rainbow smelt,osmerus mordax,pel,diadromous,nc,NA,NA,3.13,0.00417,-5.479839243171427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,ray and skate uncl,NA,NA,NA,NA,NA,NA,NA,0.0027500000000000007,-5.896154367303657,NA,clearnose skate,0.00275,3.25,-5.896154367303657,NA,NA,NA
+fishbase,NA,red barbier,NA,NA,reef,NA,NA,NA,2.97,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,489,red cornetfish,fistularia petimba,dem,reef,nc,NA,NA,2.96,7.1e-4,-7.250245587928913,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red dory,NA,NA,reef,NA,NA,NA,3,0.01698,-4.0757190980989355,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red drum,NA,NA,coastal,NA,NA,NA,3.06,0.00871,-4.743283488117726,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red goatfish,NA,NA,groundfish,NA,NA,NA,3.09,0.01047,-4.559241254099692,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red grouper,NA,NA,reef,NA,NA,NA,3.01,0.01445,-4.237060864423696,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,077,red hake,urophycis chuss,gf,groundfish,com,NA,NA,3,0.01245,-4.386034656071421,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,SPRING,0,3.0979,4.2258083077914795e-6,-12.3743,NA,NA,NA,NA,NA,3,58,t
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,FALL,0,3.0162,5.976950917807663e-6,-12.0276,NA,NA,NA,NA,NA,2,68,t
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,SPRING,1,3.1139,3.944848529372071e-6,-12.4431,NA,NA,NA,NA,NA,6,52,t
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,FALL,1,3.0491,5.173298837026966e-6,-12.172,NA,NA,NA,NA,NA,8,68,t
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,SPRING,2,3.1684,3.349833214778426e-6,-12.6066,NA,NA,NA,NA,NA,6,58,t
+wigley,077,red hake,urophycis chuss,gf,groundfish,com,FALL,2,3.1533,3.7882741953653714e-6,-12.4836,NA,NA,NA,NA,NA,7,62,t
+fishbase,NA,red hind,NA,NA,reef,NA,NA,NA,3.04,0.011148,-4.4964951693624355,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red hogfish,NA,NA,reef,NA,NA,NA,3.04,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red lizardfish,NA,NA,groundfish,NA,NA,NA,3.21,0.00468,-5.3644571690525815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red porgy,NA,NA,reef,NA,NA,NA,3.03,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,red snapper,NA,NA,reef,NA,NA,NA,2.97,0.01445,-4.237060864423696,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,862,redeye gaper,chaunax stigmaeus,dem,groundfish,nc,NA,NA,3.04,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,reef butterflyfish,NA,NA,reef,NA,NA,NA,3.02,0.01389,-4.2765861222158845,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,remora,NA,NA,NA,NA,NA,NA,NA,0.0027500000000000007,-5.896154367303657,NA,sharksucker,0.00275,3.15,-5.896154367303657,NA,NA,NA
+fishbase,NA,requiem shark uncl,NA,NA,NA,NA,NA,NA,NA,0.004470000000000001,-5.410366870356659,NA,blacktip reef shark,0.00447,3.05,-5.410366870356659,NA,NA,NA
+fishbase,NA,righteye flounder uncl,NA,NA,NA,NA,NA,NA,NA,0.019949999999999996,-3.914526135646265,NA,cockatoo righteye flounder,0.01995,3.01,-3.914526135646265,NA,NA,NA
+fishbase,180,rock gunnel,pholis gunnellus,dem,reef,nc,NA,NA,3.14,0.00214,-6.1469494499483766,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,rock hind,NA,NA,reef,NA,NA,NA,3.1,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,rock sea bass,NA,NA,reef,NA,NA,NA,3.06,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,025,rosette skate,leucoraja garmani,el,elasmobranch,com,NA,NA,3.13,0.00575,-5.158555424172878,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,025,rosette skate,leucoraja garmani,el,elasmobranch,com,SPRING,0,3.3526,1.1527040821092045e-6,-13.673400000000001,NA,NA,NA,NA,NA,32,43,t
+wigley,025,rosette skate,leucoraja garmani,el,elasmobranch,com,FALL,0,3.0718,3.543484474883643e-6,-12.5504,NA,NA,NA,NA,NA,14,42,t
+wigley,025,rosette skate,leucoraja garmani,el,elasmobranch,com,FALL,1,3.0307,3.812978178602216e-6,-12.4771,NA,NA,NA,NA,NA,14,42,t
+wigley,025,rosette skate,leucoraja garmani,el,elasmobranch,com,FALL,2,3.0688,3.825964368422134e-6,-12.4737,NA,NA,NA,NA,NA,15,42,t
+fishbase,212,rough scad,trachurus lathami,pel,pelagic,nc,NA,NA,2.96,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,rough silverside,NA,NA,pelagic,NA,NA,NA,3.1,0.00525,-5.249527202378605,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,roughback batfish,NA,NA,groundfish,NA,NA,NA,2.96,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,092,roughhead grenadier,macrourus berglax,gf,groundfish,nc,NA,NA,3.13,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,004,roughtail stingray,dasyatis centroura,NA,elasmobranch,NA,NA,NA,NA,0.07389999999999998,-2.6050424510279813,NA,southern stingray,0.0739,2.81,-2.6050424510279813,NA,NA,NA
+wigley,004,roughtail stingray,dasyatis centroura,NA,elasmobranch,NA,SPRING,0,3.0222,3.2573874063065e-5,-10.332,NA,NA,NA,NA,NA,36,155,f
+wigley,004,roughtail stingray,dasyatis centroura,NA,elasmobranch,NA,FALL,0,3.0222,3.2573874063065e-5,-10.332,NA,NA,NA,NA,NA,36,155,t
+fishbase,NA,roughtongue bass,NA,NA,reef,NA,NA,NA,2.9,0.00245,-6.011667254425501,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,031,round herring,etrumeus teres,pel,pelagic,nc,NA,NA,3.1,0.0055,-5.2030071867437115,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,031,round herring,etrumeus teres,pel,pelagic,nc,SPRING,0,2.9645,1.0380308085323395e-5,-11.4756,NA,NA,NA,NA,NA,11,20,f
+wigley,031,round herring,etrumeus teres,pel,pelagic,nc,FALL,0,2.9645,1.0380308085323395e-5,-11.4756,NA,NA,NA,NA,NA,11,20,t
+fishbase,211,round scad,decapterus punctatus,dem,pelagic,nc,NA,NA,2.98,0.01148,-4.467148888090716,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,saddle bass,NA,NA,reef,NA,NA,NA,3.03,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sand diver,NA,NA,groundfish,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sand perch,NA,NA,reef,NA,NA,NA,3.1,0.00912,-4.697285474895897,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sand seatrout,NA,NA,coastal,NA,NA,NA,3.06,0.01072,-4.535644123339481,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,012,sand tiger,carcharias taurus,NA,elasmobranch,NA,NA,NA,3.03,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,012,sand tiger,carcharias taurus,NA,elasmobranch,NA,SPRING,0,3.2927,1.3865387835687097e-6,-13.4887,NA,NA,NA,NA,NA,150,260,f
+wigley,012,sand tiger,carcharias taurus,NA,elasmobranch,NA,FALL,0,3.2927,1.3865387835687097e-6,-13.4887,NA,NA,NA,NA,NA,150,260,t
+fishbase,NA,sand tilefish,NA,NA,reef,NA,NA,NA,3.03,0.00537,-5.226927370461364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,009,sandbar shark,carcharhinus plumbeus,NA,elasmobranch,NA,NA,NA,3.17,0.00513,-5.272649619799459,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,009,sandbar shark,carcharhinus plumbeus,NA,elasmobranch,NA,SPRING,0,3.1706,3.1314950991466613e-6,-12.674,NA,NA,NA,NA,NA,63,174,t
+wigley,009,sandbar shark,carcharhinus plumbeus,NA,elasmobranch,NA,FALL,0,3.1706,3.1314950991466613e-6,-12.674,NA,NA,NA,NA,NA,63,174,t
+wigley,009,sandbar shark,carcharhinus plumbeus,NA,elasmobranch,NA,SPRING,1,3.1706,3.1314950991466613e-6,-12.674,NA,NA,NA,NA,NA,63,174,f
+wigley,009,sandbar shark,carcharhinus plumbeus,NA,elasmobranch,NA,FALL,1,3.1706,3.1314950991466613e-6,-12.674,NA,NA,NA,NA,NA,63,174,f
+fishbase,NA,sargassumfish,NA,NA,pelagic,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,saucereye porgy,NA,NA,reef,NA,NA,NA,2.93,0.02455,-3.7070434247416073,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,scalloped hammerhead shark,NA,NA,elasmobranch,NA,NA,NA,3.11,0.00355,-5.640807675494813,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,scaly dragonfish uncl,NA,NA,NA,NA,NA,NA,NA,0.0014800000000000004,-6.515713191206113,NA,scaly dragonfish,0.00148,3.14,-6.515713191206113,NA,NA,NA
+fishbase,NA,scamp,NA,NA,reef,NA,NA,NA,3,0.01435,-4.244005336776507,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,school bass,NA,NA,reef,NA,NA,NA,3.13,0.00468,-5.3644571690525815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,scorpionfish and rockfish uncl,NA,NA,NA,NA,NA,NA,NA,0.011749999999999998,-4.443902038391969,NA,longspine scorpionfish,0.01175,3.03,-4.443902038391969,NA,NA,NA
+fishbase,NA,scrawled cowfish,NA,NA,reef,NA,NA,NA,2.7,0.02348,-3.7516062840222415,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,scrawled filefish,NA,NA,reef,NA,NA,NA,NA,0.02042,-3.8912404662456175,NA,unicorn filefish,0.02042,2.87,-3.8912404662456175,NA,NA,NA
+fishbase,NA,sculpin uncl,NA,NA,NA,NA,NA,NA,NA,0.007079999999999998,-4.950481371276509,NA,northern sculpin,0.00708,3.13,-4.950481371276509,NA,NA,NA
+fishbase,143,scup,stenotomus chrysops,dem,NA,com,NA,NA,3,0.02261,-3.7893629926922583,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,642,scup,stenotomus caprinus,dem,NA,nc,NA,NA,3,0.02261,-3.7893629926922583,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,642,scup,stenotomus caprinus,dem,NA,nc,SPRING,0,3.2446,1.0096719387490707e-5,-11.5033,NA,NA,NA,NA,NA,6,38,t
+wigley,642,scup,stenotomus caprinus,dem,NA,nc,FALL,0,3.1365,1.5575677422735097e-5,-11.0698,NA,NA,NA,NA,NA,4,30,t
+fishbase,NA,sea bass uncl,NA,NA,NA,NA,NA,NA,NA,0.010960000000000003,-4.513502997462267,NA,rock sea bass,0.01096,3.06,-4.513502997462267,NA,NA,NA
+fishbase,002,sea lamprey,petromyzon marinus,pel,diadromous,nc,NA,NA,3,0.00208,-6.175387385268911,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,164,sea raven,hemitripterus americanus,dem,groundfish,nc,NA,NA,3,0.0183,-4.000854219134761,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,164,sea raven,hemitripterus americanus,dem,groundfish,nc,SPRING,0,3.1551,1.1598903386120523e-5,-11.3646,NA,NA,NA,NA,NA,8,64,t
+wigley,164,sea raven,hemitripterus americanus,dem,groundfish,nc,FALL,0,3.1822,1.012908063991963e-5,-11.5001,NA,NA,NA,NA,NA,7,68,t
+wigley,164,sea raven,hemitripterus americanus,dem,groundfish,nc,FALL,1,3.0726,1.4286436032967211e-5,-11.1562,NA,NA,NA,NA,NA,9,53,t
+wigley,164,sea raven,hemitripterus americanus,dem,groundfish,nc,FALL,2,3.259,7.936009427828394e-6,-11.7441,NA,NA,NA,NA,NA,7,68,t
+fishbase,NA,searobin uncl,NA,NA,NA,NA,NA,NA,NA,0.003890000000000001,-5.549346121351782,NA,northern searobin,0.00389,3.12,-5.549346121351782,NA,NA,NA
+fishbase,NA,seaweed blenny,NA,NA,reef,NA,NA,NA,3.01,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sergeant major,NA,NA,reef,NA,NA,NA,3.05,0.01905,-3.960688177409427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shark uncl,NA,NA,NA,NA,NA,NA,NA,0.004470000000000001,-5.410366870356659,NA,blacktip reef shark,0.00447,3.05,-5.410366870356659,NA,NA,NA
+fishbase,NA,sharksucker,NA,NA,pelagic,NA,NA,NA,3.15,0.00275,-5.896154367303657,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sharpnose puffer,NA,NA,reef,NA,NA,NA,2.94,0.02754,-3.5921157856816284,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,631,sheepshead,archosargus probatocephalus,pel,coastal,nc,NA,NA,3.04,0.01413,-4.259455082285701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sheepshead porgy,NA,NA,reef,NA,NA,NA,2.87,0.02951,-3.523026090027289,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,sherborn's cardinalfish,NA,NA,reef,NA,NA,NA,NA,0.012589999999999999,-4.374852430925881,NA,twospot cardinalfish,0.01259,3.09,-4.374852430925881,NA,NA,NA
+fishbase,NA,shoal flounder,NA,NA,groundfish,NA,NA,NA,3.12,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,557,short bigeye,pristigenys alta,dem,reef,nc,NA,NA,2.94,0.02239,-3.7991408483714735,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shortfin mako,NA,NA,elasmobranch,NA,NA,NA,3.03,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shortfin searobin,NA,NA,groundfish,NA,NA,NA,2.97,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,162,shorthorn sculpin,myoxocephalus scorpius,dem,groundfish,nc,NA,NA,NA,0.007079999999999998,-4.950481371276509,NA,northern sculpin,0.00708,3.13,-4.950481371276509,NA,NA,NA
+fishbase,NA,shortjaw lizardfish,NA,NA,groundfish,NA,NA,NA,NA,0.004470000000000001,-5.410366870356659,NA,brazilian lizardfish,0.00447,3.07,-5.410366870356659,NA,NA,NA
+fishbase,450,shortnose batfish,ogcocephalus nasutus,dem,groundfish,nc,NA,NA,2.96,0.0195,-3.937340813412436,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,232,shortnose greeneye,chloropthalmus agassizi,dem,NA,nc,NA,NA,3.14,0.00437,-5.432992269874639,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shortspine boarfish,NA,NA,NA,NA,NA,NA,2.92,0.02692,-3.61488577420561,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shortwing searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shrimp eel,NA,NA,groundfish,NA,NA,NA,2.9,0.00151,-6.495645628155304,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,shrimp flounder,NA,NA,groundfish,NA,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silk snapper,NA,NA,reef,NA,NA,NA,2.97,0.01479,-4.213804002259429,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silky shark,NA,NA,elasmobranch,NA,NA,NA,3.09,0.00468,-5.3644571690525815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,865,silver anchovy,engraulis eurystole,pel,NA,nc,NA,NA,3.12,0.00468,-5.3644571690525815,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,072,silver hake,merluccius bilinearis,gf,groundfish,com,NA,NA,3.11,0.00562,-5.181423615076537,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,072,silver hake,merluccius bilinearis,gf,groundfish,com,SPRING,0,3.1512,3.7513304283818177e-6,-12.4934,NA,NA,NA,NA,NA,4,58,t
+wigley,072,silver hake,merluccius bilinearis,gf,groundfish,com,FALL,0,3.0606,5.366685850612837e-6,-12.1353,NA,NA,NA,NA,NA,3,63,t
+wigley,072,silver hake,merluccius bilinearis,gf,groundfish,com,FALL,1,3.0869,4.8569494612383786e-6,-12.2351,NA,NA,NA,NA,NA,7,41,t
+wigley,072,silver hake,merluccius bilinearis,gf,groundfish,com,FALL,2,3.2186,3.2271860254360435e-6,-12.6439,NA,NA,NA,NA,NA,7,63,t
+fishbase,NA,silver hatchetfish,NA,NA,NA,NA,NA,NA,2.98,0.0123,-4.398156016603766,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,599,silver jenny,eucinostomus gula,dem,NA,nc,NA,NA,3.07,0.001148,-6.769733981084762,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silver perch,NA,NA,coastal,NA,NA,NA,3.07,0.01175,-4.443902038391969,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silver porgy,NA,NA,reef,NA,NA,NA,3.03,0.01259,-4.374852430925881,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,213,silver rag,ariomma bondi,dem,NA,nc,NA,NA,2.91,5.1e-4,-7.5810998322459024,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silver seatrout,NA,NA,coastal,NA,NA,NA,3,0.01259,-4.374852430925881,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,silverside uncl,NA,NA,NA,NA,NA,NA,NA,0.005249999999999998,-5.249527202378605,NA,atlantic silverside,0.00525,3.08,-5.249527202378605,NA,NA,NA
+fishbase,066,silverstripe halfbeak,hyporhamphus unifasciatus,pel,reef,nc,NA,NA,3.11,0.002,-6.214608098422191,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,simonys frostfish,NA,NA,NA,NA,NA,NA,3.06,1.1e-4,-9.115030192171858,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,singlespot frogfish,NA,NA,NA,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,skate uncl,NA,NA,NA,NA,NA,NA,NA,0.0027500000000000007,-5.896154367303657,NA,clearnose skate,0.00275,3.25,-5.896154367303657,NA,NA,NA
+fishbase,NA,slender searobin,NA,NA,groundfish,NA,NA,NA,NA,0.003890000000000001,-5.549346121351782,NA,northern searobin,0.00389,3.12,-5.549346121351782,NA,NA,NA
+fishbase,067,slender snipe eel,nemichthys scolopaceus,pel,NA,nc,NA,NA,3,4.1e-4,-7.799353398265921,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,slender tonguefish,NA,NA,NA,NA,NA,NA,NA,0.00776,-4.85877294478701,NA,blackcheek tonguefish,0.00776,3.03,-4.85877294478701,NA,NA,NA
+fishbase,NA,slippery dick,NA,NA,reef,NA,NA,NA,3.06,9.33e-4,-6.977105357116931,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,117,smallmouth flounder,etropus microstomus,gf,groundfish,nc,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,376,smooth butterfly ray,gymnura micrura,NA,elasmobranch,NA,NA,NA,3.08,0.00562,-5.181423615076537,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,376,smooth butterfly ray,gymnura micrura,NA,elasmobranch,NA,SPRING,0,3.0742,7.512817470706207e-6,-11.7989,NA,NA,NA,NA,NA,40,84,f
+wigley,376,smooth butterfly ray,gymnura micrura,NA,elasmobranch,NA,FALL,0,3.0742,7.512817470706207e-6,-11.7989,NA,NA,NA,NA,NA,40,84,t
+fishbase,013,smooth dogfish,mustelus canis,el,elasmobranch,com,NA,NA,3.1,0.00245,-6.011667254425501,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,SPRING,0,3.1641,1.5283833731979512e-6,-13.3913,NA,NA,NA,NA,NA,52,126,t
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,FALL,0,3.0006,3.53357659585775e-6,-12.5532,NA,NA,NA,NA,NA,40,135,t
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,SPRING,1,3.0918,2.0409401467903596e-6,-13.1021,NA,NA,NA,NA,NA,52,115,t
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,FALL,1,2.9436,4.432707441412839e-6,-12.3265,NA,NA,NA,NA,NA,40,112,t
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,SPRING,2,3.2652,1.0231750205977116e-6,-13.7926,NA,NA,NA,NA,NA,54,126,t
+wigley,013,smooth dogfish,mustelus canis,el,elasmobranch,com,FALL,2,3.0415,3.0246959013927513e-6,-12.7087,NA,NA,NA,NA,NA,44,135,t
+fishbase,NA,smooth hammerhead shark,NA,NA,elasmobranch,NA,NA,NA,3.03,0.00417,-5.479839243171427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,196,smooth puffer,lagocephalus laevigatus,dem,reef,nc,NA,NA,2.86,0.01905,-3.960688177409427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,027,smooth skate,malacoraja senta,el,elasmobranch,com,NA,NA,3.13,0.00575,-5.158555424172878,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,027,smooth skate,malacoraja senta,el,elasmobranch,com,SPRING,0,3.0655,3.5776657333716024e-6,-12.5408,NA,NA,NA,NA,NA,18,65,t
+wigley,027,smooth skate,malacoraja senta,el,elasmobranch,com,FALL,0,3.1812,2.2291281791217926e-6,-13.0139,NA,NA,NA,NA,NA,15,62,t
+fishbase,NA,smoothhead scorpionfish,NA,NA,reef,NA,NA,NA,3.01,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,snake eel uncl,NA,NA,NA,NA,NA,NA,NA,0.0037800000000000004,-5.578031269350641,NA,king snake eel,0.00378,3,-5.578031269350641,NA,NA,NA
+fishbase,NA,snake mackerel,NA,NA,pelagic,NA,NA,NA,3,7.3e-4,-7.222466023821838,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,snake mackerel uncl,NA,NA,NA,NA,NA,NA,NA,7.299999999999997e-4,-7.222466023821838,NA,snake mackerel,7.3e-4,3,-7.222466023821838,NA,NA,NA
+fishbase,182,snakeblenny,lumpenus lumpretaeformis,dem,groundfish,nc,NA,NA,3.17,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,snakefish,NA,NA,reef,NA,NA,NA,3.38,0.00288,-5.8499649848342825,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,snapper uncl,NA,NA,NA,NA,NA,NA,NA,0.014789999999999998,-4.213804002259429,NA,lane snapper,0.01479,2.97,-4.213804002259429,NA,NA,NA
+fishbase,NA,snowy grouper,NA,NA,reef,NA,NA,NA,3.04,0.01585,-4.144585778658848,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,064,snubnose eel,simenchelys parasiticus,dem,NA,nc,NA,NA,3.01,0.00145,-6.536191722549654,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,southern eagle ray,NA,NA,elasmobranch,NA,NA,NA,3.09,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,southern flounder,NA,NA,groundfish,NA,NA,NA,3.18,0.00617,-5.088056441064841,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,southern hake,NA,NA,groundfish,NA,NA,NA,3.11,0.00537,-5.226927370461364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,652,southern kingfish,menticirrhus americanus,NA,coastal,NA,NA,NA,3.06,0.00832,-4.78909302414902,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,652,southern kingfish,menticirrhus americanus,NA,coastal,NA,SPRING,0,3.4493,2.470228256637371e-6,-12.9112,NA,NA,NA,NA,NA,17,39,f
+wigley,652,southern kingfish,menticirrhus americanus,NA,coastal,NA,FALL,0,3.4493,2.470228256637371e-6,-12.9112,NA,NA,NA,NA,NA,17,39,t
+fishbase,NA,southern puffer,NA,NA,reef,NA,NA,NA,2.85,0.0257,-3.661264287080963,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,southern stargazer,NA,NA,groundfish,NA,NA,NA,3.14,0.00457,-5.3882420740760235,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,029,southern stingray,dasyatis americana,NA,elasmobranch,NA,NA,NA,2.81,0.0739,-2.6050424510279813,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,029,southern stingray,dasyatis americana,NA,elasmobranch,NA,SPRING,0,3.1428,1.7730929747956512e-5,-10.9402,NA,NA,NA,NA,NA,45,100,t
+wigley,029,southern stingray,dasyatis americana,NA,elasmobranch,NA,FALL,0,3.1428,1.7730929747956512e-5,-10.9402,NA,NA,NA,NA,NA,45,100,t
+fishbase,745,spanish mackerel,scomberomorus maculatus,NA,coastal,NA,NA,NA,3.01,0.00776,-4.85877294478701,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,745,spanish mackerel,scomberomorus maculatus,NA,coastal,NA,SPRING,0,3.0242,8.829607456492075e-6,-11.6374,NA,NA,NA,NA,NA,18,59,f
+wigley,745,spanish mackerel,scomberomorus maculatus,NA,coastal,NA,FALL,0,3.0242,8.829607456492075e-6,-11.6374,NA,NA,NA,NA,NA,18,59,t
+fishbase,429,spanish sardine,sardinella aurita,NA,coastal,NA,NA,NA,3.03,0.00741,-4.904924839674141,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,429,spanish sardine,sardinella aurita,NA,coastal,NA,SPRING,0,3.1463,7.40614868044436e-6,-11.8132,NA,NA,NA,NA,NA,8,18,f
+wigley,429,spanish sardine,sardinella aurita,NA,coastal,NA,FALL,0,3.1463,7.40614868044436e-6,-11.8132,NA,NA,NA,NA,NA,8,18,f
+fishbase,NA,spinner shark,NA,NA,elasmobranch,NA,NA,NA,3.07,0.0038,-5.572754212249797,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,375,spiny butterfly ray,gymnura altavela,NA,elasmobranch,NA,NA,NA,3.08,0.0123,-4.398156016603766,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,375,spiny butterfly ray,gymnura altavela,NA,elasmobranch,NA,SPRING,0,3.306,2.1212606495459384e-6,-13.0635,NA,NA,NA,NA,NA,52,187,t
+wigley,375,spiny butterfly ray,gymnura altavela,NA,elasmobranch,NA,FALL,0,3.1787,4.038246479263542e-6,-12.4197,NA,NA,NA,NA,NA,38,210,t
+fishbase,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,NA,NA,3.07,0.00282,-5.871018394032115,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,SPRING,0,3.1863,1.7955485209553261e-6,-13.2302,NA,NA,NA,NA,NA,13,114,t
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,FALL,0,3.0596,3.133687913111412e-6,-12.6733,NA,NA,NA,NA,NA,22,106,t
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,SPRING,1,3.0075,3.5608901579081233e-6,-12.5455,NA,NA,NA,NA,NA,20,91,t
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,FALL,1,2.9651,4.486669010572848e-6,-12.3144,NA,NA,NA,NA,NA,23,90,t
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,SPRING,2,3.2369,1.5041238330823563e-6,-13.4073,NA,NA,NA,NA,NA,13,114,t
+wigley,015,spiny dogfish,squalus acanthias,el,elasmobranch,com,FALL,2,3.1012,2.7034008594020324e-6,-12.821,NA,NA,NA,NA,NA,22,106,t
+fishbase,NA,spiny searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spinycheek scorpionfish,NA,NA,reef,NA,NA,NA,3.02,0.0123,-4.398156016603766,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spinycheek soldierfish,NA,NA,reef,NA,NA,NA,3.02,0.01778,-4.029681048896379,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spoon-nose eel uncl,NA,NA,NA,NA,NA,NA,NA,0.0015099999999999996,-6.495645628155304,NA,spotted spoon nose eel,0.00151,2.9,-6.495645628155304,NA,NA,NA
+fishbase,149,spot,leiostomus xanthurus,NA,coastal,NA,NA,NA,3.07,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,149,spot,leiostomus xanthurus,NA,coastal,NA,SPRING,0,2.9481,1.604521313360793e-5,-11.0401,NA,NA,NA,NA,NA,15,24,t
+wigley,149,spot,leiostomus xanthurus,NA,coastal,NA,FALL,0,3.3175,7.1214443141595824e-06,-11.8524,NA,NA,NA,NA,NA,9,26,t
+fishbase,NA,spotfin butterflyfish,NA,NA,elasmobranch,NA,NA,NA,3.02,0.0257,-3.661264287080963,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,735,spotfin dragonet,foetorepus agassizi,dem,reef,nc,NA,NA,2.82,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotfin flounder,NA,NA,groundfish,NA,NA,NA,3.13,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotfin mojarra,NA,NA,reef,NA,NA,NA,3.08,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spottail pinfish,NA,NA,coastal,NA,NA,NA,3.03,0.01259,-4.374852430925881,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spottail tonguefish,NA,NA,coastal,NA,NA,NA,3.06,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted burrfish,NA,NA,reef,NA,NA,NA,2.89,0.0309,-3.4769990950784373,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,748,spotted driftfish,ariomma regulus,dem,NA,nc,NA,NA,2.96,0.02042,-3.8912404662456175,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted eagle ray,NA,NA,elasmobranch,NA,NA,NA,NA,0.012019999999999998,-4.421183349875076,NA,cownose ray,0.01202,2.98,-4.421183349875076,NA,NA,NA
+fishbase,NA,spotted goatfish,NA,NA,reef,NA,NA,NA,3.1,0.01072,-4.535644123339481,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,078,spotted hake,urophycis regia,gf,groundfish,nc,NA,NA,3.14,0.00676,-4.996732388927264,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,SPRING,0,3.0823,6.21092947068878e-6,-11.9892,NA,NA,NA,NA,NA,3,42,t
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,FALL,0,3.0927,6.373256465081734e-6,-11.9634,NA,NA,NA,NA,NA,12,41,t
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,SPRING,1,3.1437,5.068832718025319e-6,-12.1924,NA,NA,NA,NA,NA,5,35,t
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,FALL,1,2.7812,1.55445571984873e-5,-11.0718,NA,NA,NA,NA,NA,13,32,t
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,SPRING,2,3.1139,5.7219551587863335e-6,-12.0712,NA,NA,NA,NA,NA,4,42,t
+wigley,078,spotted hake,urophycis regia,gf,groundfish,nc,FALL,2,3.0696,7.0703540607197145e-6,-11.8596,NA,NA,NA,NA,NA,12,41,t
+fishbase,NA,spotted lanternfish,NA,NA,NA,NA,NA,NA,3,0.001504,-6.499627053454489,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted moray,NA,NA,NA,NA,NA,NA,3.12,9.1e-4,-7.002065958453378,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted scorpionfish,NA,NA,reef,NA,NA,NA,2.99,0.01514,-4.190415030972834,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted seatrout,NA,NA,coastal,NA,NA,NA,3.02,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted soapfish,NA,NA,reef,NA,NA,NA,3.06,0.01122,-4.490057378887586,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted spoon-nose eel,NA,NA,NA,NA,NA,NA,2.9,0.00151,-6.495645628155304,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted tinselfish,NA,NA,NA,NA,NA,NA,2.94,0.01905,-3.960688177409427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,spotted whiff,NA,NA,groundfish,NA,NA,NA,3.13,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,798,spottedfin tonguefish,symphurus diomedianus,dem,groundfish,nc,NA,NA,NA,0.00776,-4.85877294478701,NA,blackcheek tonguefish,0.00776,3.03,-4.85877294478701,NA,NA,NA
+fishbase,NA,squirrelfish,NA,NA,reef,NA,NA,NA,2.96,0.0166,-4.098352583619639,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,squirrelfish uncl,NA,NA,NA,NA,NA,NA,NA,0.016600000000000007,-4.098352583619639,NA,squirrelfish,0.0166,2.96,-4.098352583619639,NA,NA,NA
+fishbase,NA,star drum,NA,NA,coastal,NA,NA,NA,3.09,0.00575,-5.158555424172878,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,stargazer uncl,NA,NA,NA,NA,NA,NA,NA,0.004570000000000001,-5.3882420740760235,NA,southern stargazer,0.00457,3.14,-5.3882420740760235,NA,NA,NA
+fishbase,264,stout beardfish,polymixia nobilis,dem,NA,nc,NA,NA,3.11,0.00933,-4.674520264122885,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,streamer bass,NA,NA,reef,NA,NA,NA,3.15,0.00453,-5.397033339487194,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,streamer searobin,NA,NA,groundfish,NA,NA,NA,3.12,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,856,striated argentine,argentina striata,pel,NA,nc,NA,NA,3.15,0.00417,-5.479839243171427,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,044,striped anchovy,anchoa hepsetus,pel,NA,nc,NA,NA,3.16,0.00537,-5.226927370461364,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,139,striped bass,morone saxatilis,pel,coastal,com,NA,NA,3.04,0.00813,-4.812194355422418,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,SPRING,0,3.1383,7.535389764629995e-6,-11.7959,NA,NA,NA,NA,NA,23,93,t
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,FALL,0,3.0139,1.145252875938821e-5,-11.3773,NA,NA,NA,NA,NA,49,102,t
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,SPRING,1,3.1998,6.283395744349339e-6,-11.9776,NA,NA,NA,NA,NA,23,81,t
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,FALL,1,2.8888,2.015415676055927e-5,-10.8121,NA,NA,NA,NA,NA,49,85,t
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,SPRING,2,3.0627,9.65919738143229e-6,-11.5476,NA,NA,NA,NA,NA,24,93,t
+wigley,139,striped bass,morone saxatilis,pel,coastal,com,FALL,2,3.2072,4.842884711544885e-6,-12.238,NA,NA,NA,NA,NA,50,102,t
+fishbase,NA,striped bonito,NA,NA,NA,NA,NA,NA,3.04,0.00977,-4.628438812927445,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,striped burrfish,NA,NA,reef,NA,NA,NA,3.124,0.0236,-3.7465085669505727,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,188,striped cusk-eel,ophidion marginatum,dem,groundfish,nc,NA,NA,3.06,0.00102,-6.887952651685957,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,striped grunt,NA,NA,reef,NA,NA,NA,3.099,0.0175,-4.045554398052668,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,striped mullet,NA,NA,coastal,NA,NA,NA,2.97,0.01202,-4.421183349875076,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,172,striped searobin,prionotus evolans,dem,groundfish,nc,NA,NA,NA,0.003890000000000001,-5.549346121351782,NA,northern searobin,0.00389,3.12,-5.549346121351782,NA,NA,NA
+fishbase,103,summer flounder,paralichthys dentatus,gf,groundfish,com,NA,NA,3.16,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,SPRING,0,3.1651,5.3287173288251326e-6,-12.1424,NA,NA,NA,NA,NA,15,72,t
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,FALL,0,3.2156,4.624695624890498e-6,-12.2841,NA,NA,NA,NA,NA,12,74,t
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,SPRING,1,3.1602,5.451062577196681e-6,-12.1197,NA,NA,NA,NA,NA,16,57,t
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,FALL,1,3.2394,4.298691000920595e-6,-12.3572,NA,NA,NA,NA,NA,12,57,t
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,SPRING,2,3.1759,5.0983173706271424e-06,-12.1866,NA,NA,NA,NA,NA,16,72,t
+wigley,103,summer flounder,paralichthys dentatus,gf,groundfish,com,FALL,2,3.2488,4.035824258115001e-6,-12.4203,NA,NA,NA,NA,NA,13,74,t
+fishbase,NA,swordfish,NA,NA,pelagic,NA,NA,NA,3.15,0.0038,-5.572754212249797,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,tarpon,NA,NA,coastal,NA,NA,NA,2.98,0.00794,-4.8358420037230925,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,tattler,NA,NA,reef,NA,NA,NA,3.05,0.01096,-4.513502997462267,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,177,tautog,tautoga onitis,dem,coastal,com,NA,NA,3.05,0.0138,-4.283086686818978,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,177,tautog,tautoga onitis,dem,coastal,com,SPRING,0,3.0443,1.7298340256389466e-5,-10.9649,NA,NA,NA,NA,NA,18,39,f
+wigley,177,tautog,tautoga onitis,dem,coastal,com,FALL,0,3.0443,1.7298340256389466e-5,-10.9649,NA,NA,NA,NA,NA,18,39,t
+fishbase,028,thorny skate,amblyraja radiata,el,elasmobranch,com,NA,NA,3.09,0.00575,-5.158555424172878,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,028,thorny skate,amblyraja radiata,el,elasmobranch,com,SPRING,0,3.1197,5.626629291458134e-6,-12.088,NA,NA,NA,NA,NA,10,105,t
+wigley,028,thorny skate,amblyraja radiata,el,elasmobranch,com,FALL,0,3.1197,5.626629291458134e-6,-12.088,NA,NA,NA,NA,NA,10,105,t
+fishbase,NA,three-eye flounder,NA,NA,groundfish,NA,NA,NA,3.01,0.01995,-3.914526135646265,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,threebeard rockling,NA,NA,groundfish,NA,NA,NA,3.08,0.00479,-5.341224867559313,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,115,threespine stickleback,gasterosteus aculeatus,pel,NA,nc,NA,NA,3.07,0.01023,-4.582430699018602,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,thresher shark,NA,NA,elasmobranch,NA,NA,NA,2.86,0.00851,-4.766513336396854,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,tiger shark,NA,NA,elasmobranch,NA,NA,NA,3.05,0.0038,-5.572754212249797,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,151,tilefish,lopholatilus chamaeleonticeps,dem,groundfish,nc,NA,NA,3.11,0.00776,-4.85877294478701,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,tomtate,NA,NA,reef,NA,NA,NA,3,0.01479,-4.213804002259429,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,tonguefish uncl,NA,NA,NA,NA,NA,NA,NA,0.00776,-4.85877294478701,NA,blackcheek tonguefish,0.00776,3.03,-4.85877294478701,NA,NA,NA
+fishbase,NA,triggerfish filefish uncl,NA,NA,NA,NA,NA,NA,NA,0.028840000000000005,-3.5459919665653885,NA,queen triggerfish,0.02884,2.93,-3.5459919665653885,NA,NA,NA
+fishbase,NA,trumpetfish,NA,NA,NA,NA,NA,NA,2.865,0.00396,-5.531511253715748,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,trunkfish,NA,NA,reef,NA,NA,NA,3.083,0.0178,-4.028556821684098,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,559,twospot cardinalfish,apogon pseudomaculatus,dem,reef,nc,NA,NA,3.09,0.01259,-4.374852430925881,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,twospot flounder,NA,NA,groundfish,NA,NA,NA,3.01,0.01,-4.605170185988091,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,unicorn filefish,NA,NA,reef,NA,NA,NA,2.87,0.02042,-3.8912404662456175,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,unicornfish,NA,NA,NA,NA,NA,NA,3.07,0.00115,-6.767993336606978,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,vermilion snapper,NA,NA,reef,NA,NA,NA,2.96,0.01549,-4.16756062455336,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,596,vermillion snapper,rhomboplites aurorubens,dem,NA,nc,SPRING,0,3.0106,1.3469266814745483e-5,-11.2151,NA,NA,NA,NA,NA,8,21,t
+wigley,596,vermillion snapper,rhomboplites aurorubens,dem,NA,nc,FALL,0,3.0106,1.3469266814745483e-5,-11.2151,NA,NA,NA,NA,NA,8,21,f
+fishbase,240,viperfish,chauliodus sloani,pel,NA,nc,NA,NA,3.12,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,wahoo,NA,NA,pelagic,NA,NA,NA,3.17,0.00275,-5.896154367303657,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,warsaw grouper,NA,NA,reef,NA,NA,NA,3.06,0.01288,-4.352079558305929,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,145,weakfish,cynoscion regalis,NA,coastal,NA,NA,NA,NA,0.007940000000000003,-4.8358420037230925,NA,spotted weakfish,0.00794,3.02,-4.8358420037230925,NA,NA,NA
+wigley,145,weakfish,cynoscion regalis,NA,coastal,NA,SPRING,0,3.1338,5.984127564035566e-6,-12.0264,NA,NA,NA,NA,NA,13,62,t
+wigley,145,weakfish,cynoscion regalis,NA,coastal,NA,FALL,0,2.9575,1.1021088325456852e-5,-11.4157,NA,NA,NA,NA,NA,3,70,t
+wigley,145,weakfish,cynoscion regalis,NA,coastal,NA,FALL,1,2.9476,1.147316187538856e-5,-11.3755,NA,NA,NA,NA,NA,7,70,t
+wigley,145,weakfish,cynoscion regalis,NA,coastal,NA,FALL,2,2.9724,1.047729524176041e-5,-11.4663,NA,NA,NA,NA,NA,10,70,t
+fishbase,NA,wenchman,NA,NA,reef,NA,NA,NA,2.98,0.01349,-4.305806608762473,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,280,western softhead grenadier,malacocephalus occidentalis,dem,groundfish,nc,NA,NA,3.28,9.8e-4,-6.927957986299656,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,whiff uncl,NA,NA,NA,NA,NA,NA,NA,0.004570000000000001,-5.3882420740760235,NA,megrim,0.00457,3.1,-5.3882420740760235,NA,NA,NA
+fishbase,246,white barracudina,arctozenus rissoi,pel,NA,nc,NA,NA,NA,0.003240000000000001,-5.732181949177899,NA,spotted barracudina,0.00324,3.08,-5.732181949177899,NA,NA,NA
+fishbase,NA,white grunt,NA,NA,reef,NA,NA,NA,2.99,0.01445,-4.237060864423696,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,076,white hake,urophycis tenuis,gf,groundfish,com,NA,NA,3.11,0.00479,-5.341224867559313,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,SPRING,0,3.2903,2.376218973847943e-6,-12.95,NA,NA,NA,NA,NA,10,105,t
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,FALL,0,3.1715,4.118588707535708e-6,-12.4,NA,NA,NA,NA,NA,4,126,t
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,SPRING,1,3.2812,2.482362078681154e-6,-12.9063,NA,NA,NA,NA,NA,14,105,t
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,FALL,1,3.2506,3.0984765585240296e-6,-12.6846,NA,NA,NA,NA,NA,7,95,t
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,SPRING,2,3.3039,2.238062548664875e-6,-13.0099,NA,NA,NA,NA,NA,12,104,t
+wigley,076,white hake,urophycis tenuis,gf,groundfish,com,FALL,2,3.2407,3.131181965293701e-6,-12.6741,NA,NA,NA,NA,NA,7,126,t
+fishbase,NA,white marlin,NA,NA,pelagic,NA,NA,NA,NA,0.00427,-5.456141451741604,NA,blue marlin,0.00427,3.12,-5.456141451741604,NA,NA,NA
+fishbase,NA,white mullet,NA,NA,coastal,NA,NA,NA,2.96,0.01148,-4.467148888090716,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,white perch,NA,NA,coastal,NA,NA,NA,3.13,0.00447,-5.410366870356659,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,whitebone porgy,NA,NA,reef,NA,NA,NA,2.96,0.03548,-3.338786121540758,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,whiting uncl,NA,NA,NA,NA,NA,NA,NA,0.006310000000000001,-5.065619602429015,NA,whiting,0.00631,3.06,-5.065619602429015,NA,NA,NA
+fishbase,NA,windowpane,NA,NA,groundfish,NA,NA,NA,3.03,0.01318,-4.329054749907776,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,SPRING,0,2.9982,1.1738928698327483e-5,-11.3526,NA,NA,NA,NA,NA,3,39,t
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,FALL,0,2.8721,1.6547095004121455e-5,-11.0093,NA,NA,NA,NA,NA,2,40,t
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,SPRING,1,2.9781,1.2311214044585199e-5,-11.305,NA,NA,NA,NA,NA,6,36,t
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,FALL,1,2.8633,1.6991454784824685e-5,-10.9828,NA,NA,NA,NA,NA,4,36,t
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,SPRING,2,3.1293,7.74084270247865e-6,-11.769,NA,NA,NA,NA,NA,9,39,t
+wigley,108,windowpane flounder,scophthalmus aquosus,gf,NA,com,FALL,2,2.8221,1.9578079704648173e-5,-10.8411,NA,NA,NA,NA,NA,7,40,t
+fishbase,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,NA,NA,NA,0.00617,-5.088056441064841,NA,southern flounder,0.00617,3.18,-5.088056441064841,NA,NA,NA
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,SPRING,0,3.0431,1.0419828296893632e-5,-11.4718,NA,NA,NA,NA,NA,5,59,t
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,FALL,0,3.1091,8.845515062464075e-6,-11.6356,NA,NA,NA,NA,NA,5,60,t
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,SPRING,1,2.9636,1.3186723895313727e-5,-11.2363,NA,NA,NA,NA,NA,7,54,t
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,FALL,1,3.0584,1.0412536969348175e-5,-11.4725,NA,NA,NA,NA,NA,5,53,t
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,SPRING,2,3.0457,1.0545619474028667e-5,-11.4598,NA,NA,NA,NA,NA,9,59,t
+wigley,106,winter flounder,pseudopleuronectes americanus,gf,groundfish,com,FALL,2,3.1297,8.2755928149354e-6,-11.7022,NA,NA,NA,NA,NA,9,60,t
+fishbase,023,winter skate,leucoraja ocellata,el,elasmobranch,com,NA,NA,3.11,0.00389,-5.549346121351782,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,SPRING,0,3.2993,2.2405257719928602e-6,-13.0088,NA,NA,NA,NA,NA,13,16,t
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,FALL,0,3.3199,1.939461889328199e-6,-13.1531,NA,NA,NA,NA,NA,14,111,t
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,SPRING,1,3.2819,2.353045762104417e-6,-12.9598,NA,NA,NA,NA,NA,16,106,t
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,FALL,1,3.2904,2.1306147603564265e-6,-13.0591,NA,NA,NA,NA,NA,14,111,t
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,SPRING,2,3.3285,2.0283254638065184e-6,-13.1083,NA,NA,NA,NA,NA,13,98,t
+wigley,023,winter skate,leucoraja ocellata,el,elasmobranch,com,FALL,2,3.3719,1.6057815064223522e-6,-13.3419,NA,NA,NA,NA,NA,16,100,t
+fishbase,107,witch flounder,glyptocephalus cynoglossus,gf,groundfish,com,NA,NA,3.06,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,107,witch flounder,glyptocephalus cynoglossus,gf,groundfish,com,SPRING,0,3.3289,1.8228670393630882e-6,-13.2151,NA,NA,NA,NA,NA,6,64,t
+wigley,107,witch flounder,glyptocephalus cynoglossus,gf,groundfish,com,FALL,0,3.1997,2.950901031031866e-6,-12.7334,NA,NA,NA,NA,NA,4,63,t
+fishbase,190,wolf eelpout,lycenchelys verrilli,dem,groundfish,nc,NA,NA,3.21,0.00269,-5.9182140853683896,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,wrasse uncl,NA,NA,NA,NA,NA,NA,NA,0.00933,-4.674520264122885,NA,slippery dick,0.00933,3.06,-4.674520264122885,NA,NA,NA
+fishbase,191,wrymouth,cryptacanthodes maculatus,dem,groundfish,nc,NA,NA,3.06,0.00102,-6.887952651685957,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,yellow jack,NA,NA,reef,NA,NA,NA,2.93,0.02138,-3.845299373385238,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,yellowedge grouper,NA,NA,reef,NA,NA,NA,3.05,0.01738,-4.052435159144891,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,yellowfin bass,NA,NA,reef,NA,NA,NA,2.97,0.00955,-4.651214124489498,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,yellowmouth grouper,NA,NA,reef,NA,NA,NA,3.06,0.00646,-5.042125961187627,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,NA,NA,3.1,0.00891,-4.720581037499419,NA,NA,NA,NA,NA,NA,NA,NA
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,SPRING,0,3.2099,4.2948239194674495e-6,-12.3581,NA,NA,NA,NA,NA,6,55,t
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,FALL,0,3.0559,7.224012583132391e-6,-11.8381,NA,NA,NA,NA,NA,4,50,t
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,SPRING,1,3.0161,8.010959630520114e-6,-11.7347,NA,NA,NA,NA,NA,11,46,t
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,FALL,1,2.9983,8.627981272405897e-6,-11.6605,NA,NA,NA,NA,NA,12,49,t
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,SPRING,2,3.3235,3.0289334412404638e-6,-12.7073,NA,NA,NA,NA,NA,6,55,t
+wigley,105,yellowtail flounder,limanda ferruginea,gf,groundfish,com,FALL,2,3.0995,6.29094034509766e-6,-11.9764,NA,NA,NA,NA,NA,9,50,t
+fishbase,NA,yellowtail reeffish,NA,NA,reef,NA,NA,NA,2.99,0.01479,-4.213804002259429,NA,NA,NA,NA,NA,NA,NA,NA
+fishbase,NA,yellowtail snapper,NA,NA,reef,NA,NA,NA,2.95,0.01514,-4.190415030972834,NA,NA,NA,NA,NA,NA,NA,NA
