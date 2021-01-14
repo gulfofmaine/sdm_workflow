@@ -1,0 +1,484 @@
+SVSPP,Common Name,Scientific Name,GF,DEM,EL,PEL,INV,COM,NC
+000,UNCLASSIFIED FISH,UNIDENTIFIED FISH,,,,,,,
+001,Atlantic hagfish,Myxine glutinosa,,X,,,,,X
+002,Sea lamprey,Petromyzon marinus,,,,X,,,X
+003,DUSKY SHARK,CARCHARHINUS OBSCURUS,,,,,,,
+004,ROUGHTAIL STINGRAY,DASYATIS CENTROURA,,,,,,,
+005,RAY AND SKATE UNCL,RAJIFORMES,,,,,,,
+006,BASKING SHARK,CETORHINUS MAXIMUS,,,,,,,
+007,BLACK DOGFISH,CENTROSCYLLIUM FABRICII,,,,,,,
+008,ROUGH SAGRE,ETMOPTERUS PRINCEPS,,,,,,,
+009,SANDBAR SHARK,CARCHARHINUS PLUMBEUS,,,,,,,
+010,,,,,,,,,
+011,SHARK UNCL,SELACHIMORPHA,,,,,,,
+012,SAND TIGER,CARCHARIAS TAURUS,,,,,,,
+013,Smooth dogfish,Mustelus canis,,,X,,,X,
+014,Chain dogfish,Scyliorhinus retifer,,,X,,,,X
+015,Spiny dogfish,Squalus acanthias,,,X,,,X,
+016,ATLANTIC ANGEL SHARK,SQUATINA DUMERIL,,,,,,,
+018,BLUNTNOSE STINGRAY,DASYATIS SAY,,,,,,,
+019,BULLNOSE RAY,MYLIOBATIS FREMINVILLEI,,,,,,,
+020,Skate (unclassified),Raja sp.,,,X,,,,X
+021,Atlantic torpedo,Torpedo nobiliana,,,X,,,,X
+022,Barndoor skate,Dipturus laevis,,,X,,,X,
+023,Winter skate,Leucoraja ocellata,,,X,,,X,
+024,Clearnose skate,Raja eglanteria,,,X,,,X,
+025,Rosette skate,Leucoraja garmani,,,X,,,X,
+026,Little skate,Leucoraja erinacea,,,X,,,X,
+027,Smooth skate,Malacoraja senta,,,X,,,X,
+028,Thorny skate,Amblyraja radiata,,,X,,,X,
+029,SOUTHERN STINGRAY,DASYATIS AMERICANA,,,,,,,
+030,Herring (unclassified),Clupeidae,,,,X,,,X
+031,Round herring,Etrumeus teres,,,,X,,,X
+032,Atlantic herring,Clupea harengus,,,,X,,X,
+033,Alewife,Alosa pseudoharengus,,,,X,,X,
+034,Blueback herring,Alosa aestivalis,,,,X,,X,
+035,American shad,Alosa sapidissima,,,,X,,X,
+036,Atlantic menhaden,Brevoortia tyrannus,,,,X,,X,
+037,Hickory shad,Alosa mediocris,,,,X,,X,
+038,Capelin,Mallotus villosus,,,,X,,,X
+039,SLICKHEAD UNCL,ALEPOCEPHALIIDAE,,,,,,,
+043,Bay anchovy,Anchoa mitchilli,,,,X,,,X
+044,Striped anchovy,Anchoa hepsetus,,,,X,,,X
+045,Rainbow smelt,Osmerus mordax,,,,X,,,X
+046,Atlantic argentine,Argentina silus,,,,X,,,X
+047,Greeneye (unclassified),Chlorophthalmidae,,X,,,,,X
+051,GLACIER LANTERNFISH,BENTHOSEMA GLACIALE,,,,,,,
+053,Humboldt's lanternfish,Myctophum humboldti,,,,X,,,X
+054,Horned lanternfish,Ceratoscopelus maderensis,,,,X,,,X
+055,SPOTTED LANTERNFISH,MYCTOPHUM PUNCTATUM,,,,,,,
+056,Lanternfish (unclassified),Myctophidae,,,,X,,,X
+057,0,HYGOPHUM TAANINGI,,,,,,,
+060,Eel (unclassified),Anguilliformes,,X,,,,,X
+061,HEADLIGHTFISH UNCL,DIAPHUS SP,,,,,,,
+063,Conger eel,Conger oceanicus,,X,,,,,X
+064,Snubnose eel,Simenchelys parasiticus,,X,,,,,X
+065,Margined snake eel,Ophichthus cruentifer,,X,,,,,X
+066,Silverstripe halfbeak,Hyporhamphus unifasciatus,,,,X,,,X
+067,Slender snipe eel,Nemichthys scolopaceus,,,,X,,,X
+068,FLAT NEEDLEFISH,ABLENNES HIANS,,,,,,,
+069,Offshore hake,Merluccius albidus,X,,,,,X,
+070,BEARDLESS CODLING,GADELLA IMBERBIS,,,,,,,
+071,,,,,,,,,
+072,Silver hake,Merluccius bilinearis,X,,,,,X,
+073,Atlantic cod,Gadus morhua,X,,,,,X,
+074,Haddock,Melanogrammus aeglefinus,X,,,,,X,
+075,Pollock,Pollachius virens,X,,,,,X,
+076,White hake,Urophycis tenuis,X,,,,,X,
+077,Red hake,Urophycis chuss,X,,,,,X,
+078,Spotted hake,Urophycis regia,X,,,,,,X
+079,Longfin hake,Urophycis chesteri,X,,,,,,X
+080,Hake (unclassified),Gadidae,X,,,,,,X
+081,BLUE HAKE,ANTIMORA ROSTRATA,,,,,,,
+082,METALLIC CODLING,PHYSICULUS FULVUS,,,,,,,
+083,Fourbeard rockling,Enchelyopus cimbrius,X,,,,,,X
+084,Cusk,Brosme brosme,X,,,,,,X
+085,THREEBEARD ROCKLING,GAIDROPSARUS ENSIS,,,,,,,
+086,Whiting (unclassified),Merluccius sp.,X,,,,,,X
+087,Ling (unclassified),Urophycis sp.,X,,,,,,X
+088,Mora (unclassified),Moridae,X,,,,,,X
+090,Grenadier (unclassified),Macrouridae,X,,,,,,X
+091,Marlin-spike,Nezumia bairdi,X,,,,,,X
+092,Roughhead grenadier,Macrourus berglax,X,,,,,,X
+093,Longnose grenadier,Coelorhynchus carminatus,X,,,,,,X
+098,DEEPWATER DAB,POECILOPSETTA BEANI,,,,,,,
+099,Greenland halibut,Reinhardtius hippoglossoides,X,,,,,,X
+100,Flounder (unclassified),Pleuronectiformes,X,,,,,,X
+101,Atlantic halibut,Hippoglossus hippoglossus,X,,,,,X,
+102,American plaice,Hippoglossoides platessoides,X,,,,,X,
+103,Summer flounder,Paralichthys dentatus,X,,,,,X,
+104,Fourspot flounder,Paralichthys oblongus,X,,,,,,X
+105,Yellowtail flounder,Limanda ferruginea,X,,,,,X,
+106,Winter flounder,Pseudopleuronectes americanus,X,,,,,X,
+107,Witch flounder,Glyptocephalus cynoglossus,X,,,,,X,
+108,Windowpane flounder,Scophthalmus aquosus,X,,,,,X,
+109,Gulf stream flounder,Citharichthys arctifrons,X,,,,,,X
+110,Deepwater flounder,Monolene sessilicauda,X,,,,,,X
+111,Longnose snipefish,Macrorhamphosus scolopax,,X,,,,,X
+112,Buckler dory,Zenopsis conchifera,,,,X,,,X
+113,Atlantic silverside,Menidia menidia,,,,X,,,X
+114,BLACKMOUTH BASS,SYNAGROPS BELLUS,,,,,,,
+115,Threespine stickleback,Gasterosteus aculeatus,,,,X,,,X
+116,Northern pipefish,Syngnathus fuscus,,X,,,,,X
+117,Smallmouth flounder,Etropus microstomus,X,,,,,,X
+118,HOGCHOKER,TRINECTES MACULATUS,,,,,,,
+119,TRUMPETFISH,AULOSTOMUS MACULATUS,,,,,,,
+120,Bluespotted cornetfish,Fistularia tabacaria,,,,X,,,X
+121,Atlantic mackerel,Scomber scombrus,,,,X,,,X
+122,,,,,,,,,
+123,Atlantic bonito,Sarda sarda,,,,X,,,X
+124,Chub mackerel,Scomber japonicus,,,,X,,,X
+126,Atlantic cutlassfish,Trichiurus lepturus,,X,,,,,X
+127,CONEJO,PROMETHICHTHYS PROMETHEUS,,,,,,,
+129,Blue runner,Caranx crysos,,,,X,,,X
+131,Butterfish,Peprilus triacanthus,,,,X,,,X
+132,Atlantic moonfish,Selene setapinnis,,,,X,,,X
+133,Lookdown,Selene vomer,,,,X,,,X
+134,Bigeye,Priacanthus arenatus,,X,,,,,X
+135,Bluefish,Pomatomus saltatrix,,,,X,,X,
+136,Atlantic croaker,Micropogonias undulatus,,X,,,,X,
+137,KEELCHEEK BASS,SYNAGROPS SPINOSUS,,,,,,,
+138,CARDINALFISH UNCL,APOGONIDAE,,X,,,,,X
+139,Striped bass,Morone saxatilis,,,,X,,X,
+141,Black sea bass,Centropristis striata,,X,,,,X,
+142,Pigfish,Orthopristis chrysoptera,,X,,,,,X
+143,Scup,Stenotomus chrysops,,X,,,,X,
+144,Bigeye,Epigonus pandionis,,X,,,,,X
+145,WEAKFISH,CYNOSCION REGALIS,,,,,,,
+146,NORTHERN KINGFISH,MENTICIRRHUS SAXATILIS,,,,,,,
+148,SILVER PERCH,BAIRDIELLA CHRYSOURA,,,,,,,
+149,SPOT,LEIOSTOMUS XANTHURUS,,,,,,,
+150,SHERBORN'S CARDINALFISH,HOWELLA SHERBORNI,,,,,,,
+151,Tilefish,Lopholatilus chamaeleonticeps,,X,,,,,X
+153,,,,,,,,,
+154,LONGSPINE SCORPIONFISH,PONTINUS LONGISPINIS,,,,,,,
+155,Acadian redfish,Sebastes fasciatus,,X,,,,,X
+156,Blackbelly rosefish,Helicolenus dactylopterus,,X,,,,,X
+158,Deepbody boarfish,Antigonia capros,,X,,,,,X
+159,Hookear sculpin (unclassified),Artediellus sp.,,X,,,,,X
+160,Sculpin (unclassified),Cottidae,,X,,,,,X
+161,Moustache sculpin,Triglops murrayi,,X,,,,,X
+162,Shorthorn sculpin,Myoxocephalus scorpius,,X,,,,,X
+163,Longhorn sculpin,Myoxocephalus octodecemspinosus,,X,,,,,X
+164,Sea raven,Hemitripterus americanus,,X,,,,,X
+165,Alligatorfish,Aspidophoroides monopterygius,,X,,,,,X
+166,Grubby,Myoxocephalus aenaeus,,X,,,,,X
+167,Inquiline snailfish,Liparis inquilinus,,X,,,,,X
+168,Lumpfish,Cyclopterus lumpus,,X,,,,,X
+169,Atlantic spiny lumpsucker,Eumicrotremus spinosus,,X,,,,,X
+170,Atlantic seasnail,Liparis atlanticus,,X,,,,,X
+171,Northern searobin,Prionotus carolinus,,X,,,,,X
+172,Striped searobin,Prionotus evolans,,X,,,,,X
+173,Armored searobin,Peristedion miniatum,,X,,,,,X
+174,Searobin (unclassified),Triglidae,,X,,,,,X
+175,Flying gurnard,Dactylopterus volitans,,X,,,,,X
+176,Cunner,Tautogolabrus adspersus,,X,,,,,X
+177,Tautog,Tautoga onitis,,X,,,,X,
+178,,,,,,,,,
+179,NORTHERN STARGAZER,ASTROSCOPUS GUTTATUS,,,,,,,
+180,Rock gunnel,Pholis gunnellus,,X,,,,,X
+181,Northern sand lance,Ammodytes dubius,,X,,,,,X
+182,Snakeblenny,Lumpenus lumpretaeformis,,X,,,,,X
+183,Daubed shanny,Lumpenus maculatus,,X,,,,,X
+184,Radiated shanny,Ulvaria subbifurcata,,X,,,,,X
+185,Oyster toadfish,Opsanus tau,,X,,,,,X
+186,POLKA-DOT CUSK-EEL,OTOPHIDIUM OMOSTIGMUM,,,,,,,
+187,RED GOATFISH,MULLUS AURATUS,,,,,,,
+188,Striped cusk-eel,Ophidion marginatum,,X,,,,,X
+189,ARCTIC EELPOUT,LYCODES RETICULATUS,,,,,,,
+190,Wolf eelpout,Lycenchelys verrilli,,X,,,,,X
+191,Wrymouth,Cryptacanthodes maculatus,,X,,,,,X
+192,Atlantic wolffish,Anarhichas lupus,,X,,,,,X
+193,Ocean pout,Macrozoarces americanus,,X,,,,X,
+194,Fawn cusk-eel,Lepophidium profundorum,,X,,,,,X
+195,SMOOTH PUFFER,LAGOCEPHALUS LAEVIGATUS,,,,,,,
+196,Smooth puffer,Lagocephalus laevigatus,,X,,,,,X
+197,Goosefish,Lophius americanus,,X,,,,X,
+198,STRIPED BURRFISH,CHILOMYCTERUS SCHOEPFI,,,,,,,
+199,Atlantic batfish,Dibranchus atlanticus,,X,,,,,X
+201,Planehead filefish,Monacanthus hispidus,,X,,,,,X
+202,Gray triggerfish,Balistes capriscus,,X,,,,,X
+203,GREATER AMBERJACK,SERIOLA DUMERILI,,,,,,,
+204,Banded rudderfish,Seriola zonata,,,,X,,,X
+205,Atlantic saury,Scomberesox saurus,,,,X,,,X
+206,Longnose batfish,Ogcocephalus corniger,,X,,,,,X
+207,Barrelfish,Hyperoglyphe perciformis,,,,X,,,X
+208,Mackerel scad,Decapterus macarellus,,,,X,,,X
+209,Bigeye scad,Selar crumenophthalmus,,,,X,,,X
+210,HEADLIGHTFISH,DIAPHUS DUMERILI,,,,,,,
+211,Round scad,Decapterus punctatus,,X,,,,,X
+212,Rough scad,Trachurus lathami,,,,X,,,X
+213,Silver rag,Ariomma bondi,,X,,,,,X
+215,HOUNDFISH,TYLOSURUS CROCODILUS,,,,,,,
+221,Tonguefish (unclassified),Symphurus sp.,,X,,,,,X
+227,BLACK GEMFISH,NESIARCHUS NASUTUS,,,,,,,
+228,Boa dragonfish,Stomias boa,,,,X,,,X
+229,Weitzman's pearlsides,Maurolicus weitzmani,,X,,,,,X
+230,,,,,,,,,
+231,0,CHLOROPHTHALMUS SP,,,,,,,
+232,Shortnose greeneye,Chloropthalmus agassizi,,X,,,,,X
+234,0,GONOSTOMA ATLANTICUM,,,,,,,
+235,LONGTOOTH ANGLEMOUTH,GONOSTOMA ELONGATUM,,,,,,,
+236,0,VINCIGUERRIA SP,,,,,,,
+237,,Polymetme thaeocoryla,,X,,,,,X
+239,Simony's frostfish,Benthodesmus simonyi,,,,,,,X
+240,Viperfish,Chauliodus sloani,,,,X,,,X
+241,0,CHAULIODUS DANAE,,,,,,,
+242,Longnose greeneye,Parasudis truculenta,,X,,,,,X
+245,Sharpnose barracudina,Paralepis coregonoides,,,,X,,,X
+246,White barracudina,Arctozenus rissoi,,,,X,,,X
+248,Scaly dragonfish (unclassified),Stomiidae,,,,X,,,X
+249,LUMPFISH SNAILFISH UNCL,CYCLOPTERIDAE,,,,,,,
+250,SILVER HATCHETFISH,ARGYROPELECUS ACULEATUS,,,,,,,
+251,Slope hatchetfish,Polyipnus clarus,,,,X,,,X
+252,Hatchetfish (unclassified),Sternoptychidae,,,,X,,,X
+253,,,,,,,,,
+260,0,CAREPROCTUS RANULA,,,,,,,
+261,BLACKMOUTHED ALFONSIN,HOPLOSTETHUS MEDITERRANEUS,,,,,,,
+262,Atlantic soft pout,Melanostigma atlanticum,,,,X,,,X
+263,Beardfish,Polymixia lowei,,X,,,,,X
+264,Stout beardfish,Polymixia nobilis,,X,,,,,X
+265,OCEAN SUNFISH,MOLA MOLA,,,,,,,
+266,0,HOPLOSTETHUS OCCIDENTALIS,,,,,,,
+267,Eelpout (unclassified),Zoarchidae,,X,,,,,X
+268,BIG ROUGHY,GEPHYROBERYX DARWINI,,,,,,,
+270,COWNOSE RAY,RHINOPTERA BONASUS,,,,,,,
+271,SPOTTED EAGLE RAY,AETOBATIS NARINARI,,,,,,,
+272,MANTA,MANTA BIROSTRIS,,,,,,,
+280,Western softhead grenadier,Malacocephalus occidentalis,,X,,,,,X
+300,WATER HAUL,NO FISH BUT GOOD TOW,,,,,X,,
+301,American lobster,Homerus americanus,,,,,X,X,
+302,Ridged slipper lobster,Scyllarides nodifer,,,,,X,,X
+303,SPANISH SLIPPER LOBSTER,SCYLLARIDES AEQUINOCTIALIS,,,,,X,,
+305,Shrimp (unclassified),Crustacea shrimp,,,,,X,,X
+306,NORTHERN SHRIMP,PANDALUS BOREALIS,,,,,X,,
+308,GOLDEN DEEPSEA CRAB,GERYON FENNERI,,,,,X,,
+310,Red deepsea crab,Geryon quinquedens,,,,,X,X,
+311,Cancer crab (unclassified),Cancridae,,,,,X,,X
+312,Jonah crab,Cancer borealis,,,,,X,,X
+313,Atlantic rock crab,Cancer irroratus,,,,,X,,X
+314,BLUE CRAB,CALLINECTES SAPIDUS,,,,,X,,
+317,Spider crab (unclassified),Majidae,,,,,X,,X
+318,HORSESHOE CRAB,LIMULUS POLYPHEMUS,,,,,X,,
+319,Galatheid (unclassified),Galatheidae,,,,,X,,X
+320,Swimming crab (unclassified),Portunidae,,,,,X,,X
+321,Coarsehand lady crab,Ovalipes stephensoni,,,,,X,,X
+322,Lady crab,Ovalipes ocellatus,,,,,X,,X
+323,MANTIS SHRIMP UNCL,STOMATOPODA,,,,,X,,
+324,Northern stone crab,Lithodes maja,,,,,X,,X
+325,Snow crab,Chionoecetes opilio,,,,,X,,X
+326,GREEN CRAB,CARCINUS MAENAS,,,,,X,,
+328,FLAME BOX CRAB,CALAPPA FLAMMEA,,,,,X,,
+330,Sand dollar (unclassified),Clypeasteroida,,,,,X,,X
+331,Sea urchin and sand dollar (unclassified),Echinoidea,,,,,X,,X
+332,"Sea star, brittle star, and baskets",Stelleroidea,,,,,X,,X
+335,Hermit crab (unclassified),Paguroidea,,,,,X,,X
+338,"Moon snail, shark eye, and baby-ear",Naticidae,,,,,X,,X
+339,BOX CRAB UNCL,CALAPPIDAE,,,,,X,,
+340,Iceland scallop,Chlamys islandica,,,,,X,,X
+341,ICELAND SCALLOP CLAPPER,CHLAMYS ISLANDICA CLAPPER,,,,,X,,
+342,Northern horsemussel,Modiolus modiolus,,,,,X,,X
+352,SHORTFIN MAKO,ISURUS OXYRINCHUS,,,,,,,
+355,SILKY SHARK,CARCHARHINUS FALCIFORMIS,,,,,,,
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,,,,,,,
+362,SCALLOPED HAMMERHEAD SHARK,SPHYRNA LEWINI,,,,,,,
+375,SPINY BUTTERFLY RAY,GYMNURA ALTAVELA,,,,,,,
+376,SMOOTH BUTTERFLY RAY,GYMNURA MICRURA,,,,,,,
+378,SOUTHERN EAGLE RAY,MYLIOBATIS GOODEI,,,,,,,
+380,ATLANTIC STURGEON,ACIPENSER OXYRHYNCHUS,,,,,,,
+384,American eel,Anguilla rostrata,,X,,,,X,
+389,BANDTOOTH CONGER,ARIOSOMA BALEARICUM,,,,,,,
+390,Conger eel (unclassified),Congridae,,X,,,,,X
+396,PALESPOTTED EEL,OPHICHTHUS PUNCTICEPS,,,,,,,
+399,SPOON-NOSE EEL UNCL,ECHIOPHIS SP,,,,,,,
+400,Sea scallop clapper,Placopecten magellanicus (clapper),,,,,X,,X
+401,Sea scallop,Placopecten magellanicus,,,,,X,X,
+403,Atlantic surfclam,Spisula solidissima,,,,,X,,X
+404,ATLANTIC CALICO SCALLOP,ARGOPECTEN GIBBUS,,,,,X,,
+409,OCEAN QUAHOG,ARCTICA ISLANDICA,,,,,X,,
+421,Pipefish (unclassified),Syngnathidae,,,,X,,,X
+422,BOARFISH UNCL,CAPROIDAE,,,,,,,
+423,SILVERSIDE UNCL,ATHERINIDAE,,,,,,,
+424,,,,,,,,,
+425,Snake eel (unclassified),Ophichthidae,,X,,,,,X
+428,ATLANTIC THREAD HERRING,OPISTHONEMA OGLINUM,,,,,,,
+429,SPANISH SARDINE,SARDINELLA AURITA,,,,,,,
+434,SHORTJAW LIZARDFISH,SAURIDA NORMANI,,,,,,,
+435,INSHORE LIZARDFISH,SYNODUS FOETENS,,,,,,,
+436,SAND DIVER,SYNODUS INTERMEDIUS,,,,,,,
+437,OFFSHORE LIZARDFISH,SYNODUS POEYI,,,,,,,
+439,SNAKEFISH,TRACHINOCEPHALUS MYOPS,,,,,,,
+440,LONGNOSE LANCETFISH,ALEPISAURUS FEROX,,,,,,,
+445,OCELLATED FROGFISH,ANTENNARIUS OCELLATUS,,,,,,,
+446,SINGLESPOT FROGFISH,ANTENNARIUS RADIOSUS,,,,,,,
+449,PANCAKE BATFISH,HALIEUTICHTHYS ACULEATUS,,,,,,,
+450,Shortnose batfish,Ogcocephalus nasutus,,X,,,,,X
+451,ROUGHBACK BATFISH,OGCOCEPHALUS PARVUS,,,,,,,
+452,Batfish (unclassified),Ogcocephalidae,,X,,,,,X
+454,Carolina hake,Urophycis earlli,X,,,,,,X
+455,SOUTHERN HAKE,UROPHYCIS FLORIDANA,,,,,,,
+458,BLOTCHED CUSK-EEL,OPHIDION GRAYI,,,,,,,
+459,BANK CUSK-EEL,OPHIDION HOLBROOKI,,,,,,,
+461,Cusk-eel (unclassified),Ophidiidae,,X,,,,,X
+462,PEARLFISH,CARAPUS BERMUDENSIS,,,,,,,
+463,MARGINED FLYINGFISH,CYPSELURUS CYANOPTERUS,,,,,,,
+466,Flying halfbeak,Euleptorhamphus velox,,,,X,,,X
+484,CARDINAL SOLDIERFISH,PLECTRYPOPS RETROSPINIS,,,,,,,
+486,SHORTSPINE BOARFISH,ANTIGONIA COMBATIA,,,,,,,
+488,Fourspine stickleback,Apeltes quadricus,,X,,,,,X
+489,Red cornetfish,Fistularia petimba,,X,,,,,X
+490,CORNETFISH UNCL,FISTULARIA SP,,,,,,,
+492,LINED SEAHORSE,HIPPOCAMPUS ERECTUS,,,,,,,
+493,LONGSNOUT SEAHORSE,HIPPOCAMPUS REIDI,,,,,,,
+500,YELLOWFIN BASS,ANTHIAS NICHOLSI,,,,,,,
+501,"Squid, cuttlefish, and octopod (unclassified)",Cephalopoda,,,,,X,,X
+502,Northern shortfin squid,Illex illecebrosus,,,,,X,X,
+503,Longfin squid,Loligo pealeii,,,,,X,X,
+504,Atlantic brief squid,Lolliguncula brevis,,,,,X,,X
+505,ARROW SQUID,LOLIGO PLEII,,,,,X,,
+506,Bobtail (unclassified),Sepiolidae,,,,,X,,X
+507,Lesser shining bobtail,Semirossia tenera,,,,,X,,X
+508,Shield bobtail,Stoloteuthis leucoptera,,,,,X,,X
+509,RUPPELL'S ABRALIA,ABRALIA VERANYI,,,,,X,,
+510,Octopus (unclassified),Octopoda,,,,,X,,X
+511,Common octopus,Octopus vulgaris,,,,,X,,X
+512,Spoonarm octopus,Bathypolypus arcticus,,,,,X,,X
+516,BLOTCHED SWIMMING CRAB,PORTUNUS SPINIMANUS,,,,,X,,
+517,Bathyal swimming crab,Bathynectes longispina,,,,,X,,X
+518,Speckled swimming crab,Arenaeus cribrarius,,,,,X,,X
+526,Bank sea bass,Centropristis ocyurus,,,,,,,X
+527,ROCK SEA BASS,CENTROPRISTIS PHILADELPHICA,,,,,,,
+529,DWARF SAND PERCH,DIPLECTRUM BIVITTATUM,,,,,,,
+530,SAND PERCH,DIPLECTRUM FORMOSUM,,,,,,,
+536,WARSAW GROUPER,EPINEPHELUS NIGRITUS,,,,,,,
+537,SNOWY GROUPER,EPINEPHELUS NIVEATUS,,,,,,,
+539,RED BARBIER,HEMANTHIAS VIVANUS,,,,,,,
+541,GAG,MYCTEROPERCA MICROLEPIS,,,,,,,
+546,STREAMER BASS,HEMANTHIAS AUREORUBENS,,,,,,,
+549,BLACKEAR BASS,SERRANUS ATROBRANCHUS,,,,,,,
+552,TATTLER,SERRANUS PHOEBE,,,,,,,
+554,SEA BASS UNCL,SERRANIDAE,,,,,,,
+556,Glasseye snapper,Priacanthus cruentatus,,X,,,,,X
+557,Short bigeye,Pristigenys alta,,X,,,,,X
+559,Twospot cardinalfish,Apogon pseudomaculatus,,X,,,,,X
+560,,,,,,,,,
+561,,,,,,,,,
+562,BLACKLINE TILEFISH,CAULOLATILUS CYANOPS,,,,,,,
+563,COBIA,RACHYCENTRON CANADUM,,,,,,,
+567,REMORA,REMORA REMORA,,,,,,,
+568,AFRICAN POMPANO,ALECTIS CILIARIS,,,,,,,
+569,YELLOW JACK,CARANX BARTHOLOMAEI,,,,,,,
+571,HORSE-EYE JACK,CARANX LATUS,,,,,,,
+573,ATLANTIC BUMPER,CHLOROSCOMBRUS CHRYSURUS,,,,,,,
+576,Pilotfish,Naucrates ductor,,,,X,,,X
+578,ALMACO JACK,SERIOLA RIVOLIANA,,,,,,,
+582,Jack pompano (unclassified),Carangidae,,,,X,,,X
+584,DOLPHIN,CORYPHAENA HIPPURUS,,,,,,,
+592,LANE SNAPPER,LUTJANUS SYNAGRIS,,,,,,,
+595,WENCHMAN,PRISTIPOMOIDES AQUILONARIS,,,,,,,
+596,Vermillion snapper,Rhomboplites aurorubens,,X,,,,,X
+597,Snapper (unclassified),Lutjanidae,,X,,,,,X
+599,Silver jenny,Eucinostomus gula,,X,,,,,X
+600,,SQUALIDAE,,,,,,,
+601,BROADBAND DOGFISH,ETMOPTERUS GRACILISPINIS,,,,,,,
+604,GLADIATOR BOX CRAB,ACANTHOCARPUS ALEXANDRI,,,,,,,
+616,Bulleye,Cookeolus japonicus,,X,,,,,X
+617,SPOTTED TINSELFISH,XENOLEPIDICHTHYS DALGLEISHI,,,,,,,
+620,Barracuda (unclassified),Sphyraena sp.,,,,X,,,X
+621,BLUELINE TILEFISH,CAULOLATILUS MICROPS,,,,,,,
+622,GOLDFACE TILEFISH,CAULOLATILUS CHRYSOPS,,,,,,,
+625,MOJARRA UNCL,GERREIDAE,,,,,,,
+630,GRUNT UNCL,HAEMULIDAE,,,,,,,
+631,Sheepshead,Archosargus probatocephalus,,,,X,,,X
+634,WHITEBONE PORGY,CALAMUS LEUCOSTEUS,,,,,,,
+640,PINFISH,LAGODON RHOMBOIDES,,,,,,,
+641,RED PORGY,PAGRUS SEDECIM,,,,,,,
+642,Scup,Stenotomus caprinus,,X,,,,,X
+643,PORGY AND PINFISH UNCL,SPARIDAE,,,,,,,
+650,CUBBYU,EQUETUS UMBROSUS,,,,,,,
+651,BANDED DRUM,LARIMUS FASCIATUS,,,,,,,
+652,SOUTHERN KINGFISH,MENTICIRRHUS AMERICANUS,,,,,,,
+654,RED DRUM,SCIAENOPS OCELLATUS,,,,,,,
+657,DWARF GOATFISH,UPENEUS PARVUS,,,,,,,
+659,ATLANTIC SPADEFISH,CHAETODIPTERUS FABER,,,,,,,
+662,SPOTFIN BUTTERFLYFISH,CHAETODON OCELLATUS,,,,,,,
+667,ROCK BEAUTY,HOLACANTHUS TRICOLOR,,,,,,,
+682,HOGFISH,LACHNOLAIMUS MAXIMUS,,,,,,,
+694,Northern sennet,Sphyraena borealis,,,,,,,X
+698,GOBY FLATHEAD,BEMBROPS GOBIOIDES,,,,,,,
+699,SOUTHERN STARGAZER,ASTROSCOPUS Y-GRAECUM,,,,,,,
+700,SWORDFISH,XIPHIAS GLADIUS,,,,,,,
+703,ALBACORE,THUNNUS ALALUNGA,,,,,,,
+725,FRECKLED STARGAZER,XENOCEPHALUS EGREGIUS,,,,,,,
+726,LANCER STARGAZER,KATHETOSTOMA ALBIGUTTA,,,,,,,
+733,Combtooth blenny (unclassified),Blenniidae,,X,,,,,X
+734,American sand lance,Ammodytes americanus,,X,,,,,X
+735,Spotfin dragonet,Foetorepus agassizi,,X,,,,,X
+738,NAKED GOBY,GOBIOSOMA BOSC,,,,,,,
+739,GOBY UNCL,GOBIIDAE,,,,,,,
+744,KING MACKEREL,SCOMBEROMORUS CAVALLA,,,,,,,
+745,SPANISH MACKEREL,SCOMBEROMORUS MACULATUS,,,,,,,
+748,Spotted driftfish,Ariomma regulus,,X,,,,,X
+750,Butterfish (unclassified),Stromateidae,,,,X,,,X
+751,SPINYCHEEK SCORPIONFISH,NEOMERINTHE HEMINGWAYI,,,,,,,
+752,HIGHFIN SCORPIONFISH,PONTINUS RATHBUNI,,,,,,,
+753,LONGFIN SCORPIONFISH,SCORPAENA AGASSIZI,,,,,,,
+755,SMOOTHHEAD SCORPIONFISH,SCORPAENA CALCARATA,,,,,,,
+756,HUNCHBACK SCORPIONFISH,SCORPAENA DISPAR,,,,,,,
+759,Scorpionfish (unclassified),Scorpaenidae,,X,,,,,X
+760,SHORTFIN SEAROBIN,BELLATOR BRACHYCHIR,,,,,,,
+762,HORNED SEAROBIN,BELLATOR MILITARIS,,,,,,,
+763,SLENDER SEAROBIN,PERISTEDION GRACILE,,,,,,,
+764,SPINY SEAROBIN,PRIONOTUS ALATUS,,,,,,,
+765,BANDTAIL SEAROBIN,PRIONOTUS OPHRYAS,,,,,,,
+768,BLACKWING SEAROBIN,PRIONOTUS RUBIO,,,,,,,
+769,LEOPARD SEAROBIN,PRIONOTUS SCITULUS,,,,,,,
+770,BIGHEAD SEAROBIN,PRIONOTUS TRIBULUS,,,,,,,
+773,Righteye flounder (unclassified),Pleuronectidae,X,,,,,,X
+774,THREE-EYE FLOUNDER,ANCYLOPSETTA DILECTA,,,,,,,
+780,HORNED WHIFF,CITHARICHTHYS CORNUTUS,,,,,,,
+781,SPOTTED WHIFF,CITHARICHTHYS MACROPS,,,,,,,
+783,SPOTFIN FLOUNDER,CYCLOPSETTA FIMBRIATA,,,,,,,
+785,FRINGED FLOUNDER,ETROPUS CROSSOTUS,,,,,,,
+786,GRAY FLOUNDER,ETROPUS RIMOSUS,,,,,,,
+788,GULF FLOUNDER,PARALICHTHYS ALBIGUTTA,,,,,,,
+789,SOUTHERN FLOUNDER,PARALICHTHYS LETHOSTIGMA,,,,,,,
+790,BROAD FLOUNDER,PARALICHTHYS SQUAMILENTUS,,,,,,,
+793,DUSKY FLOUNDER,SYACIUM PAPILLOSUM,,,,,,,
+794,ETROPUS UNCL,ETROPUS SP,,,,,,,
+795,Lefteye flounder (unclassified),Bothidae,X,,,,,,X
+797,Offshore tonguefish,Symphurus civitatus,,X,,,,,X
+798,Spottedfin tonguefish,Symphurus diomedianus,,X,,,,,X
+820,"Triggerfish, filefish (unclassified)",Balistidae,,,,X,,,X
+821,SLENDER TONGUEFISH,SYMPHURUS MARGINATUS,,,,,,,
+822,SNAKE MACKEREL UNCL,TRICHIURIDAE,,,,,,,
+824,ESCOLAR,LEPIDOCYBIUM FLAVOBRUNNEUM,,,,,,,
+825,Blackcheek tonguefish,Symphurus plagiusa,,X,,,,,X
+826,NORTHERN TONGUEFISH,SYMPHURUS PUSILLUS,,,,,,,
+827,SPOTTAIL TONGUEFISH,SYMPHURUS UROSPILUS,,,,,,,
+829,JAMBEAU,PARAHOLLARDIA LINEATA,,,,,,,
+830,DOTTEREL FILEFISH,ALUTERUS HEUDELOTI,,,,,,,
+831,UNICORN FILEFISH,ALUTERUS MONOCEROS,,,,,,,
+832,Orange filefish,Aluterus schoepfi,,,,X,,,X
+833,SCRAWLED FILEFISH,ALUTERUS SCRIPTUS,,,,,,,
+843,MARBLED PUFFER,SPHOEROIDES DORSALIS,,,,,,,
+844,SOUTHERN PUFFER,SPHOEROIDES NEPHELUS,,,,,,,
+851,Anchovy (unclassified),Engraulidae,,,,X,,,X
+852,Lizardfish (unclassified),Synodontidae,,X,,,,,X
+855,BUTTERFLYFISH UNCL,CHAETODONTIDAE,,,,,,,
+856,Striated argentine,Argentina striata,,,,X,,,X
+857,STARGAZER UNCL,URANOSCOPIDAE,,,,,,,
+858,DRUM UNCL,SCIAENIDAE,,,,,,,
+859,DUSKY ANCHOVY,ANCHOA LYOLEPIS,,,,,,,
+860,MACKEREL AND TUNA UNCL,SCOMBRIDAE,,,,,,,
+861,PUFFER UNCL,TETRAODONTIDAE,,,,,,,
+862,Redeye gaper,Chaunax stigmaeus,,X,,,,,X
+865,Silver anchovy,Engraulis eurystole,,,,X,,,X
+866,Whiff (unclassified),Citharichthys sp.,X,,,,,,X
+867,Shortbeard codling,Laemonema barbatulum,,X,,,,,X
+869,Mooneye cusk-eel,Ophidion selenops,,X,,,,,X
+871,SHORTWING SEAROBIN,PRIONOTUS STEARNSI,,,,,,,
+874,SNAKE MACKEREL,GEMPYLUS SERPENS,,,,,,,
+876,Bigeye cigarfish,Cubiceps pauciradiatus,,,,X,,,X
+877,LESSER AMBERJACK,SERIOLA FASCIATA,,,,,,,
+880,Bluntnose puffer,Sphoeroides pachygaster,,X,,,,,X
+886,,,,,,,,,
+887,Lightfish (unclassified),Gonostomatidae,,,,X,,,X
+890,LONGNOSE ANCHOVY,ANCHOA NASUTA,,,,,,,
+891,BROWN DRIFTFISH,ARIOMMA MELANUM,,,,,,,
+894,Atlantic salmon,Salmo salar,,,,X,,,X
+896,Barracudina (unclassified),Paralepidae,,,,X,,,X
+897,BLACKFIN GOOSEFISH,LOPHIUS GASTROPHYSUS,,,,,,,
+899,RED DORY,CYTTOPSIS ROSEA,,,,,,,
+900,LOPHIIFORM UNCL,LOPHIIFORMES,,,,,,,
+931,SPINNER SHARK,CARCHARHINUS BREVIPINNA,,,,,,,
+934,NIGHT SHARK,CARCHARHINUS SIGNATUS,,,,,,,
+938,STRIPED BONITO,SARDA ORIENTALIS,,,,,,,
+950,LOGGERHEAD SEATURTLE,CARETTA CARETTA,,,,,X,,
+978,UNKNOWN 01,UNKNOWN 01,,,,,X,,
+979,UNKNOWN 02,UNKNOWN 02,,,,,X,,
+980,UNKNOWN 03,UNKNOWN 03,,,,,X,,
+981,UNKNOWN 04,UNKNOWN 04,,,,,X,,
+982,UNKNOWN 05,UNKNOWN 05,,,,,X,,
+983,UNKNOWN 06,UNKNOWN 06,,,,,X,,
+,,,,,,,,,
