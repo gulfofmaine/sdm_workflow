@@ -107,14 +107,14 @@ month_key <- map(months, ~ str_c("X", .x))
 
 # Use month ket to subset the stack for each month
 # get the mean, then restack
-month_avgs <- map(month_key, function(month_indices){
+oisst_month_avgs <- map(month_key, function(month_indices){
   month_mean <- mean(clim_cropped[[month_indices]])}) %>% 
   stack() %>% 
   setNames(month_abbrevs)
 
 
 # Plot a month
-plot(month_avgs$Jun, main = "June 1982-2011 Climate Avg. OISST", col = temp_pal)
+plot(oisst_month_avgs$Jun, main = "June 1982-2011 Climate Avg. OISST", col = temp_pal)
 
 
 
