@@ -4,7 +4,7 @@
 ####  Packages  ####
 library(devtools)
 library(gmRi)
-library(tidyvere)
+library(tidyverse)
 library(sf)
 
 
@@ -25,51 +25,139 @@ survdat_prep
 
 #### SURVDAT Cleanup  ####
 # copied: 1/14/2021
-survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
+function(survdat = NULL, survdat_source = "2020"){
   
-  ####  Paths  
-  box_paths  <- research_access_paths(os.use = "unix")
-  mills_path <- shared.path("unix", "mills", "")
-  nsf_path   <- box_paths$okn
-  res_path   <- box_paths$res
+  ####  Resource Paths  
+  box_paths   <- research_access_paths(os.use = "unix")
+  mills_path  <- box_paths$mills
+  res_path    <- box_paths$res
+  caccel_path <- paste0(mills_path, "Projects/NSF_CAccel/Data/")
   
   
-  ####  Load Data  ####
+  ####  Load supplemental data  ####
   
-  # If providing a starting point pass it in:
-  if(exists("survdat")){ survdat <- survdat }
-  
-  # 2020 groundfish survey data
-  if(survdat_source == "2020"){
-    load(paste0(res_path, "NMFS_trawl/Survdat_Nye_Aug 2020.RData"))
-    survdat <- clean_names(survdat)
-  } 
   
   
   # # Load Survey Stratum Area Info - old and in nautical miles (with errors)
-  # stratum_area <- read_csv(str_c(mills_path, "Projects/NSF_CAccel/Data/strata area.csv"), col_types = cols())
+  # stratum_area <- read_csv(str_c(caccel_path, "strata area.csv"), col_types = cols())
   
   # Load fresh stratum areas
-  stratum_area <- read_csv(str_c(mills_path, "Projects/NSF_CAccel/Data/strata_areas_km2.csv"), col_types = cols())
+  stratum_area <- read_csv(str_c(caccel_path, "strata_areas_km2.csv"), 
+                           col_types = cols())  %>% 
+    mutate(stratum = as.character(stratum))
   
   # EPU are info: source slucey_survdat_functions.R and {ecodata}
-  epu_areas <- read_csv(str_c(mills_path, "Projects/NSF_CAccel/Data/EPU_areas_km2.csv"), col_types = cols())
+  epu_areas <- read_csv(str_c(caccel_path, "EPU_areas_km2.csv"), col_types = cols())
+  
+  
+  
+  
+  ####  Load SURVDAT Data  ####
+  
+  #convenience change
+  survdat_source <- tolower(survdat_source)
+  
+  # Testing:
+  #survdat_source <- "2016"
+  #survdat_source <- "2019"
+  #survdat_source <- "2020"
+  #survdat_source <- "2021"
+  #survdat_source <- "bigelow"
+  
+  
+  # Build Paths to survdat for standard options
+  survdat_path <- switch(EXPR = survdat_source,
+                         "2016"    = paste0(mills_path, "Projects/WARMEM/Old survey data/Survdat_Nye2016.RData"),
+                         "2019"    = paste0(res_path,   "NMFS_trawl/Survdat_Nye_allseason.RData"),
+                         "2020"    = paste0(res_path,   "NMFS_trawl/Survdat_Nye_Aug 2020.RData"),
+                         "2021"    = paste0(res_path,   "NMFS_trawl/survdat_slucey_01152021.RData"),
+                         "bigelow" = paste0(res_path,   "NMFS_trawl/survdat_Bigelow_slucey_01152021.RData")
+  )
+  
+  
+  
+  # If providing a starting point for survdat pass it in:
+  if(is.null(survdat) == FALSE){ 
+    trawldat <- survdat %>% clean_names()
+    
+  } else if(is.null(survdat) == TRUE){
+    load(survdat_path)
+    trawldat <- survdat %>% clean_names()  
+    
+  }
+  
+  # remove survdat
+  rm(survdat)
+  
+  
+  
+  ####  Special Steps for Different SURVDATs  ####
+  
+  # Use SVSPP to get common names
+  if(survdat_source %in% c("2021", "bigelow")){
+    
+    # Load sppclass codes and common names
+    spp_classes <- read_csv(
+      paste0(res_path, "NMFS_trawl/spp_keys/sppclass.csv"), 
+      col_types = cols()) %>%
+      clean_names() %>%
+      mutate(common_name     = str_to_lower(common_name),
+             scientific_name = str_to_lower(scientific_name)) %>%
+      distinct(svspp, comname = common_name, scientific_name)
+    
+    
+    # Add the common names over and format for rest of build
+    trawldat <- mutate(trawldat, svspp = str_pad(svspp, 3, "left", "0")) %>% 
+      left_join(spp_classes, by = "svspp") %>%
+      drop_na(comname) %>%
+      
+      # Build ID column
+      mutate(cruise6 = str_pad(cruise6, 6, "left", "0"),
+             station = str_pad(station, 3, "left", "0"),
+             stratum = str_pad(stratum, 4, "left", "0"),
+             id = str_c(cruise6, station, stratum)) %>%
+      
+      # Re-order columns
+      select(id, year, station, stratum, svvessel, season, 
+             lat, lon, depth, surftemp, surfsalin, bottemp, 
+             botsalin, svspp, comname, scientific_name, everything()) %>% 
+      
+      # Rename to match other survdat files
+      rename(est_year = year, 
+             decdeg_beglat = lat, 
+             decdeg_beglon = lon, 
+             avgdepth = depth)
+    # }
+    # 
+    # 
+    # # seperate tow data
+    # if(survdat_source %in% c("2021", "bigelow")){
+    trawldat <- mutate(trawldat,
+                       est_month = str_sub(est_towdate, 6,7),
+                       est_month = as.numeric(est_month),
+                       est_day   = str_sub(est_towdate, -2, -1),
+                       est_day = as.numeric(est_day),)
+  }
   
   
   
   ####__ 1. Column Changes  ####
-  trawldat <- survdat %>% 
+  trawldat <- trawldat %>% 
     mutate(
       # Text Formatting 
       comname = tolower(comname),
       id      = format(id, scientific = FALSE),
       svspp   = as.character(svspp),
       svspp   = str_pad(svspp, 3, "left", "0"),
+      
       # Biomass and abundance NA substitutions
       biomass   = ifelse(is.na(biomass) == TRUE & abundance > 0, 0.0001, biomass),
       abundance = ifelse(is.na(abundance) == TRUE & biomass > 0, 1, abundance),
+      
       # Sratum number, excluding leading and trailing codes for inshore/offshore, for matching
       strat_num = str_sub(stratum, 2, 3)) %>%  
+    
+    # these are redundant, but leaving for now
     mutate(biom_adj  = ifelse(biomass == 0 & abundance > 0, 0.0001, biomass), .after = biomass) %>% 
     mutate(abund_adj = ifelse(abundance == 0 & biomass > 0, 1, abundance), .after = abundance)
   
@@ -82,31 +170,30 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
   # currently a light-weight group of columns, 
   # leaves behind CTD and shipboard instrument details.
   # Favors the larger categorical group metadata
-  trawldat <- trawldat %>%
-    select(
-      id, 
-      cruise6,
-      station,
-      est_year, 
-      est_month, 
-      est_day, 
-      svvessel, 
-      season, 
-      stratum, 
-      strat_num, 
-      decdeg_beglat, 
-      decdeg_beglon,
-      avgdepth, 
-      svspp, 
-      comname, 
-      catchsex, 
-      length, 
-      numlen,
-      abundance, 
-      abund_adj,
-      biomass, 
-      biom_adj
-    ) 
+  
+  # 2016 colnames lack month and day columns
+  short_list <- c(
+    "id", "cruise6", "station", "est_year", "svvessel", 
+    "season", "stratum", "strat_num", "decdeg_beglat", 
+    "decdeg_beglon", "avgdepth", "svspp", "comname", 
+    "catchsex", "length", "numlen", "abundance", "abund_adj", 
+    "biomass", "biom_adj")
+  
+  # These are the columns we want from the more inclusive pulls (has month and day...)
+  long_list <- c(short_list, "est_month", "est_day")
+  
+  
+  # Toggle for different survdat resources
+  if(survdat_source %in% c("2016")){
+    important_cols <- syms(short_list)
+  } else {
+    important_cols <- syms(long_list)
+  }
+  
+  
+  # select the appropriate columns
+  trawldat <- select(trawldat, !!!important_cols)
+  
   
   
   
@@ -118,7 +205,7 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
   # 5. Species Exclusion
   trawldat <- trawldat %>%
     filter(
-      # Eliminate Candian Strata and Strata No longer in Use 
+      # Eliminate Canadian Strata and Strata No longer in Use 
       stratum >= 01010,
       stratum <= 01760,
       stratum != 1310,
@@ -128,17 +215,22 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
       stratum != 1410,
       stratum != 1420,
       stratum != 1490,
+      
       # Filter to just Spring and Fall
       season %in% c("SPRING", "FALL"),
+      
       # Only the Albatross and Henry Bigelow
       svvessel %in% c("AL", "HB"),
       est_year >= 1970,
       est_year < 2020,
-      # Drop na Biomass and Abundance Records
+      
+      # Drop NA Biomass and Abundance Records
       !is.na(biomass),
       !is.na(abundance),
+      
       # Exclude the Skrimps
       svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961),
+      
       # Exclude the unidentified fish
       svspp %not in% c(0, 978, 979, 980, 998)
     )
@@ -154,7 +246,7 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
   
   
   #### EPU assignment for survdat stations - function from Sean Luceys "RSurvey" repo
-  source(here("nmfs_trawl_processing/data/slucey_survdat_functions.R"))
+  source(here("R/kathy_ss_code/slucey_survdat_functions.R"))
   epu_sf <- ecodata::epu_sf
   epu_sp <- suppressWarnings(as_Spatial(epu_sf))
   
@@ -199,7 +291,8 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
   
   
   # Filtering with strata_select
-  trawldat <- trawldat %>% filter(strat_num %in% strata_select)
+  trawldat <- trawldat %>% filter(strat_num %in% strata_select) %>% 
+    mutate(stratum = as.character(stratum))
   
   
   
@@ -267,20 +360,9 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
   
   
   ####__ 6. Adjusted NumLength  ####
-  # scales difference between the sum(numlen) and the reported abundance
-  # convers is the difference between abundance and the number measured
-  # conv_factor <- trawldat %>%
-  #   group_by(id, comname, catchsex, abundance) %>%
-  #   summarise(
-  #     abund_raw   = sum(numlen),               
-  #     convers     = abund_adj / abund_raw,
-  #     n_len_class = n_distinct(length),
-  #     .groups     = "keep") %>% 
-  #   ungroup
-  
+  # Sometimes there are more/less measured than initially tallied*
   
   # Get the abundance value for each sex arrived at by summing across each length
-  # sometimes there are more measured than initially tallied*
   abundance_check <- trawldat %>%
     group_by(id, comname, catchsex, abundance) %>%
     summarise(
@@ -289,6 +371,7 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
       .groups     = "keep") %>% 
     ungroup()
   
+  # Get the ratio between the abundance column and the sum of numlen
   conv_factor <- trawldat %>% 
     distinct(id, comname, catchsex, length, abund_adj) %>% 
     inner_join(abundance_check) %>% 
@@ -316,22 +399,41 @@ survdat_prep <- function(survdat = NULL, survdat_source = "2020"){
            is.na(numlen) == FALSE,
            numlen_adj > 0) %>% 
     # Columns that uniquely identify a station and the different catches
-    distinct(id, svspp, comname, catchsex, abundance, n_len_class, length,  numlen, numlen_adj, biom_adj)
+    distinct(id, svspp, comname, catchsex, abundance, n_len_class, 
+             length,  numlen, numlen_adj, biom_adj)
   
   
   
   # Pull distinct records of the stations themselves and metadata that match
   # these are susceptible to upstream changes
-  trawl_stations <- survdat_processed %>% 
-    select(
+  
+  if(survdat_source %in% c("2016")) {
+    station_cols <- syms(c(
       # Tow Identification details
-      id, est_year, est_month,  est_day, svvessel, season,
+      "id", "est_year", "svvessel", "season", 
       # physical location details
-      decdeg_beglat, decdeg_beglon, avgdepth,
+      "decdeg_beglat", "decdeg_beglon", "avgdepth", 
       # NMFS/NEFSC Survey Stratum
-      stratum, strat_num, s_area_km2, st_ratio, strat_ntows, tot_s_area,
+      "stratum", "strat_num", "s_area_km2", "st_ratio", "strat_ntows", "tot_s_area",
       # Aggregate Regions/EPU's
-      survey_area, epu, epu_area_km2, epu_ratio, epu_ntows, tot_epu_area) %>% 
+      "survey_area", "epu", "epu_area_km2", "epu_ratio", "epu_ntows", "tot_epu_area"
+    ))
+  } else{
+    station_cols <- syms(c(
+      # Tow Identification details
+      "id", "est_year", "est_month", "est_day", "svvessel", "season", 
+      # physical location details
+      "decdeg_beglat", "decdeg_beglon", "avgdepth", 
+      # NMFS/NEFSC Survey Stratum
+      "stratum", "strat_num", "s_area_km2", "st_ratio", "strat_ntows", "tot_s_area",
+      # Aggregate Regions/EPU's
+      "survey_area", "epu", "epu_area_km2", "epu_ratio", "epu_ntows", "tot_epu_area"
+    ))
+  }
+  
+  # Pull distinct
+  trawl_stations <- survdat_processed %>% 
+    select(!!!station_cols) %>% 
     distinct() 
   
   
