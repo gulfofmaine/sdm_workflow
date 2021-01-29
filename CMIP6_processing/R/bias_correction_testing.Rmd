@@ -202,3 +202,48 @@ plot(cmip_anoms$X1955.01.16, main = "CMIP6 Anomalies 1955-01-16", col = temp_pal
 
 ```
 
+
+
+## Bias Correction testing
+
+Do a quick one off of for January of cmip vs january of oisst. This should highlight the difference (if any) of doing the delta method vs. just removing the difference between climates directly.
+
+
+```{r}
+# Get OISST Climatology for the whole region
+oisst_clim_timeline <- cellStats(oisst_month_avgs, mean)
+oisst_clim_timeline <- as.data.frame(oisst_clim_timeline) %>% rownames_to_column(var = "month")
+
+# Same deal for cmip climatology
+cmip_clim_timeline <- cellStats(cmip_clim, mean)
+cmip_clim_timeline <- as.data.frame(cmip_clim_timeline) %>% rownames_to_column(var = "month")
+
+# Pull one year of CMIP
+test_year <- "2000"
+which_cmip <- which(str_sub(names(cmip_cropped), 2, 5 ) == test_year) 
+cmip_2020_timeline <- cellStats(cmip_cropped[[which_cmip]], mean, na.rm = T)
+cmip_2020_timeline <- as.data.frame(cmip_2020_timeline) 
+cmip_2020_timeline$month <- month_abbrevs
+  
+# # Pull the anomalies that year as well as a validation of that
+# which_cmip_anoms <- which(str_sub(names(cmip_anoms), 2, 5 ) == test_year) 
+# cmip_2020_anom_timeline <- cellStats(cmip_anoms[[which_cmip_anoms]], mean, na.rm = T)
+# cmip_2020_anom_timeline <- as.data.frame(cmip_2020_anom_timeline)
+# cmip_2020_anom_timeline$month <- month_abbrevs
+
+
+# Plot the bias
+all_timelines <- left_join(oisst_clim_timeline, cmip_clim_timeline, by = "month") %>% 
+  left_join(cmip_2020_timeline, by = "month") %>% 
+  #left_join(cmip_2020_anom_timeline, by = "month") %>% 
+  pivot_longer(names_to = "data_source", values_to = "temp", cols = 2:4) %>% 
+  mutate(month = factor(month, levels = month_abbrevs))
+
+#
+ggplot(all_timelines, aes(month, temp, color  = data_source)) +
+  geom_line(aes(group = data_source)) +
+  labs(x = "", y = "Temperature")
+
+
+```
+
