@@ -1,4 +1,4 @@
-nefsc_trawl_prep<- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/NMFS Trawl Data/Survdat_Nye_allseason.RData", out_path = "./Data/") {
+nefsc_trawl_prep <- function(survdat_path = "~/Volumes/Shared/Research/MillsLab/NMFS Trawl Data/Survdat_Nye_allseason.RData", out_path = "./Data/") {
   ## Details
   # This function reads in an .RData file of NOAA NEFSC bottom trawl survey data and then makes some modifications to produce a data file ready for fitting with SDM, such that for every tow there is a record of every species (presence, log(biomass+1) given presence) occurrence. The function saves the tidy data set as "model_dat.rds."
   
