@@ -55,6 +55,7 @@ This doc is a sandbox for testing approaches for pairing OISST climate means wit
 
 # Load the climatology for 1982-2011
 oisst_clim_82 <- stack(str_c(oisst_path, "daily_climatologies/daily_clims_1982to2011.nc"))
+oisst_clim_91 <- stack(str_c(oisst_path, "daily_climatologies/daily_clims_1991to2020.nc"))
 
 # Load a CMIP6 file for testing:
 cmip_file <- paste0(res_path, "CMIP6/TestFiles/tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc")
@@ -78,8 +79,9 @@ cmip_test <- stack(cmip_file)
 # Northeast Area
 ne_area <- extent(c(260, 320, 20, 70))
 clim_cropped <- crop(oisst_clim_82, ne_area)
+clim_cropped_91 <- crop(oisst_clim_91, ne_area)
 rm(oisst_clim_82)
-
+rm(oisst_clim_91)
 
 
 # Use number key to match months to corresponding the day of year,
@@ -112,9 +114,16 @@ oisst_month_avgs <- map(month_key, function(month_indices){
   stack() %>% 
   setNames(month_abbrevs)
 
+oisst_month_avgs_91 <- map(month_key, function(month_indices){
+  month_mean <- mean(clim_cropped_91[[month_indices]])}) %>% 
+  stack() %>% 
+  setNames(month_abbrevs)
 
-# Plot a month
-plot(oisst_month_avgs$Jun, main = "June 1982-2011 Climate Avg. OISST", col = temp_pal)
+
+# Plot a month from each
+#par(mfrow = c(2,1))
+plot(oisst_month_avgs$Jun, main = "June 1982-2011 Climate Avg. OISST", col = temp_pal, xlim = c(260, 320))
+plot(oisst_month_avgs_91$Jun, main = "June 1991-2020 Climate Avg. OISST", col = temp_pal)
 
 
 
@@ -242,8 +251,121 @@ all_timelines <- left_join(oisst_clim_timeline, cmip_clim_timeline, by = "month"
 #
 ggplot(all_timelines, aes(month, temp, color  = data_source)) +
   geom_line(aes(group = data_source)) +
+  geom_point(size = 1) +
+  scale_color_gmri() +
   labs(x = "", y = "Temperature")
 
 
 ```
+
+
+## Bias correcting work flows
+
+### The delta method
+
+
+This is what we have done in the past, with guidance from Mike and Andy. The process involves three steps, two of which are already done:
+  1. Calculating climate model climatology
+  2. Calculate climate model deltas from the climate model climatology
+  3. Apply the deltas of the climate model to the observed OISST climatology for the same reference period
+
+
+```{r}
+
+# The file that has the anomalies from the climate model 
+# (climate model projected temps - climate model climatology) -- 
+# these are also "deltas"
+
+# cmip_anoms
+
+
+# Grabbing how I had done this before requires a litle adjusting.
+# Resampling cmip anomalies to match oisst grid
+cmip_anoms_ds <- resample(cmip_anoms, oisst_month_avgs[[1]], method = "bilinear")
+
+
+# Some work with the names so we can find matches between the cmip anoms and the oisst climatology 
+months_numeric <- str_pad(seq(from = 1, to = 12, by = 1), 
+                          width = 2, side = "left", pad = 0)
+oisst_month_avgs <- setNames(oisst_month_avgs, months_numeric)
+cmip_dates <- as.Date(gsub("[.]", "-", gsub("X", "", names(cmip_anoms_ds))))
+cmip_anoms_z <- setZ(cmip_anoms_ds, cmip_dates)
+
+
+# Alright, apply the anomalies (deltas) of the climate model to OISST climatology. The code below "loops" over each of the layers in the climate model anomalies stack and then adds those values to the matching oisst monthly climatology bsased on the month of the climate model anomalies stack
+cmip_proj_out <- lapply(seq(1:nlayers(cmip_anoms_z)), function(x) { 
+  cmip_anom_layer  <- cmip_anoms_z[[x]]
+  layer_match <- match(format(getZ(cmip_anoms_z)[x], "%m"), gsub("X", "", names(oisst_month_avgs)))
+  oisst_clim_layer <- oisst_month_avgs[[layer_match]]
+  delta_out   <- cmip_anom_layer + oisst_clim_layer}) %>% 
+  stack()
+names(cmip_proj_out) <- cmip_dates
+
+
+# Get difference from the "biased" original?
+# Resampling to match resolutions
+cmip_cropped_ds<- resample(cmip_cropped, oisst_month_avgs[[1]], method = "bilinear")
+
+
+# Now one example difference
+cmip_diffs <- cmip_cropped_ds$X2014.04.16 - cmip_proj_out$X2014.04.16
+par(mfrow = c(1, 3))
+plot(cmip_cropped$X2014.04.16, main = "CMIP6 2014-01-16 original", col = temp_pal, zlim = c(-1, 28)) 
+plot(cmip_proj_out$X2014.04.16, main = "CMIP6 2014-01-16 bias corrected delta method", col = temp_pal, zlim = c(-1, 28))
+plot(cmip_diffs, main = "CMIP6 2014-01-16 differences", col = temp_pal, zlim = c(-10, 10)) 
+
+#dev.off()
+```
+
+
+
+### The "nudging" method?
+
+An alternative way of thinking about this is to calculate a bias over the same reference period between the climate model temperatures and the observed temperatures. This bias would then be used to adjust the climate model projected temperatures.
+
+```{r}
+
+# First, get the two climatology stacks and make sure they have the same resolution. First, climatology based on the climate model projected temps and then OISST. Both calculated over 1982-2011 period.
+cmip_clim_ds <- resample(cmip_clim, oisst_month_avgs[[1]], method = "bilinear") 
+oisst_month_avgs
+
+
+# Take the difference to get the "bias" during this baseline period
+cmip_clim_bias <- cmip_clim_ds - oisst_month_avgs
+
+
+# Now, adjust all of the climate model projected temperatures according to this bias. This is similar to applying anomalies to corresponding matching OISST month.
+# Work on names
+names(cmip_clim_bias) <- months_numeric
+cmip_dates <- as.Date(gsub("[.]", "-", gsub("X", "", names(cmip_cropped_ds))))
+cmip_cropped_z <- setZ(cmip_cropped_ds, cmip_dates)
+
+
+# Alright, for every climate model projected temperature, adjust based on bias (difference between climate model and observed)
+cmip_proj_out_alt <- lapply(seq(1:nlayers(cmip_cropped_z)), function(x) {
+  cmip_layer      <- cmip_cropped_z[[x]]
+  layer_match     <- match(format(getZ(cmip_cropped_z)[x], "%m"), gsub("X", "", names(cmip_clim_bias)))
+  cmip_bias_layer <- cmip_clim_bias[[layer_match]]
+  delta_out       <- cmip_layer - cmip_bias_layer}) %>% 
+  stack()
+names(cmip_proj_out_alt) <- cmip_dates
+
+
+# Get difference from the "biased" original?
+cmip_diffs_alt<- cmip_cropped_ds$X2014.04.16 - cmip_proj_out_alt$X2014.04.16
+par(mfrow = c(1, 3))
+plot(cmip_cropped$X2014.04.16, main = "CMIP6 2014-01-16", col = temp_pal, zlim = c(-1, 28))
+plot(cmip_proj_out_alt$X2014.04.16, main = "CMIP6 2014-01-16 nudged", col = temp_pal, zlim = c(-1, 28))
+plot(cmip_diffs_alt, main = "CMIP6 2014-01-16 difference", col = temp_pal, zlim = c(-10, 10))
+
+
+# Any difference??
+par(mfrow = c(1,1))
+cmip_appr_diff<- cmip_proj_out$X2014.04.16 - cmip_proj_out_alt$X2014.04.16
+plot(cmip_appr_diff, main = "CMIP6 2014-01-16 Approach differences", col = temp_pal)
+
+```
+
+
+
 
