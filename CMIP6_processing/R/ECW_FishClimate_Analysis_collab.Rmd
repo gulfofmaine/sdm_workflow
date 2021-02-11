@@ -1,0 +1,1984 @@
+---
+title: "A. Allyn ECW Fish Climate Analysis"
+author: "Adam A. Kemberling / Andrew Allyn"
+date: "2/5/2021"
+output: html_document
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+
+
+# Original file source:
+# https://github.com/aallyn/ECW_FishClimate/blob/master/Code/ECW_FishClimate_Analysis.Rmd
+
+library(tsibble)
+library(lubridate)
+library(mgcv)
+library(sf)
+library(raster)
+library(rnaturalearth)
+library(patchwork)
+library(ROCR)
+library(hydroGOF)
+library(sdm)
+library(patchwork)
+library(snakecase)
+library(randomcoloR)
+library(tidyverse)
+library(gmRi)
+
+
+# Function to get scaled temperatures
+temp.scale <- function(new.temp, base.temp.mean, base.temp.sd){
+  if(is.na(new.temp)){
+    temp.scaleds <- NA
+    return(temp.scaled)
+  } else {
+    temp.scaled <- (new.temp - base.temp.mean)/base.temp.sd
+    return(temp.scaled)
+  }
+}
+
+
+# # Original YAML
+# ---
+# title: 'Expanding marine fish and invertebrate species distribution model projections into the southern Bay of Fundy and Nova Scotia'
+# output:
+#   html_document:
+#     df_print: paged
+#     toc: yes
+#     toc_float: true
+#   html_notebook:
+#     toc: yes
+#     toc_float: true
+# ---
+
+```
+
+# Background
+
+In this project, we are expanding our current work projecting the distribution and abundance of marine fish and invertebrates throughout the U.S. Northeast Large Marine Ecosystem to include the southern Bay of Fundy and Nova Scotian waters Canada under potential future climate conditions. 
+
+Working with folks from the Eastern Charlotte Waterways Program, we have identified a suite of species of particular interest within this region of the Gulf of Maine, including American lobster, Atlantic herring, Atlantic scallops. 
+
+For each of these species, we will fit delta log-normal two-stage generalized additive models. This modeling approach has been widely used in other marine fish distribution modeling studies and has several advantages. First, the two stage approach models presence/absence and then models the log positive biomass observations, and this structure accommodates situations where the number of absence observations exceeds those expected from traditional “count” distributions (e.gPoisson, tweedie). Second, the additive modeling framework requires no a priori assumptions about the functional relationships between the response (species presence/absence and biomass) and predictor variables, allowing for non-linear relationships. 
+
+We will fit models to training data from 1982-2013 and then validate fitted models using testing data from 2013-2018. Finally, we will use the fitted models to project mid-century (2055) species distribution and abundance using sea surface temperatures from the RCP 8.5 "business as usual" climate model ensemble.
+
+# Methods
+
+## Data collection
+
+### Species occurrence
+
+```{r}
+# Load in the data
+survdat_path <- shared.path(group = "mills lab", folder = "Data")
+load(paste0(survdat_path, "Survdat_Nye_allseason.RData"))
+
+# What we will eventually use
+# survdat_path <- shared.path(os.use = "unix", group = "RES_Data", folder = "NMFS_trawl")
+# load(paste0(survdat_path, "survdat_slucey_01152021.RData"))
+
+# clean names
+survdat <- janitor::clean_names(survdat)
+
+# Do some subsetting -- we aren't going to use data before 1982 since we want to use the OISST data for temperatures. Also, only going to use the spring/fall survey. 
+dat <- survdat %>% filter(est_year >= 1982 & season %in% c("FALL", "SPRING"))
+
+# Clean up
+rm(survdat)
+
+# Filtering, don't really need ALL the species. Start with JHare assessment species...
+proj.path <- shared.path(group = "mills lab", folder = "Projects/ECW_FishClimate")
+spp.assmnt <- read_csv(paste0(proj.path, "Data/Assesmentfishspecies.csv"))
+spp.assmnt <- janitor::clean_names(spp.assmnt)
+dat.sub <- filter(dat, comname %in% spp.assmnt$comname)
+
+# Clean up
+rm(dat)
+
+# Next, we will want to aggregate among species at a tow. We don't need the CATCHSEX or the LENGTH/NUMLEN.
+dat.grp <- dat.sub %>%
+  mutate(est_date  = ymd(paste(est_year, est_month, est_day, sep = "-")),
+         unique_id = paste(est_date, station, sep = "."),
+         comname = as.character(comname),
+         season = as.character(season)) %>%
+  group_by(unique_id, est_year, est_month, est_day, est_date, season, 
+           decdeg_beglat, decdeg_beglon, comname) %>%
+  summarize("biomass.mod" = sum(biomass, na.rm = TRUE)) 
+
+
+# Need to add null observations
+null.dat <- expand.grid("unique_id" = as.character(unique(dat.grp$unique_id)),        
+                        "comname" = as.character(unique(dat.grp$comname)))
+
+
+null.dat$unique_id <- as.character(null.dat$unique_id)
+null.dat$comname   <- as.character(null.dat$comname)
+
+
+# Grab other columns for null dat from dat.grp based on unique_id...
+dat.grp.join <- dat.grp %>%
+  ungroup() %>%
+  distinct(unique_id, .keep_all = TRUE) %>%
+  dplyr::select( -c(comname, biomass.mod))
+
+null.dat.join <- null.dat %>%
+  left_join(dat.grp.join, by = c("unique_id"))
+null.dat.join$biomass.mod <- 0
+
+
+# Join em 
+null.dat.join$MatchCol <- paste(null.dat.join$unique_id, 
+                                null.dat.join$season, 
+                                null.dat.join$comname, sep = "_")
+dat.grp$MatchCol <- paste(dat.grp$unique_id, 
+                         dat.grp$season, 
+                         dat.grp$comname, sep = "_")
+
+add.dat <- null.dat.join[-which(null.dat.join$MatchCol %in% dat.grp$MatchCol),] %>%
+  dplyr::select(names(dat.grp))
+dat.all <- dat.grp %>%
+  bind_rows(add.dat) 
+
+# Check it
+dat.check <- dat.all %>%
+  group_by(comname, season) %>%
+  summarize(Rows = n(),
+            Tows = n_distinct(unique_id))
+dat.check
+
+# Looks good, some clean up
+rm(dat.sub, null.dat)
+
+# Species plots
+xlim.use <- c(-77, -65)
+ylim.use <- c(35, 45.5)
+usa <- ne_countries(scale='medium', returnclass = 'sf') %>%
+      filter(admin == "United States of America")
+ 
+# Add in decade
+dat.grp$Decade <- ifelse(dat.grp$est_year < 1990, "1980s",
+                                 ifelse(dat.grp$est_year < 2000, "1990s",
+                                        ifelse(dat.grp$est_year < 2010, "2000s", "2010s")))
+
+
+plot.tf <- FALSE
+if(plot.tf){
+  #for(i in seq_along(unique(dat.grp$comname))){
+  for(i in 61:length(unique(dat.grp$comname))){
+    
+    for(j in seq_along(unique(dat.grp$season))){
+    
+    # Data
+    dat.use <- dat.grp %>%
+      ungroup() %>%
+      dplyr::filter(
+        comname == unique(dat.grp$comname)[i],
+        season == unique(dat.grp$season)[j])
+    
+   
+    plot.zeros <- dat.use %>%
+      filter( biomass.mod == 0)
+    plot.pos <- dat.use %>%
+      filter(biomass.mod > 0)
+    
+    plot.pos$biomass.mod.Size <- ifelse(plot.pos$biomass.mod <= 1, 0.25,
+                                        ifelse(plot.pos$biomass.mod <= 5, 0.375,
+                                               ifelse(plot.pos$biomass.mod <= 10, 0.5,
+                                                      ifelse(plot.pos$biomass.mod <= 100, 0.625,
+                                                             ifelse(plot.pos$biomass.mod <= 5000, 0.75, 0.9)))))
+    base <- ggplot() +
+      geom_sf(data = usa, fill = "white", lwd = 0.2) +
+      geom_point(data = plot.zeros, 
+                 aes(x = decdeg_beglon, y = decdeg_beglat), shape = 3, size = 0.2) +
+      coord_sf(xlim = xlim.use, ylim = ylim.use, expand = FALSE) +
+      scale_x_continuous(breaks = c(-74, -68)) +
+      scale_y_continuous(breaks = c(36, 40, 44)) +
+      facet_wrap(~est_year, nrow = 4, ncol = 10) +
+      theme(axis.title.x = element_blank(), 
+            axis.title.y = element_blank(), 
+            panel.background = element_rect(fill = "white"), 
+            panel.border = element_rect(fill = NA), 
+            strip.background = element_rect(fill = "white"))
+      
+    catch.plot <- base +
+      geom_point(data = plot.pos, 
+                 aes(x = decdeg_beglon, y = decdeg_beglat, fill = biomass.mod.Size, size = biomass.mod.Size), 
+                 alpha = 0.75, pch = 21) +
+      scale_fill_gradient(name = "Catch_KG", low = "#deebf7", high = "#084594", 
+                          limits = c(0.25, 0.9), 
+                          breaks = c(0.25, 0.375, 0.5, 0.625, 0.9), 
+                          labels = c("<=1", "<=5", "<=10", "<=100", ">500")) +
+      scale_size_continuous(name = "Catch_KG", 
+                            limits = c(0.25, 0.9), 
+                            breaks = c(0.25, 0.375, 0.5, 0.625, 0.9), 
+                            labels = c("<=1", "<=5", "<=10", "<=100", ">500")) 
+    
+    # ggsave(paste0(proj.path, "Results/", unique(dat.use$comname), unique(dat.use$season), "CatchFullExt.jpg"), 
+    #        width = 18, height = 10, catch.plot, dpi = 400)
+    
+    print(paste0(unique(dat.use$comname), unique(dat.use$season), "is done!"))
+    }
+  }
+}
+```
+
+### Environmental Conditions
+#### OISST
+```{r}
+# Sea Surface Temperature -- OISST
+# source(paste0(lab.func.path, "ObservedSST_Function.R"))
+# oisst <- env_data_extract(data.set = "OISST", dates = NULL, box = c(-77, -62, 34, 46.5), out.dir = paste0(proj.path, "/Data/"), mask = NULL)
+
+# SST from gmRi::
+box_paths <- research_access_paths(os.use = "unix")
+oisst_path <- box_paths$oisst_mainstays
+data_window <- data.frame(lon = c(-77, -62),
+                          lat = c(34, 46.5),
+                          time = as.Date(c("1982-08-01", "2020-12-31")))
+
+oisst <- oisst_window_load(oisst_path = oisst_path, data_window = data_window, anomalies = FALSE)
+
+```
+
+#### Climate Model Projected Temperatures
+
+```{r}
+
+# First, need to data for different climate model members for our area of interest
+# Paths to folders where we are doing all our work
+cd.to.path <- list("RCP85"      = "Box/RES_Data/CMIP5_SST/RCP85/", 
+                   "RCP45"      = "Box/RES_Data/CMIP5_SST/RCP45/", 
+                   "Historical" = "Box/RES_Data/CMIP5_SST/Historical/")
+
+
+# For each of these folders, we are going to want to create a grid, then remap each of the climate model files located within the folder. 
+
+# Some house keeping
+# Region of interest
+ext.x <- c(-77, -62)
+ext.y <- c(34, 46.5)
+ext.use <- as.numeric(c(ext.x, ext.y))
+lonlatbox <- paste(as.character(ext.use), collapse = ",")
+
+# Pattern to use for files
+pattern.use <- "*.[[:digit:]]\\.*nc"
+
+# Now looping through folders and over files
+for(i in seq_along(cd.to.path)){
+  
+  # CD to folder and create our grid within the system call
+  cd.to.path.use <- cd.to.path[[i]]
+  system(paste("cd", paste0("~/", "'", cd.to.path.use, "'"), "&& cat > Std1degGrid <<EOF\n
+               gridtype = lonlat\n
+               xsize = 360\n
+               ysize = 180\n
+               xfirst = -179.5\n
+               yfirst = -89.5\n
+               yinc = 1\n
+               xinc = 1\n
+               EOF", sep=" "))
+
+  
+  clim.mod.files     <- list.files(paste0("~/", cd.to.path.use), pattern = pattern.use)
+  clim.mods.df       <- data.frame("File.Long" = clim.mod.files)
+  clim.mods.df$Group <- unlist(lapply(strsplit(as.character(clim.mods.df$File.Long), "_"), "[", 3))
+
+  for(j in seq_along(clim.mods.df$File.Long)){
+    
+    # 1 degree grid to use as destination grid
+    regrid.use <- "Std1degGrid"
+    in.file    <- as.character(clim.mods.df$File.Long[j])
+    
+    # out file netcdf names
+    out.file.tempA <- paste0(gsub(".nc", "", in.file), "_regrid.nc")
+    out.file.tempB <- paste0(gsub(".nc", "", in.file), "_regrid_masked.nc")
+    out.file       <- paste0(gsub(".nc", "", in.file), "_regrid_masked_focal.nc")
+    
+    # cdo command
+    run.command <- paste(
+      paste("cd", paste0("~/", "'", cd.to.path.use, "'"), sep = " "),
+      paste0(paste0(" ; cdo remapbil,", regrid.use), paste(" -selname,tos,", in.file, out.file.tempA, sep = " ")),
+      paste0(paste("; cdo div "), paste(out.file.tempA, "landlakesmaskStdGridUse.nc", out.file.tempB, sep = " ")),
+      #paste0(paste0(" ; cdo mul ", out.file.tempA), paste(" landlakesmaskStdGrid.nc", out.file.tempB, sep = " ")),
+      paste0(paste0(" ; cdo sellonlatbox,", lonlatbox), paste(out.file.tempB, out.file, sep = " "))
+    )
+    
+    #run the command
+    system(run.command)
+
+    # Add the info on the new files, needed later, to the clim.mods.df data frame
+    clim.mods.df$File.Regrid[j]              <- out.file.tempA
+    clim.mods.df$File.Regrid.Masked[j]       <- out.file.tempB
+    clim.mods.df$File.Regrid.Masked.Focal[j] <- out.file
+
+    # All done, next iteration
+    print(paste0(in.file, " is done!"))
+  }
+
+  # Save the dataframe
+  # write_csv(clim.mods.df, path = paste0("~/", cd.to.path[[i]], "ClimModelData_ECW.csv"))
+}
+
+```
+
+Now, want to combine each of the climate model member projections into a raster stack. We are going to want to have a raster stack for each of the RCP45 and RCP85 models, which combines not only their information, but also the information from the matching historical runs as this is going to be needed for the climatology calculation. 
+
+#####  Historical
+
+```{r}
+# Let's do the raster conversion for the historical files first...
+clim.mods.hist <- read_csv(paste0("~/Box/RES_Data/CMIP5_SST/Historical/ClimModelData.csv"))
+clim.mods.hist.groups <- unique(clim.mods.hist$Group)
+
+# Loop through historical groups
+for(i in seq_along(clim.mods.hist.groups)){
+  
+  clim.mods.sub <- filter(clim.mods.hist, Group == unique(clim.mods.hist$Group)[i])
+  
+  # Empty raster stack to output processed data
+  rast.stack.out <- stack()
+  
+  for(j in seq_along(clim.mods.sub$File.Regrid.Masked.Focal)){
+    
+    if(FALSE){
+      rast.temp <- raster::stack(
+        x =  paste0(cd.to.path.use, "tos_Omon_IPSL-CM5B-LR_rcp85_r1i1p1_200601-210012_regrid_masked_focal.nc"))}
+    
+    rast.temp <- raster::stack(paste0("~/Box/RES_Data/CMIP5_SST/Historical/", 
+                                    clim.mods.sub$File.Regrid.Masked.Focal[j]))
+    names.use <- names(rast.temp)
+    
+    # Adjust values
+    # Sometimes, land is 0, also sometimes have weird low values, makes these NA below Kelvin freezing point of salt water?
+    rast.temp[rast.temp < 273.15] <- NA
+    
+    # Kelvin to Celsius
+    rast.temp <- raster::calc(rast.temp, fun = function(x) x - 273.15)
+    names(rast.temp) <- names.use
+    
+    # Save it
+    rast.stack.out <- raster::stack(rast.stack.out, rast.temp)
+  }
+  
+  # # Write it out fully processed climate output for each of the modeling groups
+  # writeRaster(rast.stack.out, 
+  #             filename = paste0("~/Box/RES_Data/CMIP5_SST/Historical/", unique(clim.mods.hist$Group)[i], ".grd"), 
+  #             overwrite = TRUE)
+  
+  print(paste0(unique(clim.mods.hist$Group)[i], " is done!"))
+}
+```
+
+##### Climate Projections
+
+```{r}
+## Alright, now the CMP45 and CMP85 projections
+clim.mods.rcp.paths <- list("RCP85" = "~/Box/RES_Data/CMIP5_SST/RCP85/", 
+                            "RCP45" = "~/Box/RES_Data/CMIP5_SST/RCP45/")
+clim.hist.rasts <- list.files(path = "~/Box/RES_Data/CMIP5_SST/Historical", 
+                              pattern = "*.*grd", 
+                              full.names = TRUE)
+
+# Loop through climate projection paths
+for(i in seq_along(clim.mods.rcp.paths)){
+  
+  clim.mod.df.use <- read_csv(paste0(clim.mods.rcp.paths[[i]], "ClimModelData.csv"))
+  
+  # for(j in seq_along(unique(clim.mod.df.use$Group))){
+  for(j in 18:length(unique(clim.mod.df.use$Group))){
+    clim.mods.sub <- clim.mod.df.use %>%
+      filter(Group == unique(clim.mod.df.use$Group)[j])
+    
+    # Read in correct historical data
+    clim.hist.rast <- raster::stack(clim.hist.rasts[which(grepl(clim.mods.sub$Group, clim.hist.rasts))])
+    names.hist <- names(clim.hist.rast)
+    
+    # Empty raster stack to output projections data, which starts with historical data
+    rast.stack.out <- stack(clim.hist.rast)
+    names(rast.stack.out) <- names.hist
+    
+    for(k in seq_along(clim.mods.sub$File.Regrid.Masked.Focal)){
+      if(FALSE){
+        rast.temp <- raster::stack(
+          x = paste0(cd.to.path.use,"tos_Omon_IPSL-CM5B-LR_rcp85_r1i1p1_200601-210012_regrid_masked_focal.nc"))
+      }
+      
+      rast.temp <- raster::stack(paste0(clim.mods.rcp.paths[[i]], 
+                                      clim.mods.sub$File.Regrid.Masked.Focal[k]))
+      names.use <- names(rast.temp)
+      
+      # Adjust values
+      # Sometimes, land is 0, also sometimes have weird low values, makes these NA below Kelvin freezing point of salt water?
+      rast.temp[rast.temp < 273.15] <- NA
+      
+      # Kelvin to Celsius
+      rast.temp <- raster::calc(rast.temp, fun = function(x) x - 273.15)
+      names(rast.temp) <- names.use
+      
+      # Save it
+      rast.stack.out <- raster::stack(rast.stack.out, rast.temp)
+    }
+    
+    # # Write it out fully processed climate output for each of the modeling groups
+    # writeRaster(rast.stack.out, 
+    #             filename = paste0(clim.mods.rcp.paths[[i]], unique(clim.mod.df.use$Group)[j], "Full.grd"), 
+    #             overwrite = TRUE)
+    
+    print(paste0(unique(clim.mod.df.use$Group)[j], " is done!"))
+  }
+}
+```
+
+Next, bias correct the climate model members
+```{r}
+source("https://raw.githubusercontent.com/GMRI-SEL/LabFunctionsandCode/master/GenerateSharedPathsScript.R")
+source(paste0(lab.func.path, "GeneralHelpers.R"))
+source(paste0(lab.func.path, "ClimateSSTFunctions.R"))
+library_check(c("tidyverse", "sf", "lubridate", "here", "raster", "rts"))
+
+# List of each individual raster stack -- for each one we are going to want to calculate the climatology, and then the anomalies
+res.data.path <- "~/Box/RES_Data/"
+all.rast.ts <- tibble("Raster.TS" = c(paste0(res.data.path, "OISST/OISSTNWAtl.grd"), unlist(list.files(paste0(res.data.path, "CMIP5_SST/RCP85"), pattern = "Full.grd", full.names = TRUE)), list.files(paste0(res.data.path, "CMIP5_SST/RCP45"), pattern = "Full.grd", full.names = TRUE)))
+
+# Output path
+all.rast.ts <- all.rast.ts %>%
+  separate("Raster.TS", c("Path", "File"), sep = "/(?!.*/)", remove = FALSE)
+all.rast.ts$res.ts <- ifelse(grepl("OISST", all.rast.ts$Raster.TS), "daily", "monthly")
+  
+# First, climatology with calc_climatology
+all.rast.ts <- all.rast.ts %>%
+  mutate("Raster.Clim" = pmap(list(raster.ts = Raster.TS, res.ts = res.ts, res.clim = "monthly", baseline = list(c("1982-01-01", "2011-01-01")), out.path = Path, out.file = File), calc_climatology))
+# Okay, got the climatology, now need to calculate the anomalies. To do that, we probably want to split out the Raster.Clim list column and have two new columns...one for the mean and one for the SD.
+rast.clim.temp <- all.rast.ts %>%
+  dplyr::select(Raster.TS, Raster.Clim) %>%
+  unnest(cols = c(Raster.Clim)) 
+rast.clim.mu <- rast.clim.temp[seq(from = 1, to = nrow(rast.clim.temp), by = 2),]
+colnames(rast.clim.mu)[2] <- "Clim.Mu"
+rast.clim.sd <- rast.clim.temp[seq(from = 2, to = nrow(rast.clim.temp), by = 2),]
+colnames(rast.clim.sd)[2] <- "Clim.SD"
+rast.clim.merge <- rast.clim.mu %>%
+  left_join(rast.clim.sd)
+all.rast.ts <- all.rast.ts %>%
+  left_join(rast.clim.merge)
+# Only going to do this for the climate models, not the OISST (row 1)
+clim.rast.ts <- all.rast.ts[-1, ]
+clim.rast.ts <- clim.rast.ts %>%
+  mutate("Clim.Anom" = pmap(list(raster.ts = Raster.TS, raster.clim.mu = Clim.Mu, raster.clim.sd = Clim.SD, anom.type = "Standardized", out.path = Path, out.file = File), calc_anomaly))
+# Now, going to apply the anomalies to the observed OISST climatology to get a biased corrected projected temperature.
+clim.rast.ts <- clim.rast.ts %>%
+  mutate("Proj.SST" = pmap(list(raster.anom = Clim.Anom, raster.clim = list(all.rast.ts$Clim.Mu[[1]]), out.path = Path, out.file = File), calc_proj_sst))
+# Alright, now need to go from a raster stack Proj.SST to a data frame then calculate the mean and 95% CI
+stack_to_df <- function(rast.stack){
+  df.out <- as.data.frame(rast.stack, xy = TRUE)
+  df.out <- df.out %>%
+    gather("Year", "SST", -x, -y)
+  return(df.out)
+}
+clim.rast.ts <- clim.rast.ts %>%
+  mutate("Proj.SST.DF" = map(Proj.SST, stack_to_df))
+#saveRDS(clim.rast.ts, "~/Box/RES_Data/CMIP5_SST/ProcessedSSTProjectionsWithRasters_ECW.rds")
+clim.out <- clim.rast.ts %>%
+  dplyr::select(Raster.TS, File, Proj.SST.DF) %>%
+  unnest()
+clim.out$Year <- gsub("X", "", gsub("[.]", "-", clim.out$Year))
+clim.out$Scenario <- ifelse(grepl("85", clim.out$Raster.TS), "RCP85", "RCP45")
+clim.out <- clim.out %>%
+  dplyr::filter(Year >= "1982-01-01") %>%
+  dplyr::select(File, Scenario, Year, x, y, SST)
+#saveRDS(clim.out, "~/Box/RES_Data/CMIP5_SST/ProcessedSSTProjections_ECW.rds")
+```
+
+#### Depth
+```{r}
+depth <- raster(paste0(res.data.path, "Shapefiles/NEShelf_Etopo1_bathy.tiff"))
+```
+
+### Extracting at environmental variables at species locations
+```{r}
+# For the extractions, going to use projected coordinates UTM zone 19N
+# Set projection information
+proj.wgs84 <- CRS("+init=epsg:4326") #WGS84
+proj.utm <- CRS("+init=epsg:2960") #UTM 19
+  
+# A few processing things -- make NAs of biomass.mod to 0 (these were species that were not caught at specific stations) and then make a new presence.absence column)
+dat.all$presence.absence <- ifelse(dat.all$biomass.mod > 0, 1, 0)
+dat.full <- dat.all[order(dat.all$est_year, dat.all$est_month, dat.all$est_day),]
+
+# Convert dat.full to spatial points dataframe and we really only need the unique tows
+t1 <- dat.full[!duplicated(dat.full[c("unique_id")]),] 
+
+# Remove some of the un-needed columns
+keep.vec <-  c("unique_id", "est_year", "est_month", "est_day", "est_date", "season", "decdeg_beglat", "decdeg_beglon")
+trawl.pred.vals <- t1 %>%
+  ungroup() %>%
+  dplyr::select(one_of(keep.vec))
+  
+trawl.pred.vals.sp <- st_as_sf(trawl.pred.vals, coords = c("decdeg_beglon", "decdeg_beglat"), crs = proj.wgs84, remove = FALSE) %>%
+  st_transform(crs = proj.utm)
+
+# Getting satellite SST values
+dailymu.stack <- raster::stack(paste0(proj.path, "Data/OISSTThroughFeb2020.grd"))
+dailymu.stack <- projectRaster(dailymu.stack, crs = proj.utm)
+  
+# Reduce trawl dataset to only those observations that are within the range of SST data
+trawl.pred.vals.sub <- trawl.pred.vals.sp %>%
+  dplyr::filter(est_date >= "1982-01-01") %>%
+  st_drop_geometry()
+  
+# Okay, now with the OISST, can we get the seasonal means for each year...then match years/seasons and extract?
+years <- seq(from = 1982, to = max(trawl.pred.vals.sub$est_year), by = 1)
+seasonalmu.stack <- stack()
+  
+for(i in seq_along(years)){
+  falls <- seq(from = as.Date(paste(years[i], "09", "01", sep = "-")), 
+               to = as.Date(paste(years[i], "11", "30", sep = "-")), 
+               by = 1)
+  springs <- seq(from = as.Date(paste(years[i], "03", "01", sep = "-")), 
+                 to = as.Date(paste(years[i], "05", "31", sep = "-")), 
+                 by = 1)
+  fall.mu <- calc(dailymu.stack[[which(gsub("[.]", "-", gsub("X", "", names(dailymu.stack))) %in% as.character(falls))]], mean)
+  
+  spring.mu <- calc(dailymu.stack[[which(gsub("[.]", "-", gsub("X", "", names(dailymu.stack))) %in% as.character(springs))]], mean)
+  
+  seasonalmu.stack <- stack(seasonalmu.stack, fall.mu, spring.mu)
+  print(years[i])
+}
+  
+names(seasonalmu.stack) <- paste(c("FALL", "SPRING"), rep(years, each = 2), sep = ".")
+  
+# Get seasonal temp for each observation
+i.temp <- match(paste(trawl.pred.vals.sub$season, trawl.pred.vals.sub$est_year, sep = "."), names(seasonalmu.stack)) 
+dat.temp <- raster::extract(seasonalmu.stack, trawl.pred.vals.sp) # ~12 minutes
+  
+# Bind the i.final vector to our reduced dataset
+i.mat <- cbind(1:nrow(trawl.pred.vals.sub), i.temp) 
+  
+# Bind result to our sub dataset
+trawl.pred.vals.sub$seasonalmu.oisst <- dat.temp[i.mat]
+  
+# Get back to full dataset
+temp.pre1982 <- trawl.pred.vals.sp %>%
+  dplyr::filter(est_date < "1982-01-01") %>%
+  st_drop_geometry()
+temp.pre1982$Sseasonalmu.oisst <- rep(NA, nrow(temp.pre1982))
+trawl.pred.vals <- rbind(temp.pre1982, trawl.pred.vals.sub)
+  
+# Getting depth values
+proj4string(depth) <- proj.wgs84
+depth.utm <- projectRaster(depth, crs = proj.utm)
+  
+# Use raster to extract raster values at points
+trawl.pred.vals$depth <- raster::extract(depth.utm, trawl.pred.vals.sp, method = "bilinear")
+  
+# Get ID and added predictor variables
+trawl.pred.vals.red <- trawl.pred.vals[,c(1, 9:10)]
+  
+# Merge back with trawl catch info (date, time, lat, long, etc)
+trawl.dat.full <- dat.full %>%
+  left_join(trawl.pred.vals.red, by = c("unique_id"))
+  
+# Write out model adjusted file -----------------------------------------------------------
+#saveRDS(trawl.dat.full, file = paste0(proj.path, "Data/ECWmodel.dat.rds"))
+```
+
+## Model fitting, evaluation and validation
+```{r}
+# Getting data together into a training and testing split
+dat <- readRDS(paste0(proj.path, "Data/ECWmodel.dat.rds")) %>%
+  drop_na(depth, seasonalmu.oisst)
+
+# Unique sample locations....
+unique.samp <- dat %>%
+  ungroup() %>%
+  dplyr::select(decdeg_beglon, decdeg_beglat) %>%
+  mutate_all(round, 1) %>%
+  distinct()
+
+# Training vs. testing dates
+train.start <- "1982-01-01"
+train.end   <- "2012-12-31"
+test.start  <- "2013-01-01"
+test.end    <- max(dat$est_date)
+dat$train.test <- ifelse(dat$est_date >= train.start & dat$est_date <= train.end, "TRAIN",
+                        ifelse(dat$est_date >= test.start & dat$est_date <= test.end, "TEST", "Neither"))
+dat.train.f <- dat %>%
+  ungroup() %>%
+  filter(train.test == "TRAIN" & season == "FALL") %>%
+  mutate("est_year" = factor(est_year, levels = seq(from = min(est_year), to = max(est_year), by = 1)),
+         "depth.scale" = as.numeric(scale(abs(depth))),
+         "seasonalmu.oisst.scale" = as.numeric(scale(seasonalmu.oisst))) 
+
+# Need to keep mean and sd from rescale to use when we predict or project to other time periods
+base.depth.mean.f <- mean(abs(dat.train.f$depth))
+base.depth.sd.f   <- sd(abs(dat.train.f$depth))
+base.temp.mean.f  <- mean(dat.train.f$seasonalmu.oisst, na.rm = T)
+base.temp.sd.f    <- sd(dat.train.f$seasonalmu.oisst, na.rm = T)
+fall.rescale.df   <- data.frame(season = "FALL", 
+                                mean.t = base.temp.mean.f, 
+                                sd.t = base.temp.sd.f, 
+                                mean.depth = base.depth.mean.f, 
+                                sd.depth = base.depth.sd.f)
+
+# Now spring...
+dat.train.s <- dat %>%
+  ungroup() %>%
+  filter(train.test == "TRAIN" & season == "SPRING") %>%
+  mutate("est_year" = factor(est_year, levels = seq(from = min(est_year), to = max(est_year), by = 1)),
+         "depth.scale" = as.numeric(scale(abs(depth))),
+         "seasonalmu.oisst.scale" = as.numeric(scale(seasonalmu.oisst))) 
+
+# Temps to rescale other variables
+base.depth.mean.sp <- mean(abs(dat.train.s$depth))
+base.depth.sd.sp   <- sd(abs(dat.train.s$depth))
+base.temp.mean.sp  <- mean(dat.train.s$seasonalmu.oisst, na.rm = T)
+base.temp.sd.sp    <- sd(dat.train.s$seasonalmu.oisst, na.rm = T)
+spring.rescale.df  <- data.frame(season = "SPRING", 
+                                 mean.t = base.temp.mean.sp, 
+                                 sd.t = base.temp.sd.sp, 
+                                 mean.depth = base.depth.mean.sp, 
+                                 sd.depth = base.depth.sd.sp)
+
+## Testing dataframes and applying correct scale to match rescaled variables used in the model fitting process
+dat.test.f <- dat %>%
+  ungroup() %>%
+  filter(train.test == "TEST" & season == "FALL") %>%
+  mutate("est_year" = factor(est_year, levels = seq(from = min(est_year), to = max(est_year), by = 1))) %>%
+  left_join(fall.rescale.df, by = "season")
+
+dat.test.f$depth.scale <- mapply(temp.scale, abs(dat.test.f$depth), fall.rescale.df$mean.depth, fall.rescale.df$sd.depth)
+dat.test.f$seasonalmu.oisst.scale <- mapply(temp.scale, dat.test.f$seasonalmu.oisst, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+
+## Testing dataframes
+dat.test.s <- dat %>%
+  ungroup() %>%
+  filter(train.test == "TEST" & season == "SPRING") %>%
+  mutate("est_year" = factor(est_year, levels = seq(from = min(est_year), to = max(est_year), by = 1))) %>%
+  left_join(spring.rescale.df, by = "season")
+
+dat.test.s$depth.scale <- mapply(temp.scale, abs(dat.test.s$depth), spring.rescale.df$mean.depth, spring.rescale.df$sd.depth)
+dat.test.s$seasonalmu.oisst.scale <- mapply(temp.scale, dat.test.s$seasonalmu.oisst, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+
+# Create nested dataframes, one for testing, one for training
+# Training
+nest.vars <- colnames(dat.train.f)[c(1:5, 7:9, 11:18)]
+dat.train.f$biomass.mod <- log(dat.train.f$biomass.mod + 1)
+dat.train.s$biomass.mod <- log(dat.train.s$biomass.mod + 1)
+dat.train <- dat.train.f %>%
+  bind_rows(dat.train.s) %>%
+  group_by(comname, season) %>%
+  nest() %>%
+  arrange(comname)
+colnames(dat.train)[3] <- "train.data"
+
+# Testing
+dat.test.f$biomass.mod <- log(dat.test.f$biomass.mod + 1)
+dat.test.s$biomass.mod <- log(dat.test.s$biomass.mod + 1)
+dat.test <- dat.test.f %>%
+  bind_rows(dat.test.s) %>%
+  group_by(comname, season) %>%
+  nest() %>%
+  arrange(comname)
+colnames(dat.test)[3] <- "test.data"
+
+# Bind together
+dat.full <- dat.train %>%
+  left_join(dat.test, by = c("comname", "season"))
+
+# Need base.preds, fut.preds
+spring.preds <- readRDS(paste0(proj.path, "Data/spring.rast.preds.rds"))
+names(spring.preds)[10] <- "depth"
+
+fall.preds <- readRDS(paste(proj.path, "Data/fall.rast.preds.rds"))
+names(fall.preds)[11] <- "depth"
+
+base.preds.sp <- spring.preds %>%
+  dplyr::select(x, y, Baseline, depth) %>%
+  mutate("season" = rep("SPRING", nrow(.)))
+base.preds.sp <- base.preds.sp %>%
+  left_join(spring.rescale.df, by = "season")
+base.preds.sp$depth.scale <- mapply(temp.scale, abs(base.preds.sp$depth), spring.rescale.df$mean.depth, spring.rescale.df$sd.depth)
+base.preds.sp$seasonalmu.oisstscale <- mapply(temp.scale, base.preds.sp$Baseline, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+base.preds.sp <- base.preds.sp %>%
+  group_by(season) %>%
+  nest(.key = "Data")
+base.preds.f <- fall.preds %>%
+  dplyr::select(x, y, Baseline, depth) %>%
+  mutate("season" = rep("FALL", nrow(.))) 
+base.preds.f$depth.scale <- mapply(temp.scale, abs(base.preds.f$depth), fall.rescale.df$mean.depth, fall.rescale.df$sd.depth)
+base.preds.f$seasonalmu.oisst.scale <- mapply(temp.scale, base.preds.f$Baseline, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+base.preds.f <- base.preds.f %>%
+  group_by(season) %>%
+  nest(.key = "Data")
+base.preds <- base.preds.f %>%
+  bind_rows(base.preds.sp)
+
+## Future
+fut.preds.sp <- spring.preds %>%
+  dplyr::select(x, y, Spring.2055.rcp85.mu, Spring.2055.rcp85.pct05, Spring.2055.rcp85.pct95, depth) %>%
+  mutate("season" = rep("SPRING", nrow(.))) %>%
+  left_join(spring.rescale.df, by = "season")
+
+fut.preds.sp$depth.scale <- mapply(temp.scale, abs(fut.preds.sp$depth), spring.rescale.df$mean.depth, spring.rescale.df$sd.depth)
+fut.preds.sp$seasonALMU.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$seasonAL05.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$seasonAL95.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+
+fut.preds.sp <- fut.preds.sp %>%
+  group_by(season) %>%
+  nest(.key = "Data")
+
+fut.preds.f <- fall.preds %>%
+  dplyr::select(x, y, Fall.2055.rcp85.mu, Fall.2055.rcp85.pct05, Fall.2055.rcp85.pct95, depth) %>%
+  mutate("season" = rep("FALL", nrow(.))) %>%
+  left_join(fall.rescale.df, by = "season")
+
+fut.preds.f$depth.scale <- mapply(temp.scale, abs(fut.preds.f$depth), fall.rescale.df$mean.depth, fall.rescale.df$sd.depth)
+fut.preds.f$seasonALMU.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$seasonAL05.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$seasonAL95.2055.RCP85.OISST.scale <- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+
+fut.preds.f <- fut.preds.f %>%
+  group_by(season) %>%
+  nest(.key = "Data")
+
+fut.preds <- fut.preds.f %>%
+  bind_rows(fut.preds.sp)
+
+# Some functions
+gam_fit_full_func <- function(df, response){
+  if(response == "Presence"){
+    gam.mod0 <- gam(presence.absence ~ s(depth.scale, fx = FALSE, bs = 'cs') + s(seasonalmu.oisst.scale, fx = FALSE, bs = 'cs'), drop.unused.levels = T, data = df, family = binomial(link = logit), select = TRUE)
+    return(gam.mod0)
+  } 
+  
+  if(response == "Biomass"){
+    gam.mod0 <- gam(biomass.mod ~ s(depth.scale, fx = FALSE, bs = 'cs') + s(seasonalmu.oisst.scale, fx = FALSE, bs = 'cs'), drop.unused.levels = T, data = df, family = gaussian, select = TRUE)
+    return(gam.mod0)
+  }
+}
+
+
+predict_func <- function(mod.fitted.p, mod.fitted.b, response, percentile, test.data) {
+  temp <- dplyr::select(test.data, one_of(c("depth.scale", percentile)))
+  test.data <- data.frame(na.omit(temp))
+  out.p <- round(as.numeric(predict.gam(mod.fitted.p, newdata = test.data, type = "response", se.fit = TRUE)$fit), 3)
+  
+  if(response == "Biomass"){
+    out.b <- exp(round(as.numeric(predict.gam(mod.fitted.b, newdata = test.data, type = "response", se.fit = TRUE)$fit), 3))
+    out.c <- out.p * out.b
+    return(out.c)
+  } else {
+    return(out.p)
+  }
+}
+
+
+pred_ranges_func <- function(predicted){
+  pred.ranges <- data.frame("Min.Pred" = min(predicted, na.rm = T), "Max.Pred" = max(predicted, na.rm = T), "Mean.Pred" = mean(predicted, na.rm = T))
+  return(pred.ranges)
+}
+auc_func <- function(test.data, predicted) {
+  temp <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "presence.absence")))
+  test.data <- data.frame(na.omit(temp))
+  if(all(test.data$presence.absence == 0)){
+    return(NA)
+  } else {
+    col.ind <- which(colnames(test.data) == "presence.absence")
+    dat <- prediction(predictions = predicted, labels = test.data[,col.ind])
+    return(performance(dat, measure = "auc")@y.values[[1]])
+  }
+}
+
+
+rmse_func <- function(test.data, predicted, response) {
+  if(response == "Presence"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "presence.absence"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "presence.absence")
+    if(all(test.data$presence.absence == 0)){
+      return(NA)
+    } else {
+      rmse.out <- rmse(sim = as.numeric(predicted), obs = test.data$presence.absence)
+      rmse.out <- rmse.out / sd(test.data[,col.ind], na.rm = TRUE)
+      return(rmse.out)
+    }
+  }
+  
+  if(response == "Biomass"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "biomass.mod"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "biomass.mod")
+    if(all(test.data$biomass == 0)){
+      return(NA)
+    } else {
+      rmse.out <- rmse(sim = as.numeric(predicted), obs = exp(test.data$biomass.mod))
+      rmse.out <- rmse.out / sd(exp(test.data[,col.ind]), na.rm = TRUE)
+      return(rmse.out)
+    }
+  }
+}
+
+
+calib_stat_func <- function(test.data, predicted){
+  test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "presence.absence"))) 
+  test.data <- data.frame(na.omit(test.data))
+  col.ind <- which(colnames(test.data) == "presence.absence")
+  if(all(test.data$presence.absence == 0)){
+    return(NA)
+  } else {
+    calib.stat <- round(calibration(x = test.data[,col.ind], p = predicted)@statistic, 3)
+    return(calib.stat)
+  }
+}
+
+
+corr_coeff_func <- function(test.data, predicted, response){
+  if(response == "Presence"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "presence.absence"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "presence.absence")
+    if(all(test.data$presence.absence == 0)){
+      return(NA)
+    } else {
+      mean.obs <- mean(test.data[,col.ind])
+      mean.mod <- mean(predicted, na.rm = TRUE)
+      sd.obs <- sd(test.data[,col.ind])
+      sd.mod <- sd(predicted, na.rm = TRUE)
+      samps <- nrow(test.data)
+      corr.coeff <- ((1/samps)*(sum((predicted - mean.mod)*(test.data[,col.ind] - mean.obs))))/(sd.obs*sd.mod)
+      return(corr.coeff)
+    }
+  }
+  
+  
+  if(response == "Biomass"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "biomass.mod"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "biomass.mod")
+    if(all(test.data$biomass == 0)){
+      return(NA)
+    } else {
+      mean.obs <- mean(exp(test.data[,col.ind]))
+      mean.mod <- mean(predicted, na.rm = TRUE)
+      sd.obs <- sd(exp(test.data[,col.ind]))
+      sd.mod <- sd(predicted, na.rm = TRUE)
+      samps <- nrow(test.data)
+      corr.coeff <- ((1/samps)*(sum((predicted - mean.mod)*(exp(test.data[,col.ind]) - mean.obs))))/(sd.obs*sd.mod)
+      return(corr.coeff)
+    }
+  }
+}
+sdm_bias_func <- function(test.data, predicted, response){
+  if(response == "Presence"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "presence.absence"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "presence.absence")
+    if(all(test.data$presence.absence == 0)){
+      return(NA)
+    } else {
+      bias <- sd(predicted, na.rm = TRUE) / sd(test.data[,col.ind], na.rm = TRUE)
+      return(bias)
+    }
+  }
+  
+  if(response == "Biomass"){
+    test.data <- dplyr::select(test.data, one_of(c("depth.scale", "seasonalmu.oisst.scale", "biomass.mod"))) 
+    test.data <- data.frame(na.omit(test.data))
+    col.ind <- which(colnames(test.data) == "biomass.mod")
+    if(all(test.data$biomass == 0)){
+      return(NA)
+    } else {
+      bias <- sd(predicted) / sd(exp(test.data[,col.ind]))
+      return(bias)
+    }
+  }
+}
+
+
+mod.results                   <- data.frame(dat.full[,c(1:2)])
+mod.results$DevExp.P          <- rep(NA, nrow(mod.results))
+mod.results$DevExp.B          <- rep(NA, nrow(mod.results))
+mod.results$AUC.SDM           <- rep(NA, nrow(mod.results))
+mod.results$RMSE.SDM.P        <- rep(NA, nrow(mod.results))
+mod.results$RMSE.SDM.B        <- rep(NA, nrow(mod.results))
+mod.results$CorrCoeff.SDM.P   <- rep(NA, nrow(mod.results))
+mod.results$CorrCoeff.SDM.B   <- rep(NA, nrow(mod.results))
+mod.results$Bias.SDM.P        <- rep(NA, nrow(mod.results))
+mod.results$Bias.SDM.B        <- rep(NA, nrow(mod.results))
+mod.results$Calib.SDM         <- rep(NA, nrow(mod.results))
+mod.results$Pred.Min.SDM      <- rep(NA, nrow(mod.results))
+mod.results$Pred.Max.SDM      <- rep(NA, nrow(mod.results))
+mod.results$Pred.BaseRate.SDM <- rep(NA, nrow(mod.results))
+
+# Get the data and fit the model for each row...
+for(i in 1:nrow(dat.full)){
+  dat.use <- dat.full[i,]
+  season.use <- as.character(dat.use$season[[1]])
+  
+  dat.use <- dat.use %>%
+    mutate("mod.fitted.p" = pmap(list(df = train.data, response = list("Presence")), possibly(gam_fit_full_func, NA)),
+           "mod.fitted.b" = pmap(list(df = train.data, response = list("Biomass")), possibly(gam_fit_full_func, NA)))
+  gam.mod0.p <- dat.use$mod.fitted.p[[1]]
+  
+  # No SDM data..
+  if(is.infinite(summary(gam.mod0.p)$dev.expl) | summary(gam.mod0.p)$dev.expl > 0.97 | is.na(dat.use$mod.fitted.b)){
+    print("Bad SDM fit")
+    next()
+  }
+  
+  # Else keep going
+  #saveRDS(dat.use$mod.fitted.p[[1]], file = paste0(proj.path, "Results/gamfitpres", tolower(dat.use$comname), "_", tolower(dat.use$season), ".rds"))
+  #saveRDS(dat.use$mod.fitted.b[[1]], file = paste0(proj.path, "Results/gamfitbio", tolower(dat.use$comname), "_", tolower(dat.use$season), ".rds"))
+  
+  # Store deviance explained
+  mod.results$DevExp.P[i] <- round(summary(dat.use$mod.fitted.p[[1]])$dev.expl, 3)
+  mod.results$DevExp.B[i] <- round(summary(dat.use$mod.fitted.b[[1]])$dev.expl, 3)
+  
+   # Predictions and residuals
+  dat.use <- dat.use %>%
+    mutate("Predicted.SDM.P" = pmap(list(mod.fitted.p = mod.fitted.p, mod.fitted.b = mod.fitted.b, percentile = "seasonalmu.oisst.scale", test.data = test.data, response = "Presence"), possibly(predict_func, NA)),
+           "Predicted.SDM.B" = pmap(list(mod.fitted = mod.fitted.p, mod.fitted.b = mod.fitted.b, percentile = "seasonalmu.oisst.scale", test.data = test.data, response = "Biomass"), possibly(predict_func, NA)),
+           "Pred.Ranges.SDM" = map(Predicted.SDM.P, possibly(pred_ranges_func, NA)),
+           "AUC.SDM" = pmap(list(test.data = test.data, predicted = Predicted.SDM.P), possibly(auc_func, NA)),
+           "RMSE.SDM.P" = pmap(list(test.data = test.data, predicted = Predicted.SDM.P, response = "Presence"), possibly(rmse_func, NA)),
+           "RMSE.SDM.B" = pmap(list(test.data = test.data, predicted = Predicted.SDM.B, response = "Biomass"), possibly(rmse_func, NA)),
+           "Calib.Stat.SDM" = pmap(list(test.data = test.data, predicted = Predicted.SDM.P), possibly(calib_stat_func, NA)),
+           "CorrCoeff.SDM.P" = pmap(list(test.data = test.data, predicted = Predicted.SDM.P, response = "Presence"), possibly(corr_coeff_func, NA)),
+           "CorrCoeff.SDM.B" = pmap(list(test.data = test.data, predicted = Predicted.SDM.B, response = "Biomass"), possibly(corr_coeff_func, NA)), 
+           "Bias.SDM.P" = pmap(list(test.data = test.data, predicted = Predicted.SDM.P, response = "Presence"), possibly(sdm_bias_func, NA)),
+           "Bias.SDM.B" = pmap(list(test.data = test.data, predicted = Predicted.SDM.B, response = "Biomass"), possibly(sdm_bias_func, NA)))
+  
+  mod.results$AUC.SDM[i]           <- round(as.numeric(dat.use$AUC.SDM[[1]]), 3)
+  mod.results$RMSE.SDM.P[i]        <- round(as.numeric(dat.use$RMSE.SDM.P[[1]]), 3)
+  mod.results$RMSE.SDM.B[i]        <- round(as.numeric(dat.use$RMSE.SDM.B[[1]]), 3)
+  mod.results$Calib.SDM[i]         <- round(as.numeric(dat.use$Calib.Stat.SDM[[1]]), 3)
+  mod.results$Pred.Min.SDM[i]      <- round(as.numeric(dat.use$Pred.Ranges.SDM[[1]]$Min.Pred), 3)
+  mod.results$Pred.Max.SDM[i]      <- round(as.numeric(dat.use$Pred.Ranges.SDM[[1]]$Max.Pred), 3)
+  mod.results$Pred.BaseRate.SDM[i] <- round(as.numeric(dat.use$Pred.Ranges.SDM[[1]]$Mean.Pred), 3)
+  mod.results$CorrCoeff.SDM.P[i]   <- round(as.numeric(dat.use$CorrCoeff.SDM.P[[1]]), 3)
+  mod.results$CorrCoeff.SDM.B[i]   <- round(as.numeric(dat.use$CorrCoeff.SDM.B[[1]]), 3)
+  mod.results$Bias.SDM.P[i]        <- round(as.numeric(dat.use$Bias.SDM.P[[1]]), 3)
+  mod.results$Bias.SDM.B[i]        <- round(as.numeric(dat.use$Bias.SDM.B[[1]]), 3)
+}
+
+#write.csv(mod.results, file = paste0(proj.path, "Results/mod.results.csv",))
+```     
+
+## Model predictions
+```{r}
+res.files.pres <- list.files(paste0(proj.path, "Results"), "gamfitpres", full.names = TRUE)
+res.files.bio <- list.files(paste0(proj.path, "Results"), "gamfitbio", full.names = TRUE)
+mod.results <- read.csv(paste0(proj.path, "Results/mod.results.csv"))
+
+for(i in seq_along(res.files.pres)){
+  species.season <- gsub(".rds", "", gsub("gamfitpres", "", gsub("/Users/aallyn/Box/Mills Lab/Projects/ECW_FishClimate/Results/", "", res.files.pres[i])))
+  spp <- toupper(strsplit(species.season, "_")[[1]][1])
+  season <- toupper(strsplit(species.season, "_")[[1]][2])
+  spp.season.match <- paste(spp, season, sep = ".")
+  
+  # Model fit -- presence and biomass SDM
+  mod.fitted.p <- readRDS(res.files.pres[i])
+  mod.fitted.b <- readRDS(res.files.bio[i])
+  ilink <- family(mod.fitted.b)$linkinv
+  gam.coef <- names(coef(mod.fitted.p))
+  
+  # Make predictions
+  depth.cut <- -400
+  
+  # SDM
+  sdm.base <- base.preds$Data[[match(season, base.preds$season)]]
+  sdm.base$depth.scale[sdm.base$depth < depth.cut | sdm.base$depth > 0] <- NA
+  sdm.base <- sdm.base %>%
+    unnest() %>%
+    dplyr::select(c("x", "y", "depth.scale", "seasonalmu.oisst.scale"))
+  sdm.base.p <- round(predict.gam(mod.fitted.p, newdata = sdm.base, type = "response"), 2)
+  sdm.base.b <- round(as.numeric(sdm.base.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = sdm.base, type = "response"))), 2)
+  
+  # Mean climate model SST
+  newdat.mu <- fut.preds$Data[[match(season, fut.preds$season)]]
+  newdat.mu$depth.scale[newdat.mu$depth < depth.cut | newdat.mu$depth > 0] <- NA
+  newdat.2055.rcp85.mu <- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(c("x", "y", "depth.scale", "seasonALMU.2055.RCP85.OISST.scale"))
+  names(newdat.2055.rcp85.mu)[4] <- "seasonalmu.oisst.scale"
+  sdm.2055.rcp85.mu.p <- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.mu, type = "response"), 2)
+  sdm.2055.rcp85.mu.b <- round(as.numeric(sdm.2055.rcp85.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.mu, type = "response"))), 2)
+  
+  # pct05 climate model
+  newdat.05 <- fut.preds$Data[[match(season, fut.preds$season)]]
+  newdat.05$depth.scale[newdat.05$depth < depth.cut | newdat.05$depth > 0] <- NA
+  newdat.2055.rcp85.05 <- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(c("x", "y", "depth.scale", "seasonAL05.2055.RCP85.OISST.scale"))
+  names(newdat.2055.rcp85.05)[4] <- "seasonalmu.oisst.scale"
+  sdm.2055.rcp85.pct05.p <- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.05, type = "response"), 2)
+  sdm.2055.rcp85.pct05.b <- round(as.numeric(sdm.2055.rcp85.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.05, type = "response"))), 2)
+  
+  # pct95 climate model
+  newdat.95 <- fut.preds$Data[[match(season, fut.preds$season)]] 
+  newdat.95$depth.scale[newdat.95$depth < depth.cut | newdat.95$depth > 0] <- NA
+  newdat.2055.rcp85.95 <- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(c("x", "y", "depth.scale", "seasonAL95.2055.RCP85.OISST.scale"))
+  names(newdat.2055.rcp85.95)[4] <- "seasonalmu.oisst.scale"
+  sdm.2055.rcp85.pct95.p <- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.95, type = "response"), 2)
+  sdm.2055.rcp85.pct95.b <- round(as.numeric(sdm.2055.rcp85.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.95, type = "response"))), 2)
+  
+  # Presence only dataframes
+  sdm.map.base.p <- data.frame("x" = base.preds$Data[[match(season, base.preds$season)]]$x, "y" = base.preds$Data[[match(season, base.preds$season)]]$y, "pred" = sdm.base.p)
+  sdm.map.2055.rcp85.mu.p <- data.frame("x" = newdat.2055.rcp85.mu$x, 
+                                        "y" = newdat.2055.rcp85.mu$y, 
+                                        "pred" = sdm.2055.rcp85.mu.p)
+  sdm.map.2055.rcp85.pct05.p <- data.frame("x" = newdat.2055.rcp85.05$x, 
+                                           "y" = newdat.2055.rcp85.05$y, 
+                                           "pred.05" = sdm.2055.rcp85.pct05.p)
+  sdm.map.2055.rcp85.pct95.p <- data.frame("x" = newdat.2055.rcp85.95$x, 
+                                           "y" = newdat.2055.rcp85.95$y, 
+                                           "pred.95" = sdm.2055.rcp85.pct95.p)
+  
+  # Biomass
+  sdm.map.base.b <- data.frame("x" = base.preds$Data[[match(season, base.preds$season)]]$x, "y" = base.preds$Data[[match(season, base.preds$season)]]$y, "pred" = sdm.base.b)
+  sdm.map.2055.rcp85.mu.b <- data.frame("x" = newdat.2055.rcp85.mu$x, 
+                                        "y" = newdat.2055.rcp85.mu$y, 
+                                        "pred" = sdm.2055.rcp85.mu.b)
+  sdm.map.2055.rcp85.pct05.b <- data.frame("x" = newdat.2055.rcp85.05$x, 
+                                           "y" = newdat.2055.rcp85.05$y, 
+                                           "pred.05" = sdm.2055.rcp85.pct05.b)
+  sdm.map.2055.rcp85.pct95.b <- data.frame("x" = newdat.2055.rcp85.95$x, 
+                                           "y" = newdat.2055.rcp85.95$y, 
+                                           "pred.95" = sdm.2055.rcp85.pct95.b)
+  # Differences
+  sdm.diff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.mu.p$x, 
+                                      "y" = sdm.map.2055.rcp85.mu.p$y, 
+                                      "pred" = sdm.map.2055.rcp85.mu.p$pred - sdm.map.base.p$pred)
+  sdm.lwr.diff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.pct05.p$x, 
+                                          "y" = sdm.map.2055.rcp85.pct05.p$y, 
+                                          "pred" = sdm.map.2055.rcp85.pct05.p$pred - sdm.map.base.p$pred)
+  sdm.upr.diff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.pct95.p$x, 
+                                          "y" = sdm.map.2055.rcp85.pct95.p$y, 
+                                          "pred" = sdm.map.2055.rcp85.pct95.p$pred - sdm.map.base.p$pred)
+ 
+  # Percent Differences
+  sdm.percdiff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.mu.p$x, 
+                                          "y" = sdm.map.2055.rcp85.mu.p$y, 
+                                          "pred" = 100*((sdm.map.2055.rcp85.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.lwr.percdiff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.pct05.p$x, 
+                                              "y" = sdm.map.2055.rcp85.pct05.p$y, 
+                                              "pred" = 100*((sdm.map.2055.rcp85.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.upr.percdiff.2055.rcp85.p <- data.frame("x" = sdm.map.2055.rcp85.pct95.p$x, 
+                                              "y" = sdm.map.2055.rcp85.pct95.p$y, 
+                                              "pred" = 100*((sdm.map.2055.rcp85.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+ 
+  names(sdm.map.base.p)[3]                <- "Baseline.sdm.p"
+  names(sdm.map.2055.rcp85.mu.p)[3]       <- "Future_2055_rcp85_mean.sdm.p"
+  names(sdm.map.2055.rcp85.pct05.p)[3]    <- "Future_2055_rcp85_pct05.sdm.p"
+  names(sdm.map.2055.rcp85.pct95.p)[3]    <- "Future_2055_rcp85_pct95.sdm.p"
+  names(sdm.diff.2055.rcp85.p)[3]         <- "Future_2055_rcp85_mean_diff.sdm.p"
+  names(sdm.lwr.diff.2055.rcp85.p)[3]     <- "Future_2055_rcp85_pct05_diff.sdm.p"
+  names(sdm.upr.diff.2055.rcp85.p)[3]     <- "Future_2055_rcp85_pct95_diff.sdm.p"
+  names(sdm.percdiff.2055.rcp85.p)[3]     <- "Future_2055_rcp85_mean_percdiff.sdm.p"
+  names(sdm.lwr.percdiff.2055.rcp85.p)[3] <- "Future_2055_rcp85_pct05_percdiff.sdm.p"
+  names(sdm.upr.percdiff.2055.rcp85.p)[3] <- "Future_2055_rcp85_pct95_percdiff.sdm.p"
+  
+  # Biomass
+  sdm.diff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.mu.b$x, 
+                                      "y" = sdm.map.2055.rcp85.mu.b$y,
+                                      "pred" = sdm.map.2055.rcp85.mu.b$pred - sdm.map.base.b$pred)
+  sdm.lwr.diff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.pct05.b$x,
+                                          "y" = sdm.map.2055.rcp85.pct05.b$y, 
+                                          "pred" = sdm.map.2055.rcp85.pct05.b$pred - sdm.map.base.b$pred)
+  sdm.upr.diff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.pct95.b$x, 
+                                          "y" = sdm.map.2055.rcp85.pct95.b$y, 
+                                          "pred" = sdm.map.2055.rcp85.pct95.b$pred - sdm.map.base.b$pred)
+ 
+  # Percent Differences
+  sdm.percdiff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.mu.b$x, 
+                                          "y" = sdm.map.2055.rcp85.mu.b$y, 
+                                          "pred" = 100*((sdm.map.2055.rcp85.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.lwr.percdiff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.pct05.b$x, 
+                                              "y" = sdm.map.2055.rcp85.pct05.b$y, 
+                                              "pred" = 100*((sdm.map.2055.rcp85.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.upr.percdiff.2055.rcp85.b <- data.frame("x" = sdm.map.2055.rcp85.pct95.b$x, 
+                                              "y" = sdm.map.2055.rcp85.pct95.b$y, 
+                                              "pred" = 100*((sdm.map.2055.rcp85.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+ 
+  names(sdm.map.base.b)[3]                <- "Baseline.sdm.b"
+  names(sdm.map.2055.rcp85.mu.b)[3]       <- "Future_2055_rcp85_mean.sdm.b"
+  names(sdm.map.2055.rcp85.pct05.b)[3]    <- "Future_2055_rcp85_pct05.sdm.b"
+  names(sdm.map.2055.rcp85.pct95.b)[3]    <- "Future_2055_rcp85_pct95.sdm.b"
+  names(sdm.diff.2055.rcp85.b)[3]         <- "Future_2055_rcp85_mean_diff.sdm.b"
+  names(sdm.lwr.diff.2055.rcp85.b)[3]     <- "Future_2055_rcp85_pct05_diff.sdm.b"
+  names(sdm.upr.diff.2055.rcp85.b)[3]     <- "Future_2055_rcp85_pct95_diff.sdm.b"
+  names(sdm.percdiff.2055.rcp85.b)[3]     <- "Future_2055_rcp85_mean_percdiff.sdm.b"
+  names(sdm.lwr.percdiff.2055.rcp85.b)[3] <- "Future_2055_rcp85_pct05_percdiff.sdm.b"
+  names(sdm.upr.percdiff.2055.rcp85.b)[3] <- "Future_2055_rcp85_pct95_percdiff.sdm.b"
+  
+  projections.dat <- sdm.map.base.p %>%
+    left_join(sdm.map.2055.rcp85.mu.p, by = c("x", "y")) %>%
+    left_join(sdm.map.2055.rcp85.pct05.p, by = c("x", "y")) %>%
+    left_join(sdm.map.2055.rcp85.pct95.p, by = c("x", "y")) %>%
+    left_join(sdm.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.lwr.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.upr.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.lwr.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.upr.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(sdm.map.base.b, by = c("x", "y")) %>%
+    left_join(sdm.map.2055.rcp85.mu.b, by = c("x", "y")) %>%
+    left_join(sdm.map.2055.rcp85.pct05.b, by = c("x", "y")) %>%
+    left_join(sdm.map.2055.rcp85.pct95.b, by = c("x", "y")) %>%
+    left_join(sdm.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(sdm.lwr.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(sdm.upr.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(sdm.percdiff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(sdm.lwr.percdiff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(sdm.upr.percdiff.2055.rcp85.b, by = c("x", "y"))
+  
+  projections.dat$comname <- spp
+  projections.dat$season <- season
+  
+  projections.dat <- projections.dat %>%
+    gather("Proj.Class", "Projection", -x, -y, -comname, -season) %>%
+    group_by(comname, season, Proj.Class) %>%
+    nest(.key = "Projections")
+    
+  if(i == 1){
+    result <- projections.dat
+    print(paste(spp, season, "is done!", sep = " "))
+  } else {
+    result <- bind_rows(result, projections.dat)
+    print(paste(spp, season, "is done!", sep = " "))
+  }
+}
+#saveRDS(result, file = paste0(proj.path, "Results/SDMPredictions.rds"))
+```
+
+# Results
+
+
+## Historical and projected time series temperature time series plots under the RCP8.5 climate scenario for the southern Bay of Fundy and Nova Scotia
+
+```{r}
+# Read in the RDS climate model projections data -- change this path!!
+clim.out <- readRDS("~/Box/RES_Data/CMIP5_SST/ProcessedSSTProjections_ECW.rds")
+# Mean, rcp45 and rcp85
+clim.summs <- clim.out %>%
+  separate(Year, into = c("Year", "Month", "Day"), "-") %>%
+  group_by(Scenario, Year, Month, x, y) %>%
+  summarize("Mean" = mean(SST, na.rm = TRUE),
+            "Pct5th" = quantile(SST, probs = c(0.05), na.rm = TRUE, names = FALSE),
+            "Pct95th" = quantile(SST, probs = c(0.95), na.rm = TRUE, names = FALSE))
+if(FALSE){
+  # write_csv(temp, paste0(proj.path, "Results/CMIP5Projections.csv"))
+}
+clim.summs <- clim.summs %>%
+  group_by(Scenario, Year, Month) %>%
+  nest()
+
+# Create some masks...
+gom <- st_read(paste0(res.data.path, "Shapefiles/GulfOfMainePhysioRegions/PhysioRegions_WGS84.shp"))
+bof <- gom %>%
+  filter(Region %in% c("Bay of Fundy")) %>%
+  st_union()
+scotianshelf <- gom %>%
+  filter(Region %in% c("Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf")) %>%
+  st_union()
+gom <- gom %>%
+  filter(Region %in% c("Northern Coastal Shelf", "Browns Bank", "Wikinson Basin", "Jordan Basin", "Georges Basin", "Georges Bank", "Central Gulf of Maine")) %>%
+  st_union()
+
+# dataframe to raster function
+df_to_rast <- function(df, stat, mask.use) {
+  if(FALSE){
+    df <- clim.summs$data[[1]]
+    stat <- "Mean"
+    mask.use <- scotianshelf
+  }
+  
+  df.temp <- df %>%
+    dplyr::select(x, y, stat)
+  
+  rast.temp <- rasterFromXYZ(df.temp)
+  rast.out <- raster::mask(rast.temp, mask = as_Spatial(st_zm(mask.use)))
+  return(rast.out)
+}
+
+clim.summs <- clim.summs %>%
+  mutate("RasterStack.BoF.Mean"  = pmap(list(df = data, stat = "Mean", mask.use = list(bof)), df_to_rast),
+         "RasterStack.BoF.Pct05" = pmap(list(df = data, stat = "Pct5th", mask.use = list(bof)), df_to_rast),
+         "RasterStack.BoF.Pct95" = pmap(list(df = data, stat = "Pct95th", mask.use = list(bof)), df_to_rast),
+         "RasterStack.SS.Mean"   = pmap(list(df = data, stat = "Mean", mask.use = list(scotianshelf)), df_to_rast),
+         "RasterStack.SS.Pct05"  = pmap(list(df = data, stat = "Pct5th", mask.use = list(scotianshelf)), df_to_rast),
+         "RasterStack.SS.Pct95"  = pmap(list(df = data, stat = "Pct95th", mask.use = list(scotianshelf)), df_to_rast),
+         "RasterStack.GoM.Mean"  = pmap(list(df = data, stat = "Mean", mask.use = list(gom)), df_to_rast),
+         "RasterStack.GoM.Pct05" = pmap(list(df = data, stat = "Pct5th", mask.use = list(gom)), df_to_rast),
+         "RasterStack.GoM.Pct95" = pmap(list(df = data, stat = "Pct95th", mask.use = list(gom)), df_to_rast))
+
+rcp85 <- clim.summs %>%
+  dplyr::filter(Scenario == "RCP85" & Year <= 2100)
+
+rcp45 <- clim.summs %>%
+  dplyr::filter(Scenario == "RCP45" & Year <= 2100)
+
+# Plotting...
+# Running test to see how this behaves if it just had one region and the three runs...
+plots.out <- vector("list", 3)
+regions <- c("GoM", "BoF", "SS")
+for(i in seq_along(regions)){
+  
+  # Select the region and get the data
+  region.use <- regions[i]
+  col.names <- colnames(rcp85)[c(1:4, which(grepl(region.use, colnames(rcp85)), arr.ind = TRUE))]
+  stack85.sub <- dplyr::select(rcp85, one_of(col.names))
+  stack45.sub <- dplyr::select(rcp45, one_of(col.names))
+  
+  # Processing to get ready for plotting
+  mean.ind  <- which(grepl("Mean", colnames(stack85.sub)), arr.ind = TRUE)
+  pct05.ind <- which(grepl("05", colnames(stack85.sub)), arr.ind = TRUE)
+  pct95.ind <- which(grepl("95", colnames(stack85.sub)), arr.ind = TRUE)
+  
+  rcp85.mu <- raster::stack(stack85.sub[[mean.ind]])
+  names(rcp85.mu) <- paste(stack85.sub$Year, stack85.sub$Month, sep = ".")
+  rcp85.5th <- raster::stack(stack85.sub[[pct05.ind]])
+  names(rcp85.5th) <- paste(stack85.sub$Year, stack85.sub$Month, sep = ".")
+  rcp85.95th <- raster::stack(stack85.sub[[pct95.ind]])
+  names(rcp85.95th) <- paste(stack85.sub$Year, stack85.sub$Month, sep = ".")
+  
+  rcp45.mu <- raster::stack(stack45.sub[[mean.ind]])
+  names(rcp45.mu) <- paste(stack45.sub$Year, stack45.sub$Month, sep = ".")
+  rcp45.5th <- raster::stack(stack45.sub[[pct05.ind]])
+  names(rcp45.5th) <- paste(stack45.sub$Year, stack45.sub$Month, sep = ".")
+  rcp45.95th <- raster::stack(stack45.sub[[pct95.ind]])
+  names(rcp45.95th) <- paste(stack45.sub$Year, stack45.sub$Month, sep = ".")
+  
+  rcp85.mu.df <- as.data.frame(rcp85.mu, xy = TRUE) %>%
+    gather("Year", "SST.Mean", -x, -y)
+  rcp85.5th.df <- as.data.frame(rcp85.5th, xy = TRUE) %>%
+    gather("Year", "SST.pct5th", -x, -y)
+  rcp85.95th.df <- as.data.frame(rcp85.95th, xy = TRUE) %>%
+    gather("Year", "SST.pct95th", -x, -y)
+  
+  rcp85.df.all <- rcp85.mu.df
+  rcp85.df.all$SST.pct5th <- rcp85.5th.df$SST.pct5th
+  rcp85.df.all$SST.pct95th <- rcp85.95th.df$SST.pct95th
+  
+  rcp85.df.all$Year <- gsub("X", "", gsub("[.]", "-", rcp85.df.all$Year))
+  rcp85.df.all <- rcp85.df.all %>%
+    separate(Year, into = c("Year", "Month", "Day")) %>%
+    group_by(Year, Month) %>%
+    summarize("SST.Mean" = mean(SST.Mean, na.rm = TRUE),
+              "SST.pct5th" = mean(SST.pct5th, na.rm = TRUE),
+              "SST.pct95th" = mean(SST.pct95th, na.rm = TRUE))
+  rcp85.df.all$Scenario <- rep("RCP85", nrow(rcp85.df.all))
+  
+  rcp45.mu.df <- as.data.frame(rcp45.mu, xy = TRUE) %>%
+    gather("Year", "SST.Mean", -x, -y)
+  rcp45.5th.df <- as.data.frame(rcp45.5th, xy = TRUE) %>%
+    gather("Year", "SST.pct5th", -x, -y)
+  rcp45.95th.df <- as.data.frame(rcp45.95th, xy = TRUE) %>%
+    gather("Year", "SST.pct95th", -x, -y)
+  
+  rcp45.df.all <- rcp45.mu.df
+  rcp45.df.all$SST.pct5th <- rcp45.5th.df$SST.pct5th
+  rcp45.df.all$SST.pct95th <- rcp45.95th.df$SST.pct95th
+  
+  rcp45.df.all$Year <- gsub("X", "", gsub("[.]", "-", rcp45.df.all$Year))
+  rcp45.df.all <- rcp45.df.all %>%
+    separate(Year, into = c("Year", "Month", "Day")) %>%
+    group_by(Year, Month) %>%
+    summarize("SST.Mean" = mean(SST.Mean, na.rm = TRUE),
+              "SST.pct5th" = mean(SST.pct5th, na.rm = TRUE),
+              "SST.pct95th" = mean(SST.pct95th, na.rm = TRUE))
+  rcp45.df.all$Scenario <- rep("RCP45", nrow(rcp45.df.all))
+  
+  rcp.all <- bind_rows(rcp85.df.all, rcp45.df.all)
+  rcp.all$Scenario <- factor(rcp.all$Scenario, levels = c("RCP85", "RCP45"))
+  
+  # Plot, raw temps
+  rcp.all$Plot.Date <- as.Date(paste(rcp.all$Year, rcp.all$Month, "15", sep = "-"))
+  rcp.all <- rcp.all %>%
+    dplyr::filter(Plot.Date < "2100-01-15")
+  
+  rcp.plot <- rcp.all %>%
+    group_by(Year, Scenario) %>%
+    summarize(SST.YrMean = mean(SST.Mean, na.rm = TRUE),
+              SST.Yrpct5th = mean(SST.pct5th, na.rm = TRUE),
+              SST.Yrpct95th = mean(SST.pct95th, na.rm = TRUE))
+  rcp.plot$Region <- rep(region.use, nrow(rcp.plot))
+  
+  # Storing results
+  if(i == 1){
+    rcp.data <- rcp.plot
+  } else {
+    rcp.data <- bind_rows(rcp.data, rcp.plot)
+  }
+  
+  # Title
+  ggtitle.use <- switch(region.use,
+                     "GoM" = "Gulf of Maine",
+                     "BoF" = "Bay of Fundy", 
+                     "SS" = "Scotian Shelf")
+  
+  rcp85plot <- rcp.plot %>%
+    filter(Scenario == "RCP85")
+  rcp85plot$Year.Model <- as.integer(rcp85plot$Year) - 1982
+   rcp85.trend <- lm(SST.YrMean ~ Year.Model, data = rcp85plot)
+   rcp85.summ <- summary(rcp85.trend)
+   rcp85.adj.r2.full <- paste0("Adj R2 = ", round(summary(rcp85.trend)$adj.r.squared, 3))
+   # Fitted model formula
+   rcp85.my.formula.full <- paste0("RCP85 Mean SST = ", signif(round(rcp85.trend$coef[[1]], 3), 5), " + ", signif(round(rcp85.trend$coef[[2]], 3), 5), "*Year")
+  
+   rcp45plot <- rcp.plot %>%
+    filter(Scenario == "RCP45")
+  rcp45plot$Year.Model <- as.integer(rcp45plot$Year) - 1982
+  rcp45.trend <- lm(SST.YrMean ~ Year.Model, data = rcp45plot)
+   rcp45.summ <- summary(rcp45.trend)
+   rcp45.adj.r2.full <- paste0("Adj R2 = ", round(summary(rcp45.trend)$adj.r.squared, 3))
+   # Fitted model formula
+   rcp45.my.formula.full <- paste0("RCP45 Mean SST = ", signif(round(rcp45.trend$coef[[1]], 3), 5), " + ", signif(round(rcp45.trend$coef[[2]], 3), 5), "*Year")
+  
+  plots.out[[i]] <- ggplot() + 
+    geom_vline(xintercept = 2020, lty = "dashed") +
+    geom_line(data = rcp.plot, aes(x = as.numeric(Year), y = SST.YrMean, color = Scenario)) +
+    geom_ribbon(data = rcp.plot, aes(x = as.numeric(Year), ymin = SST.Yrpct5th, ymax = SST.Yrpct95th, fill = Scenario), alpha=0.15) +
+    scale_color_manual(name = "Scenario", values = c("#e31a1c", "#1f78b4")) +
+    scale_fill_manual(name = "Scenario", values = c("#e31a1c", "#1f78b4")) +
+    #geom_text(aes(x = 2060, y = 7.5, label = rcp85.my.formula.full), col = "#969696") +
+    #geom_text(aes(x = 2060, y = 6.5, label = rcp45.my.formula.full), col = "#969696") +
+    labs(x = "Year", y = "Ensemble Projected SST", fill = "Scenario") +
+    xlim(c(1982, 2100)) +
+    ylim(c(6, 18.5)) +
+    theme(strip.background = element_blank(), panel.background = element_rect(fill = NA)) + 
+    ggtitle(ggtitle.use)
+}
+plot.out <- plots.out[[1]] + plots.out[[2]] + plots.out[[3]] + plot_layout(nrow = 1, guides = "collect")
+# ggsave(paste0(proj.path, "Results/CMIPSSTProjections.jpg"), width = 11, height = 8)
+
+# Save the csv
+# write_csv(rcp.data, paste0(proj.path, "Results/CMIPSSTProjections.csv"))
+```
+
+## Mid-century (2055) species probability of presence and relative biomass projections under the RCP8.5 scenario in the souther Bay of Fundy and Nova Scotia waters
+```{r}
+# Manuscript Figures — Study area map --------------------------------------
+# Spatial projections
+proj.wgs84 <- CRS("+init=epsg:4326") #WGS84
+proj.utm <- CRS("+init=epsg:2960") #UTM 19
+gom <- st_read(paste0(res.data.path, "Shapefiles/GulfOfMainePhysioRegions/PhysioRegions_WGS84.shp")) %>%
+  filter(!Region %in% c("Continental Slope", "Bear Seamount", "Kelvin Seamount", "Manning Seamount"))
+bof.ss <- gom %>%
+  filter(Region %in% c("Bay of Fundy", "Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf", "Browns Bank")) %>%
+  st_union()
+bof.ss.plot <- st_difference(bof.ss, nelme)
+gom.add <- gom %>%
+  filter(!Region %in% c("Bay of Fundy", "Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf", "Browns Bank"))
+nelme <- st_read(paste0(res.data.path, "Shapefiles/NELME_regions/NELME_sf.shp")) %>%
+  st_union(gom.add)
+nelme.plot <- st_difference(nelme, bof.ss)
+bstrat <- st_read(paste0(res.data.path, "Shapefiles/BottomTrawlStrata/BTS_Strata.shp")) 
+bstrat <- bstrat %>%
+  filter(STRATA <= 3990)
+#Bounds
+xmin.use <- -77
+xmax.use <- -62.5
+ymin.use <- 34
+ymax.use <- 46.5
+xlim.use <- c(xmin.use, xmax.use)
+ylim.use <- c(ymin.use, ymax.use)
+states <- c("Maine", "New Hampshire", "Massachusetts", "Vermont", "New York", "Rhode Island", "Connecticut", "Delaware", "New Jersey", "Maryland", "Pennsylvania", "Virginia", "North Carolina", "South Carolina", "Georgia", "Florida", "District of Columbia", "West Virgina")
+provinces <- c("Ontario", "Québec", "Nova Scotia", "New Brunswick")
+us <- raster::getData("GADM",country="USA",level=1)
+us.states <- us[us$NAME_1 %in% states,]
+us.states <- gSimplify(us.states, tol=0.01, topologyPreserve=TRUE)
+us.states <- st_as_sf(us.states)
+canada <- raster::getData("GADM",country="CAN",level=1)
+ca.provinces <- canada[canada$NAME_1 %in% provinces,]
+ca.provinces <- gSimplify(ca.provinces, tol=0.01, topologyPreserve=TRUE)
+ca.provinces <- st_as_sf(ca.provinces)
+us.states.f <- fortify(us.states, NAME_1)
+ca.provinces.f <- fortify(ca.provinces, NAME_1)
+# Alright, plot time
+plot.out <- ggplot() + 
+  geom_sf(data = us.states, fill = "white", lwd = 0.4, show.legend = FALSE) +
+  geom_sf(data = ca.provinces.f, fill = "white", lwd = 0.4, show.legend = FALSE) +
+    geom_sf(data = bof.ss, aes(fill = "#377eb8"), color = NA, alpha = 0.75, show.legend = TRUE) +
+  geom_sf(data = nelme.plot, aes(fill = "#4daf4a"), color = NA, alpha = 0.75, show.legend = TRUE) +
+  geom_sf(data = bstrat, fill = NA, color = "black", show.legend = FALSE) + 
+  scale_fill_manual(name = "Region", values = c("#377eb8", "#ff7f00"), labels = c("Bay of Fundy/Nova Scotia", "Northeast Shelf U.S. Large Marine Ecosystem")) +
+  xlim(xlim.use) +
+  ylim(ylim.use) +
+  theme(panel.background = element_rect(fill = "white", color = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.background = element_rect(fill="white", color = "black"))
+#ggsave(paste0(proj.path, "Results/StudyArea.jpg"), plot.out, width = 8, height = 11, dpi = 400)
+
+# Results — Filtering, always run -----------------------------------------------
+
+# Real data
+mod.res <- read_csv(paste0(proj.path, "Results/mod.results.csv")) %>%
+  drop_na(RMSE.SDM.B, CorrCoeff.SDM.B, Bias.SDM.B)
+
+# Exploring cut offs... AUC > 0.7 in both seasons
+mod.spp.keep <- mod.res %>%
+  filter(AUC.SDM >= 0.65 & CorrCoeff.SDM.B >= 0) %>%
+  group_by(comname) %>%
+  summarize_at(vars(season), n_distinct) %>%
+  filter(season == 2)
+mod.res <- mod.res %>%
+  filter(comname %in% mod.spp.keep$comname)
+# Results — Taylor diagrams -----------------------------------------------
+# Getting maxSD for plotting
+maxsd <- max(mod.res$Bias.SDM.B, 1)
+sd.r <- 1
+# Empty plot first
+# Creating empty plot first
+plot.base <- ggplot() + 
+  scale_x_continuous(name = "Standard deviation (normalized)", limits = c(0, maxsd), breaks = seq(from = 0, to = maxsd, by = 0.5)) +
+  scale_y_continuous(name = "Standard deviation (normalized)", limits = c(0, maxsd), breaks = seq(from = 0, to = maxsd, by = 0.5)) +
+  theme_classic()
+# Coeff D rays 
+grad.corr.lines = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+for(i in 1:length(grad.corr.lines)){
+  x.vec <- c(0, maxsd*grad.corr.lines[i])
+  y.vec <- c(0, maxsd*sqrt(1 - grad.corr.lines[i]^2))
+  
+  if(i ==1){
+    coeffd.rays.df <- data.frame("Ray" = rep(1, length(x.vec)), "x" = x.vec, "y" = y.vec)
+  } else {
+    temp <- data.frame("Ray" = rep(i, length(x.vec)), "x" = x.vec, "y" = y.vec)
+    coeffd.rays.df <- bind_rows(coeffd.rays.df, temp)
+  }
+}
+# Add rays
+plot.coeffd <- plot.base +
+  geom_line(data = coeffd.rays.df, aes(x = x, y = y, group = Ray), lty = "longdash", col = "lightgray")
+coeffd.labs <- coeffd.rays.df %>%
+  group_by(Ray) %>%
+  summarize(
+            "x" = max(x, na.rm = TRUE), 
+            "y" = max(y, na.rm = TRUE)) %>%
+  data.frame()
+coeffd.labs$Label <- grad.corr.lines
+plot.coeffd <- plot.coeffd +
+  geom_label(data = coeffd.labs, aes(x = x, y = y, label = Label), color = "gray", fill = "white", label.size = NA)
+# SD arcs
+# Need to add in SD arcs
+sd.arcs <- seq(from = 0, to = maxsd, by = 0.5)
+for(i in 1:length(sd.arcs)){
+  x.vec <- sd.arcs[i]*cos(seq(0, pi/2, by = 0.03))
+  y.vec <- sd.arcs[i]*sin(seq(0, pi/2, by = 0.03))
+  
+  if(i ==1){
+    sd.arcs.df <- data.frame("Arc" = rep(sd.arcs[1], length(x.vec)), "x" = x.vec, "y" = y.vec)
+  } else {
+    temp <- data.frame("Arc" = rep(sd.arcs[i], length(x.vec)), "x" = x.vec, "y" = y.vec)
+    sd.arcs.df <- bind_rows(sd.arcs.df, temp)
+  }
+}
+# Add arcs to plot.base
+plot.sd <- plot.coeffd +
+  geom_line(data = sd.arcs.df, aes(x = x, y = y, group = Arc), lty = "dotted", color = "lightgray") 
+# Now gamma? -- Standard deviation arcs around the reference point
+gamma <- pretty(c(0, maxsd), n = 4)[-1]
+gamma <- gamma[-length(gamma)]
+labelpos <- seq(45, 70, length.out = length(gamma))
+for(gindex in 1:length(gamma)) {
+  xcurve <- cos(seq(0, pi, by = 0.03)) * gamma[gindex] + sd.r
+  endcurve <- which(xcurve < 0)
+  endcurve <- ifelse(length(endcurve), min(endcurve) - 1, 105)
+  ycurve <- sin(seq(0, pi, by = 0.03)) * gamma[gindex]
+  maxcurve <- xcurve * xcurve + ycurve * ycurve
+  startcurve <- which(maxcurve > maxsd * maxsd)
+  startcurve <- ifelse(length(startcurve), max(startcurve) + 1, 0)
+  x.vec <- xcurve[startcurve:endcurve]
+  y.vec <- ycurve[startcurve:endcurve]
+  
+  if(gindex ==1){
+    gamma.df <- data.frame("Gamma" = rep(gamma[1], length(x.vec)), "x" = x.vec, "y" = y.vec)
+  } else {
+    temp <- data.frame("Gamma" = rep(gamma[gindex], length(x.vec)), "x" = x.vec, "y" = y.vec)
+    gamma.df <- bind_rows(gamma.df, temp)
+  }
+}
+gamma.df$Gamma <- factor(gamma.df$Gamma, levels = unique(gamma.df$Gamma))
+# Add em
+plot.gamma <- plot.sd +
+  geom_line(data = gamma.df, aes(x = x, y = y, group = Gamma), lty = "solid", col = "lightgray")
+# Label...
+gamma.labs <- gamma.df %>%
+  group_by(Gamma) %>%
+  summarize("x" = mean(x, na.rm = TRUE), 
+            "y" = median(y, na.rm = TRUE))
+plot.gamma <- plot.gamma +
+  geom_label(data = gamma.labs, aes(x = x, y = y, label = Gamma), color = "gray", fill = "white", label.size = NA)
+
+# Add in reference point
+plot.all <- plot.gamma +
+  geom_point(aes(x = sd.r, y = 0), color = "black", size = 2.75)
+
+# Add in species points
+mod.results.td <- mod.res %>%
+  mutate("TD.X" = Bias.SDM.B * CorrCoeff.SDM.B,
+         "TD.Y" = Bias.SDM.B * sin(acos(CorrCoeff.SDM.B)))
+
+# Join with functional groups
+func.groups <- read.csv(paste0(proj.path, "Data/JHareSppFunctionalGroup.csv"))
+func.groups$comname <- toupper(func.groups$comname)
+mod.results.td <- mod.results.td %>%
+  left_join(func.groups)
+mod.results.td$comname <- to_sentence_case(mod.results.td$comname)
+
+# Faceting isn't working and not sure why...loop?
+func.groups <- c("Groundfish", "Pelagic", "Coastal", "Invertebrates", "Diadromous", "Elasmobranch")
+plots.out.f <- vector("list", length(func.groups))
+plots.out.s <- vector("list", length(func.groups))
+# Colors stuff -- what is the highest number we will need?
+colors.max <- mod.results.td %>%
+  group_by(season, Functional.Group) %>%
+  summarize("Rows" = n())
+colors.n <- max(colors.max$Rows)
+colors <- distinctColorPalette(colors.n)
+for(i in seq_along(func.groups)){
+  group.use <- func.groups[i]
+  dat.use.f <- mod.results.td %>%
+    filter(season == "FALL" & as.character(Functional.Group) == group.use)
+  dat.use.s <- mod.results.td %>%
+    filter(season == "SPRING" & as.character(Functional.Group) == group.use)
+  
+  if(length(unique(dat.use.f$comname)) == length(colors)){
+    colors.use <- colors
+  } else {
+    colors.use <- sample(colors, length(unique(dat.use.f$comname)))
+  }
+ 
+  plots.out.f[[i]] <- plot.all +
+    geom_point(data = dat.use.f, aes(x = TD.X, y = TD.Y, fill = comname), pch = 21, alpha = 0.85, size = 2.75) +
+    scale_fill_manual(name = "Species", values = colors.use) +
+    geom_text(aes(label = "Correlation coefficient", x = 0.75, y = 0.75), angle = -45)
+  plots.out.s[[i]] <- plot.all +
+    geom_point(data = dat.use.s, aes(x = TD.X, y = TD.Y, fill = comname), pch = 21, alpha = 0.85, size = 2.75) +
+    scale_fill_manual(name = "Species", values = colors.use) +
+    geom_text(aes(label = "Correlation coefficient", x = 0.75, y = 0.75), angle = -45)
+  print(i)
+}
+
+# Arrange in a grid
+out.f <- plot_grid(plots.out.f[[1]], plots.out.f[[2]], plots.out.f[[3]], plots.out.f[[4]], plots.out.f[[5]], plots.out.f[[6]], nrow = 2, labels = func.groups, label_x = 0.25, label_y = 1)
+#ggplot2::ggsave(filename = paste0(proj.path, "Results/FallTaylorDiagram", ".jpg"), plot = out.f, width = 18, height = 10, units = "in")
+out.s <- plot_grid(plots.out.s[[1]], plots.out.s[[2]], plots.out.s[[3]], plots.out.s[[4]], plots.out.s[[5]], plots.out.s[[6]], nrow = 2, labels = func.groups, label_x = 0.25, label_y = 1)
+#ggplot2::ggsave(filename = paste0(proj.path, "Results/SpringTaylorDiagram", ".jpg"), plot = out.s, width = 18, height = 10, units = "in")
+
+
+# Results — SDM shelfwide and regional changes ----------------------------
+# Read in projections
+results <- read_rds(paste0(proj.path, "Results/SDMPredictions.rds")) # This should have everything we need. 
+
+# Filter species 
+dat.sub <- results %>%
+  filter(comname %in% mod.res$comname)
+dat.full <- dat.sub
+
+# Save results
+if(FALSE){
+  preds.out.temp <- dat.full %>%
+    unnest() 
+  preds.out <- preds.out.temp %>%
+    spread(Proj.Class, Projection) %>%
+    dplyr::select(comname, season, x, y, Baseline.sdm.p, Baseline.sdm.b, Future_2055_rcp85_mean.sdm.p, Future_2055_rcp85_mean.sdm.b, Future_2055_rcp85_pct05.sdm.p, Future_2055_rcp85_pct05.sdm.b, Future_2055_rcp85_pct95.sdm.p, Future_2055_rcp85_pct95.sdm.b)
+  # write_csv(preds.out, paste0(proj.path, "Results/SDMPredictions.csv"))
+}
+
+# Spatial projections
+proj.wgs84 <- CRS("+init=epsg:4326") #WGS84
+proj.utm <- CRS("+init=epsg:2960") #UTM 19
+
+# NELME, GoM and Southern New England-Mid Atlantic Bight Regions
+nelme <- as(st_read(paste0(res.data.path, "Shapefiles/NELME_regions/NELME_sf.shp")), "Spatial")
+gom <- st_read(paste0(res.data.path, "Shapefiles/GulfOfMainePhysioRegions/PhysioRegions_WGS84.shp"))
+bof.ss <- gom %>%
+  filter(Region %in% c("Bay of Fundy", "Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf")) %>%
+  st_union() 
+bof.ss <- sf::as_Spatial(st_zm(bof.ss))
+
+# For these changes, don't want to use the cell by cell differences or percent differences...
+dat.sub <- dat.full[-which(grepl("diff", dat.full$Proj.Class)),] 
+
+# Overlay func
+overlay_func <- function(df, region, proj.use = proj4string(nelme)){
+  dat.use <- data.frame(df)
+  pts.temp <- dat.use
+  coordinates(pts.temp) <- ~x+y
+  proj4string(pts.temp) <- proj.use
+  
+  region.avg <- switch(region,
+         NELME = mean(data.frame(pts.temp[!is.na(over(pts.temp, as(nelme, "SpatialPolygons"))),])[,3], na.rm = T),
+         CA = mean(data.frame(pts.temp[!is.na(over(pts.temp, as(bof.ss, "SpatialPolygons"))),])[,3], na.rm = T))
+  return(region.avg)
+}
+preds.df.sub <- dat.sub %>%
+  mutate("NELME.Mean" = purrr::map2(Projections, list("NELME"), possibly(overlay_func, NA)),
+         "CA.Mean" = purrr::map2(Projections, list("CA"), possibly(overlay_func, NA)))
+
+# Now, we want regional differences (raw and percentages)...
+preds.df.sub <- preds.df.sub %>%
+  ungroup() %>%
+  dplyr::select(comname, season, Proj.Class, NELME.Mean, CA.Mean) %>%
+  gather(Region, Projections, -comname, -season, -Proj.Class) %>%
+  mutate(Proj.ClassandRegion = paste(Proj.Class, Region, sep = "_")) %>%
+  dplyr::select(comname, season, Proj.ClassandRegion, Projections) %>%
+  spread(Proj.ClassandRegion, Projections) %>%
+  mutate_if(is.list, as.numeric) %>%
+  mutate("NELME.2055.rcp85.Mean.Change.mu.b" = Future_2055_rcp85_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+         "NELME.2055.rcp85.Mean.Change.pct95.b" = Future_2055_rcp85_pct95.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+         "NELME.2055.rcp85.Mean.Change.pct05.b" = Future_2055_rcp85_pct05.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+         "NELME.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(NELME.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+         "NELME.2055.rcp85.Mean.Perc.Change.pct95.b" = 100*(NELME.2055.rcp85.Mean.Change.pct95.b/Baseline.sdm.b_NELME.Mean),
+         "NELME.2055.rcp85.Mean.Perc.Change.pct05.b" = 100*(NELME.2055.rcp85.Mean.Change.pct05.b/Baseline.sdm.b_NELME.Mean),
+         "CA.2055.rcp85.Mean.Change.mu.b" = Future_2055_rcp85_mean.sdm.b_CA.Mean - Baseline.sdm.b_CA.Mean,
+         "CA.2055.rcp85.Mean.Change.pct95.b" = Future_2055_rcp85_pct95.sdm.b_CA.Mean - Baseline.sdm.b_CA.Mean,
+         "CA.2055.rcp85.Mean.Change.pct05.b" = Future_2055_rcp85_pct05.sdm.b_CA.Mean - Baseline.sdm.b_CA.Mean,
+         "CA.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(CA.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_CA.Mean),
+         "CA.2055.rcp85.Mean.Perc.Change.pct95.b" = 100*(CA.2055.rcp85.Mean.Change.pct95.b/Baseline.sdm.b_CA.Mean),
+         "CA.2055.rcp85.Mean.Perc.Change.pct05.b" = 100*(CA.2055.rcp85.Mean.Change.pct05.b/Baseline.sdm.b_CA.Mean))
+preds.df.sub.perc.plot <- preds.df.sub %>%
+  dplyr::select(comname, season, NELME.2055.rcp85.Mean.Perc.Change.mu.b, NELME.2055.rcp85.Mean.Perc.Change.pct95.b, NELME.2055.rcp85.Mean.Perc.Change.pct05.b, CA.2055.rcp85.Mean.Perc.Change.mu.b, CA.2055.rcp85.Mean.Perc.Change.pct95.b, CA.2055.rcp85.Mean.Perc.Change.pct05.b) %>%
+  gather("Region_Scenario", "Change", -comname, -season)
+preds.df.sub.perc.plot$Region_Only <- unlist(lapply(strsplit(preds.df.sub.perc.plot$Region_Scenario, "[.]"), "[", 1))
+preds.df.sub.perc.plot$Scenario_Only <- unlist(lapply(strsplit(sub("[.]", "*", preds.df.sub.perc.plot$Region_Scenario), "[*]"), "[", 2))
+preds.df.sub.perc.plot$Climate_Only <- ifelse(grepl("mu", preds.df.sub.perc.plot$Region_Scenario), "Mean", 
+                                             ifelse(grepl("pct95", preds.df.sub.perc.plot$Region_Scenario), "95th percentile", "5th percentile"))
+
+## Alright, we are now after a species - scenario - season - region - mean change dataframe...
+res <- preds.df.sub.perc.plot 
+res$Change[is.nan(res$Change)] <- 0
+res$Change[is.infinite(res$Change)] <- NA
+res$Change[res$Change >= 500] <- 500
+
+# Biomass shelfwide pct95 and pct05 ...
+res.plot <- res
+
+# Lets add a functional group column...
+# Merge with functional groups....
+func.groups <- read.csv(paste0(proj.path, "Data/JHareSppFunctionalGroup.csv"))
+func.groups$comname <- toupper(func.groups$comname)
+res.plot <- res.plot %>%
+  left_join(func.groups, by = "comname")
+res.plot <- res.plot[!is.na(res.plot$Functional.Group),]
+res.plot$Functional.Group <- factor(res.plot$Functional.Group, levels = c("Groundfish", "Pelagic", "Coastal", "Invertebrates", "Diadromous", "Elasmobranch"))
+res.plot <- res.plot %>%
+  dplyr::select(-Region_Scenario, -Scenario_Only) %>%
+  dplyr::arrange(comname, Functional.Group, season, Region_Only, Climate_Only, Change)
+res.plot$comname <- factor(res.plot$comname, levels = unique(res.plot$comname))
+res.plot$season <- factor(res.plot$season, levels = c("FALL", "SPRING"))
+res.plot$Climate_Only <- factor(res.plot$Climate_Only, levels = c("Mean", "95th percentile", "5th percentile"))
+res.plot$Region_Only <- factor(res.plot$Region_Only, levels = c("NELME", "CA"))
+res.plot.nelme <- res.plot %>%
+  dplyr::filter(Region_Only == "NELME")
+res.plot.ca <- res.plot %>%
+  dplyr::filter(Region_Only == "CA")
+res.plot.all <- list(res.plot.nelme, res.plot.ca)
+names(res.plot.all) <- c("NELME", "CA")
+## Climate variability across the shelf by season
+df <- data.frame(res.plot.all[[2]])
+df.null <- cbind(expand.grid(comname = levels(res.plot.nelme$comname), season = unique(res.plot.nelme$season), Climate_Only = unique(res.plot.nelme$Climate_Only), Region_Only = levels(res.plot.nelme$Region_Only), Change = NA))
+df.null <- df.null %>%
+  left_join(func.groups, by = "comname")
+df <- rbind(df[,], df.null)
+df$duplicated <- paste(df$comname, df$season, df$Climate_Only, df$Functional.Group)
+df <- df[!duplicated(df$duplicated),] %>%
+  arrange(comname, season)
+for(j in seq_along(levels(df$season))){
+  dat.use <- df %>%
+    dplyr::filter(season == levels(df$season)[j])
+  
+  dodge <- position_dodge(width = 1)
+  
+  dat.use.df <- dat.use %>%
+    tidyr::complete(comname, season)
+  dat.use.df$comname <- str_to_title(dat.use.df$comname)
+  dat.use.df$comname <- factor(dat.use.df$comname, levels = rev(unique(dat.use.df$comname)))
+  
+  dat.use.df <- dat.use.df %>%
+    drop_na(Change)
+  dat.use.df$comname.Plot <- factor(dat.use.df$comname, levels = rev(unique(dat.use.df$comname)), labels = rev(unique(to_sentence_case(as.character(dat.use.df$comname)))))
+  dat.use.df$Scenario <- ifelse(dat.use.df$Climate_Only == "5th percentile", "5th percentile",
+                               ifelse(dat.use.df$Climate_Only == "95th percentile", "95th percentile", "Mean"))
+  dat.use.df$Scenario <- factor(dat.use.df$Scenario, levels = c("5th percentile", "Mean", "95th percentile"))
+  
+  plot.out <- ggplot(data = dat.use.df, aes(x = comname.Plot, y = Change, color = Scenario)) + 
+    geom_hline(yintercept = 0, color = "#bdbdbd") +
+    geom_point(alpha = 0.7, size = 2.5) +
+    scale_color_manual("Climate Ensemble Statistic", values = c("#3182bd", "#636363", "#de2d26")) +
+    ylab("Percent change in relative biomass") + 
+    xlab("Species") +
+    ylim(c(-100, 500)) +
+    theme_bw() +
+    theme(text = element_text(size = 12),
+          strip.background = element_blank(),
+          panel.border = element_rect(colour = "black")) +
+    coord_flip() +
+    facet_wrap(~Functional.Group, scales = "free_y") +
+    ggtitle(paste(names(res.plot.all)[2], levels(df$season)[j], sep = " "))
+  
+  #ggplot2::ggsave(filename = paste0(proj.path, "Results/", names(res.plot.all)[2], levels(df$season)[j], ".jpg"), plot = plot.out, width = 11, height = 8, units = "in")
+}
+### Season, differences by region
+df <- data.frame(rbind(res.plot.all[[1]], res.plot.all[[2]]))
+df <- df %>%
+  filter(as.character(Climate_Only) == "Mean")
+df$Region_Only <- factor(df$Region_Only, levels = c("NELME", "CA"), labels = c("Northeast Shelf US Large Marine Ecosystem", "southern Bay of Fundy/Nova Scotia"))
+df.null <- cbind(expand.grid(comname = levels(df$comname), season = unique(df$season), Climate_Only = unique(df$Climate_Only), Region_Only = levels(df$Region_Only), Change = NA))
+df.null <- df.null %>%
+  left_join(func.groups, by = "comname")
+df <- rbind(df[,], df.null)
+df$duplicated <- paste(df$comname, df$season, df$Region_Only, df$Functional.Group)
+df <- df[!duplicated(df$duplicated),] %>%
+  arrange(comname, season) 
+spp.keep <- df %>%
+  group_by(comname) %>%
+  summarize_at(vars(Change), n_distinct, na.rm = T) %>%
+  filter(Change == 4) %>%
+  dplyr::select(comname)
+df <- df %>%
+  filter(as.character(comname) %in% as.character(spp.keep$comname))
+# One plot per season, regional differences
+seasons <- c("FALL", "SPRING")
+for(i in seq_along(seasons)){
+  dat.use <- df %>%
+    filter(season == seasons[i])
+  dodge <- position_dodge(width = 1)
+  
+  dat.use$comname <- str_to_title(dat.use$comname)
+  dat.use$comname <- factor(dat.use$comname, levels = rev(unique(dat.use$comname)))
+  
+  dat.use.df <- dat.use %>%
+    drop_na(Change)
+ 
+  dat.use.df$comname.Plot <- factor(dat.use.df$comname, levels = rev(unique(dat.use.df$comname)), labels = rev(unique(to_sentence_case(as.character(dat.use.df$comname)))))
+  
+  plot.means <- ggplot(data = dat.use.df, aes(x = comname.Plot, y = Change, fill = Region_Only)) + 
+    geom_bar(stat = "identity", width = 0.6, position = position_dodge(width = 0.6)) +
+    scale_fill_manual(name = "Region", values  = c("#ff7f00", "#377eb8")) +
+    ylab("Percent change in relative biomass") + 
+    xlab("Species") +
+    geom_hline(yintercept = 0) +
+    theme_bw() +
+    theme(text = element_text(size = 12),
+          strip.background = element_blank(),
+          panel.border = element_rect(colour = "black")) +
+    coord_flip() +
+    facet_wrap(~Functional.Group, scales = "free_y") +
+    guides(fill = guide_legend(reverse = TRUE)) +
+    ggtitle(paste(seasons[i], sep = " "))
+  
+  #ggplot2::ggsave(filename = paste0(proj.path, "Results/", seasons[i], ".jpg"), plot = plot.means, width = 11, height = 8, units = "in")
+}
+# Results — Projection maps ----------------------------
+proj.path <- "~/Box/Mills Lab/Projects/ECW_FishClimate/"
+preds <- dat.full
+# Spatial data components
+xmin.use <- -77
+xmax.use <- -62.5
+ymin.use <- 34
+ymax.use <- 46.5
+xlim <- c(xmin.use, xmax.use)
+ylim <- c(ymin.use, ymax.use)
+land <- st_read(paste0(res.data.path, "Shapefiles/ne_50m_land/ne_50m_land.shp")) 
+spp = c("ATLANTIC COD", "AMERICAN LOBSTER", "ATLANTIC HERRING", "LONGFIN SQUID", "SUMMER FLOUNDER", "SEA SCALLOP", "BLACK SEA BASS")
+scenarios <- c("Baseline.sdm.b", "Future_2055_rcp85_mean_diff.sdm.b")
+# Spatial stuff
+proj.wgs84 <- "+init=epsg:4326" #WGS84
+proj.utm <- "+init=epsg:2960" #UTM 19
+bof.ss <- gom %>%
+  filter(Region %in% c("Bay of Fundy", "Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf", "Browns Bank")) %>%
+  st_union()
+gom.add <- gom %>%
+  filter(!Region %in% c("Bay of Fundy", "Eastern Coastal Shelf", "Scotian Coastal Shelf", "Scotian Shelf", "Browns Bank"))
+nelme <- st_read(paste0(res.data.path, "Shapefiles/NELME_regions/NELME_sf.shp")) %>%
+  st_union(gom.add)
+nelme.plot <- st_difference(nelme, bof.ss)
+full.region <- bof.ss %>%
+  st_union(nelme.plot)
+out.path.use <- paste0(proj.path, "Results/")
+font.family <- "Arial"
+gmri.gray <- "#bdbdbd"
+for(i in seq_along(spp)){
+  spp.use <- spp[i]
+  dat.use <- preds %>% 
+    filter(Proj.Class %in% scenarios & comname == spp.use) %>% 
+    unnest(cols = c(Projections))
+  
+  spp.plots.all <- vector("list", 4)
+  
+  for(j in seq_along(scenarios)){
+    fall.dat <- dat.use %>%
+      filter(Proj.Class == scenarios[j] & season == "FALL")
+    fall.dat$Projection <- ifelse(is.infinite(fall.dat$Projection), NA, fall.dat$Projection)
+    
+    spring.dat <- dat.use %>%
+      filter(Proj.Class == scenarios[j] & season == "SPRING")
+    spring.dat$Projection <- ifelse(is.infinite(spring.dat$Projection), NA, spring.dat$Projection)
+    
+    # Rescaling for nicer maps...
+    # Interpolation grid
+    coords.df <- data.frame("x" = fall.dat$x, "y" = fall.dat$y)
+    pred.df <- na.omit(data.frame("x" = coords.df$x, "y" = coords.df$y, "layer" = rep(0, length(coords.df$x))))
+    pred.df.interp <- interp(pred.df[,1], pred.df[,2], pred.df[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred.df.interp.final <- data.frame(expand.grid(x = pred.df.interp$x, y = pred.df.interp$y), z = c(pred.df.interp$z))
+    pred.sp <- st_as_sf(pred.df.interp.final, coords = c("x", "y"), crs = proj.wgs84)
+    
+    # FALL
+    data.use <- fall.dat
+    pred.df.fall <- na.omit(data.frame("x" = data.use$x, "y" = data.use$y, "layer" = data.use$Projection))
+    pred.df.interp <- interp(pred.df.fall[,1], pred.df.fall[,2], pred.df.fall[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred.df.interp.final <- data.frame(expand.grid(x = pred.df.interp$x, y = pred.df.interp$y), z = c(round(pred.df.interp$z, 2)))
+    pred.sp <- st_as_sf(pred.df.interp.final, coords = c("x", "y"), crs = proj.wgs84)
+    
+    # Clip to depth range...
+    pred.sp.depths <- extract(depth, pred.sp)
+    rows.na <- which(pred.sp.depths < -400)
+    pred.sp$z[rows.na] <- NA
+    
+    pred.df.temp.fall <- pred.sp
+    coords.keep <- as.data.frame(st_coordinates(pred.df.temp.fall))
+    row.names(coords.keep) <- NULL
+    pred.df.fall <- data.frame(cbind(coords.keep, "z" = as.numeric(pred.df.temp.fall$z))) %>% 
+      drop_na(z)
+    names(pred.df.fall) <- c("long", "lat", "z")
+    
+    # Spring
+    data.use <- spring.dat
+    pred.df.sp <- na.omit(data.frame("x" = data.use$x, "y" = data.use$y, "layer" = data.use$Projection))
+    pred.df.interp <- interp(pred.df.sp[,1], pred.df.sp[,2], pred.df.sp[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred.df.interp.final <- data.frame(expand.grid(x = pred.df.interp$x, y = pred.df.interp$y), z = c(round(pred.df.interp$z, 2)))
+    pred.sp <- st_as_sf(pred.df.interp.final, coords = c("x", "y"), crs = proj.wgs84)
+    
+    # Clip to depth range
+    pred.sp$z[rows.na] <- NA
+    
+    pred.df.temp.sp <- pred.sp
+    coords.keep <- as.data.frame(st_coordinates(pred.df.temp.sp))
+    row.names(coords.keep) <- NULL
+    pred.df.sp <- data.frame(cbind(coords.keep, "z" = as.numeric(pred.df.temp.sp$z))) %>% 
+      drop_na(z)
+    names(pred.df.sp) <- c("long", "lat", "z")
+    
+    if(grepl("Baseline", scenarios[j])){
+      plot.out.fall <- ggplot() +
+        # Here you'd make adjustments to the point colors...
+        geom_tile(data = pred.df.fall, aes(x = long, y = lat, fill = z)) +
+        scale_fill_viridis_c(name = "2015-2018\nRelative biomass", limits = c(0, max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # scale_fill_gradient(name = "2011-2015\nRelative biomass", low = "#dde199", high = "#868d00", limits = c(0, max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # Update "fill" and "color" to change map color
+        geom_sf(data = land, fill = "#f6f6f6", color = "dark gray") +
+        coord_sf(datum = proj.wgs84) +
+        ggtitle("Fall") +
+        xlim(xlim) + 
+        ylim(ylim) +
+        xlab("") +
+        ylab("") +
+        theme(legend.position = "right", 
+              text = element_text(family = font.family, size = 6),
+              panel.grid.major=element_line(colour="transparent"),
+              panel.background = element_rect(fill="white"),
+              axis.line.x = element_line(size = 0.15, color = gmri.gray),
+              axis.line.y = element_line(size = 0.15, color = gmri.gray),
+              axis.text.x = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.text.y = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.ticks = element_line(color = gmri.gray, size = 0.1),
+              plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+      
+      spp.plots.all[[1]] <- plot.out.fall
+      
+      plot.out.sp <- ggplot() +
+        # Here you'd make adjustments to the point colors...
+        geom_tile(data = pred.df.sp, aes(x = long, y = lat, fill = z)) +
+        scale_fill_viridis_c(name = "2015-2018\nRelative biomass", limits = c(0, max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # scale_fill_gradient(name = "2011-2015\nRelative biomass", low = "#dde199", high = "#868d00", limits = c(0, max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # Update "fill" and "color" to change map color
+        geom_sf(data = land, fill = "#f6f6f6", color = "dark gray") +
+        coord_sf(datum = proj.wgs84) +
+        ggtitle("Spring") + 
+        xlim(xlim) + 
+        ylim(ylim) +
+        xlab("") +
+        ylab("") +
+        theme(legend.position = "right", 
+              text = element_text(family = font.family, size = 6),
+              panel.grid.major=element_line(colour="transparent"),
+              panel.background = element_rect(fill="white"),
+              axis.line.x = element_line(size = 0.15, color = gmri.gray),
+              axis.line.y = element_line(size = 0.15, color = gmri.gray),
+              axis.text.x = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.text.y = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.ticks = element_line(color = gmri.gray, size = 0.1),
+              plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+      
+      spp.plots.all[[2]] <- plot.out.sp
+    } else {
+      plot.out.fall <- ggplot() +
+        # Here you'd make adjustments to the point colors...
+        geom_tile(data = pred.df.fall, aes(x = long, y = lat, fill = z)) +
+        #scale_fill_gradient2(name = "2055 Projected\nPercent Change in Biomass", low = "#0571b0", high = "#ca0020", limits = c(min(min(pred.df.fall$z), min(pred.df.sp$z)), max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        scale_fill_gradient2(name = "2055 Projected\nChange in Biomass (kg/tow)", low = "#0571b0", high = "#ca0020", limits = c(min(min(pred.df.fall$z), min(pred.df.sp$z)), max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # Update "fill" and "color" to change map color
+        geom_sf(data = land, fill = "#f6f6f6", color = "dark gray") +
+        coord_sf(datum = proj.wgs84) +
+        ggtitle("Fall") +
+        xlim(xlim) + 
+        ylim(ylim) +
+        xlab("") +
+        ylab("") +
+        theme(legend.position = "right", 
+              text = element_text(family = font.family, size = 6),
+              panel.grid.major=element_line(colour="transparent"),
+              panel.background = element_rect(fill="white"),
+              axis.line.x = element_line(size = 0.15, color = gmri.gray),
+              axis.line.y = element_line(size = 0.15, color = gmri.gray),
+              axis.text.x = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.text.y = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.ticks = element_line(color = gmri.gray, size = 0.1),
+              plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+      
+      spp.plots.all[[3]] <- plot.out.fall
+      
+      plot.out.sp <- ggplot() +
+        # Here you'd make adjustments to the point colors...
+        geom_tile(data = pred.df.sp, aes(x = long, y = lat, fill = z)) +
+        #scale_fill_gradient2(name = "2055 Projected\nPercent Change in Biomass", low = "#0571b0", high = "#ca0020", limits = c(min(min(pred.df.fall$z), min(pred.df.sp$z)), max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        scale_fill_gradient2(name = "2055 Projected\nChange in Biomass (kg/tow)", low = "#0571b0", high = "#ca0020", limits = c(min(min(pred.df.fall$z), min(pred.df.sp$z)), max(max(pred.df.fall$z), max(pred.df.sp$z)))) +
+        # Update "fill" and "color" to change map color
+        geom_sf(data = land, fill = "#f6f6f6", color = "dark gray") +
+        coord_sf(datum = proj.wgs84) +
+        ggtitle("Spring") + 
+        xlim(xlim) + 
+        ylim(ylim) +
+        xlab("") +
+        ylab("") +
+        theme(legend.position = "right", 
+              text = element_text(family = font.family, size = 6),
+              panel.grid.major=element_line(colour="transparent"),
+              panel.background = element_rect(fill="white"),
+              axis.line.x = element_line(size = 0.15, color = gmri.gray),
+              axis.line.y = element_line(size = 0.15, color = gmri.gray),
+              axis.text.x = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.text.y = element_text(family = font.family, color = gmri.gray, size = 5.5),
+              axis.ticks = element_line(color = gmri.gray, size = 0.1),
+              plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+      
+      spp.plots.all[[4]] <- plot.out.sp
+    }
+  }
+  plot.out <- spp.plots.all[[1]] + spp.plots.all[[3]] + spp.plots.all[[2]] + spp.plots.all[[4]] + plot_layout(ncol = 2, byrow = 2)
+  #ggsave(paste0(proj.path, "Results/", tolower(spp.use), "_ProjectedPercentBioChanges.tiff"), plot.out, dpi = 400)
+}
+```

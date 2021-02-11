@@ -4,3 +4,7 @@
 .Ruserdata
 .rds
 model_dat.rds
+
+
+# Targets data
+_targets/
