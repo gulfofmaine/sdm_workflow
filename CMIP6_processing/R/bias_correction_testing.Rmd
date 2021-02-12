@@ -264,6 +264,8 @@ cmip_clim_bias <- cmip_clim_ds - oisst_month_avgs_91
 
 
 # Now, adjust all of the climate model projected temperatures according to this bias. This is similar to applying anomalies to corresponding matching OISST month.
+
+
 # Work on names
 names(cmip_clim_bias) <- months_numeric
 cmip_dates <- as.Date(gsub("[.]", "-", gsub("X", "", names(cmip_cropped_ds))))
@@ -273,7 +275,9 @@ cmip_cropped_z <- setZ(cmip_cropped_ds, cmip_dates)
 # Alright, for every climate model projected temperature, adjust based on bias (difference between climate model and observed)
 cmip_proj_out_alt <- lapply(seq(1:nlayers(cmip_cropped_z)), function(x) {
   cmip_layer      <- cmip_cropped_z[[x]]
-  layer_match     <- match(format(getZ(cmip_cropped_z)[x], "%m"), gsub("X", "", names(cmip_clim_bias)))
+  layer_match     <- match(format(getZ(cmip_cropped_z)[x], "%m"), gsub("X", "", 
+                                                                       
+                                                                       names(cmip_clim_bias)))
   cmip_bias_layer <- cmip_clim_bias[[layer_match]]
   delta_out       <- cmip_layer - cmip_bias_layer}) %>% 
   stack()
