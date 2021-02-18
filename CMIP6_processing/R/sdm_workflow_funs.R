@@ -1,5 +1,6 @@
 #### Functions for cmip6 processing  ####
 # This file should be sourced to provide the stepping stones for the sdm_workflows pipeline
+# Used to either facilitate a {targets} workflow or to build a makefile workflow.
 
 
 ####  Common Resources  ####
@@ -46,7 +47,6 @@ import_oisst_clim <- function(climatology_period = "1991-2020", os.use = "unix")
 
 
 
-# load the tester cmip data
 #' @title Load CMIP6 NetCDF data.
 #' 
 #' @description Load CMIP6 data off BOX by path to specific file(s) in RES_Data/CMIP6/.
@@ -87,8 +87,6 @@ import_cmip_sst_test <- function(cmip_file = "tester"){
 
 
 
-# Pulls the mean of each month from a climatology
-# Maps over a vector/list of what raster layers equate to which month (ex. MOD for oisst clim)
 #' @title Monthly Mean from Climatology
 #' 
 #' @details Uses the names of each daily layer in the OISST climatology pattern
@@ -132,6 +130,48 @@ months_from_clim <- function(clim_source, month_layer_key = NULL){
   #return the monthly average stack
   return(monthly_avgs)
  }
+
+
+####  SODA Processing  ####
+
+
+
+
+#' @title Import SODA Monthly Climatology
+#' 
+#' @description Load raster stack of SODA climatology for desired variable. Choices
+#' are "surf_sal", "surf_temp", "bot_sal", "bot_temp". Area is also cropped to study area.
+#'
+#' @param var_name variable name to use when stacking data
+#' @param os.use windows mac toggle for box path
+#'
+#' @return Raster stack for monthly climatology, cropped to study area
+#' @export
+#'
+#' @examples
+import_soda_clim <- function(var_name = c("surf_sal", "surf_temp", "bot_sal", "bot_temp"), 
+                             os.use = "unix"){
+  
+  # Path to OISST on Box
+  soda_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "SODA")
+  
+  # Load climatology for desired variable
+  clim_stack <- stack(paste0(soda_path, "SODA_monthly_climatology1990to2019.nc"), varname = var_name)
+  
+  # Crop it to study area
+  clim_cropped <- crop(clim_stack, study_area)
+  return(clim_cropped)
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -190,7 +230,6 @@ cmip_to_clim <- function(cmip_stack = cmip_cropped, clim_years = NULL){
 
 
 
-# Get CMIP anomalies from the cmip data and its climatology
 #' @title CMIP Monthly Anomalies from Climatology
 #'
 #' @param cmip_data CMIP Observations
@@ -257,8 +296,11 @@ resample_grid <- function(starting_grid = cmip_anoms,
 
 
 
-# Get bias corrected anomalies - Delta-method
+
 #' @title Bias Correction - Delta Method
+#' 
+#' @description Bias correct climate data using a reference climatology. Performs the delta-method 
+#' where anomalies in climate data are applied directly to reference climate.
 #'
 #' @param cmip_grid Input Grid we want to bias correct the observations for
 #' @param reference_climatology The climatology for real-life data to bias correct with
@@ -354,9 +396,10 @@ restack_cmip_projections <- function(cmip_inputs = cmip_delta_bias_corrected){
 #' @title Raster Quantiles from Timestep Stacks
 #' 
 #' @description Get the Mean/5th/95th percentile at each time step from an ensemble of climate
-#' projections.
+#' projections. Typically used with map() to iterate through years. This function operates on
+#' the name structure of the months.
 #'
-#' @param year_stacks 
+#' @param year_stacks Raster stack containing a full year of each CMIP model's data
 #'
 #' @return
 #' 
@@ -435,15 +478,16 @@ timestep_stats <- function(year_stacks){
 
 
 #' @title Reassemble Timeseries from List of Ensemble Quantiles
+#' 
+#' @description 
 #'
-#' @param year_stack 
-#' @param year_lab 
-#' @param stat_group 
+#' @param year_stack Output Raster stack or list of raster stacks from timestep_stats()
+#' @param year_lab Matching string indicating the year or timestep to go with each list item
+#' @param stat_group String indicating which statistic to extract ("mean", "percentile05", 
+#' "percentile95")
 #'
 #' @return
-#' @export
-#'
-#' @examples
+#' 
 timestep_to_full <- function(year_stack, year_lab, stat_group){
   stat_out   <- year_stack[[stat_group]] 
   orig_names <- str_replace(names(stat_out), "X", "")

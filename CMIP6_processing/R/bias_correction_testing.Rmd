@@ -252,7 +252,7 @@ plot(cmip_diffs,
 
 An alternative way of thinking about this is to calculate a bias over the same reference period between the climate model temperatures and the observed temperatures. This bias would then be used to adjust the climate model projected temperatures.
 
-```{r}
+```{r, eval = FALSE}
 
 # First, get the two climatology stacks and make sure they have the same resolution. First, climatology based on the climate model projected temps and then OISST. Both calculated over 1982-2011 period.
 cmip_clim_ds <- resample(cmip_clim, oisst_month_avgs_91[[1]], method = "bilinear") 

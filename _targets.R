@@ -9,15 +9,14 @@ library(tidyverse)
 source("CMIP6_processing/R/sdm_workflow_funs.R")
 options(tidyverse.quiet = T)
 
+
 # Additional packages to load specific to target(s)
-tar_option_set(
-  packages = c("raster", "sf", "rmarkdown", "tidyverse", "gmRi")
-)
+tar_option_set( packages = c("raster", "sf", "rmarkdown", "tidyverse", "gmRi") )
 
 
 
 
-# End of _targets.R
+
 
 # Define target pipeline: Outlines high-level steps of the analysis
 # Format is just a list of all the targets
@@ -58,8 +57,15 @@ list(
     command = imap(cmip_sst_quants, timestep_to_full, stat_group = "percentile_05") %>% stack() ),
   tar_target(
     name = cmip_sst_95,
-    command = imap(cmip_sst_quants, timestep_to_full, stat_group = "percentile_95") %>% stack()
+    command = imap(cmip_sst_quants, timestep_to_full, stat_group = "percentile_95") %>% stack()),
+  tar_target(
+    name = soda_clim_vars,
+    command = map(c("surf_sal", "surf_temp", "bot_sal", "bot_temp"), import_soda_clim, os.use = "unix")
   )
   
   
 )
+
+
+
+# End of _targets.R
