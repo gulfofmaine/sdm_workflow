@@ -1,0 +1,249 @@
+SVSPP,Common.Name,Scientific.Name,SEASON,CATCHSEX,lna,b,wigleyvalue,wigleymin,wigleymax
+4,ROUGHTAIL STINGRAY,DASYATIS CENTROURA,SPRING,0,-10.332,3.0222,f,36,155
+4,ROUGHTAIL STINGRAY,DASYATIS CENTROURA,FALL,0,-10.332,3.0222,t,36,155
+9,SANDBAR SHARK,CARCHARHINUS PLUMBEUS,SPRING,0,-12.674,3.1706,t,63,174
+9,SANDBAR SHARK,CARCHARHINUS PLUMBEUS,FALL,0,-12.674,3.1706,t,63,174
+9,SANDBAR SHARK,CARCHARHINUS PLUMBEUS,SPRING,1,-12.674,3.1706,f,63,174
+9,SANDBAR SHARK,CARCHARHINUS PLUMBEUS,FALL,1,-12.674,3.1706,f,63,174
+12,SAND TIGER,CARCHARIAS TAURUS,SPRING,0,-13.4887,3.2927,f,150,260
+12,SAND TIGER,CARCHARIAS TAURUS,FALL,0,-13.4887,3.2927,t,150,260
+13,Smooth dogfish,Mustelus canis,SPRING,0,-13.3913,3.1641,t,52,126
+13,Smooth dogfish,Mustelus canis,FALL,0,-12.5532,3.0006,t,40,135
+13,Smooth dogfish,Mustelus canis,SPRING,1,-13.1021,3.0918,t,52,115
+13,Smooth dogfish,Mustelus canis,FALL,1,-12.3265,2.9436,t,40,112
+13,Smooth dogfish,Mustelus canis,SPRING,2,-13.7926,3.2652,t,54,126
+13,Smooth dogfish,Mustelus canis,FALL,2,-12.7087,3.0415,t,44,135
+14,Chain dogfish,Scyliorhinus retifer,SPRING,0,-12.9053,3.1282,f,10,45
+14,Chain dogfish,Scyliorhinus retifer,FALL,0,-12.9053,3.1282,t,10,45
+14,Chain dogfish,Scyliorhinus retifer,SPRING,1,-12.2155,2.9322,f,18,45
+14,Chain dogfish,Scyliorhinus retifer,FALL,1,-12.2155,2.9322,t,18,45
+14,Chain dogfish,Scyliorhinus retifer,SPRING,2,-13.5677,3.3321,f,10,43
+14,Chain dogfish,Scyliorhinus retifer,FALL,2,-13.5677,3.3321,t,10,43
+15,Spiny dogfish,Squalus acanthias,SPRING,0,-13.2302,3.1863,t,13,114
+15,Spiny dogfish,Squalus acanthias,FALL,0,-12.6733,3.0596,t,22,106
+15,Spiny dogfish,Squalus acanthias,SPRING,1,-12.5455,3.0075,t,20,91
+15,Spiny dogfish,Squalus acanthias,FALL,1,-12.3144,2.9651,t,23,90
+15,Spiny dogfish,Squalus acanthias,SPRING,2,-13.4073,3.2369,t,13,114
+15,Spiny dogfish,Squalus acanthias,FALL,2,-12.821,3.1012,t,22,106
+16,ATLANTIC ANGEL SHARK,SQUATINA DUMERIL,SPRING,0,-11.5279,2.9556,t,32,84
+16,ATLANTIC ANGEL SHARK,SQUATINA DUMERIL,FALL,0,-12.1783,3.142,t,35,120
+18,BLUNTNOSE STINGRAY,DASYATIS SAY,SPRING,0,-10.5372,3.0527,t,39,103
+18,BLUNTNOSE STINGRAY,DASYATIS SAY,FALL,0,-10.8751,3.2275,t,18,104
+19,BULLNOSE RAY,MYLIOBATIS FREMINVILLEI,SPRING,0,-12.1806,3.2885,f,28,129
+19,BULLNOSE RAY,MYLIOBATIS FREMINVILLEI,FALL,0,-12.1806,3.2885,t,28,129
+21,Atlantic torpedo,Torpedo nobiliana,SPRING,0,-14.4803,3.8164,f,71,102
+21,Atlantic torpedo,Torpedo nobiliana,FALL,0,-14.4803,3.8164,t,71,102
+21,Atlantic torpedo,Torpedo nobiliana,SPRING,1,-14.4803,3.8164,f,71,102
+21,Atlantic torpedo,Torpedo nobiliana,FALL,1,-14.4803,3.8164,f,71,102
+22,Barndoor skate,Dipturus laevis,SPRING,0,-13.3224,3.2919,f,23,121
+22,Barndoor skate,Dipturus laevis,FALL,0,-13.3224,3.2919,t,23,121
+23,Winter skate,Leucoraja ocellata,SPRING,0,-13.0088,3.2993,t,13,16
+23,Winter skate,Leucoraja ocellata,FALL,0,-13.1531,3.3199,t,14,111
+23,Winter skate,Leucoraja ocellata,SPRING,1,-12.9598,3.2819,t,16,106
+23,Winter skate,Leucoraja ocellata,FALL,1,-13.0591,3.2904,t,14,111
+23,Winter skate,Leucoraja ocellata,SPRING,2,-13.1083,3.3285,t,13,98
+23,Winter skate,Leucoraja ocellata,FALL,2,-13.3419,3.3719,t,16,100
+24,Clearnose skate,Raja eglanteria,SPRING,0,-13.8683,3.4235,t,22,71
+24,Clearnose skate,Raja eglanteria,FALL,0,-13.8683,3.4235,t,22,71
+24,Clearnose skate,Raja eglanteria,SPRING,1,-14.1912,3.4918,t,37,68
+24,Clearnose skate,Raja eglanteria,FALL,1,-14.1912,3.4918,t,37,68
+24,Clearnose skate,Raja eglanteria,SPRING,2,-13.86,3.4291,t,22,71
+24,Clearnose skate,Raja eglanteria,FALL,2,-13.86,3.4291,t,22,71
+25,Rosette skate,Leucoraja garmani,SPRING,0,-13.673400000000001,3.3526,t,32,43
+25,Rosette skate,Leucoraja garmani,FALL,0,-12.5504,3.0718,t,14,42
+25,Rosette skate,Leucoraja garmani,FALL,1,-12.4771,3.0307,t,14,42
+25,Rosette skate,Leucoraja garmani,FALL,2,-12.4737,3.0688,t,15,42
+26,Little skate,Leucoraja erinacea,SPRING,0,-12.4462,3.128,t,8,59
+26,Little skate,Leucoraja erinacea,FALL,0,-12.602,3.1567,t,6,63
+26,Little skate,Leucoraja erinacea,SPRING,1,-12.3175,3.0842,t,9,57
+26,Little skate,Leucoraja erinacea,FALL,1,-12.5172,3.1247,t,10,63
+26,Little skate,Leucoraja erinacea,SPRING,2,-12.6115,3.1805,t,8,59
+26,Little skate,Leucoraja erinacea,FALL,2,-12.6889,3.1872,t,6,60
+27,Smooth skate,Malacoraja senta,SPRING,0,-12.5408,3.0655,t,18,65
+27,Smooth skate,Malacoraja senta,FALL,0,-13.0139,3.1812,t,15,62
+28,Thorny skate,Amblyraja radiata,SPRING,0,-12.088,3.1197,t,10,105
+28,Thorny skate,Amblyraja radiata,FALL,0,-12.088,3.1197,t,10,105
+29,SOUTHERN STINGRAY,DASYATIS AMERICANA,SPRING,0,-10.9402,3.1428,t,45,100
+29,SOUTHERN STINGRAY,DASYATIS AMERICANA,FALL,0,-10.9402,3.1428,t,45,100
+31,Round herring,Etrumeus teres,SPRING,0,-11.4756,2.9645,f,11,20
+31,Round herring,Etrumeus teres,FALL,0,-11.4756,2.9645,t,11,20
+32,Atlantic herring,Clupea harengus,SPRING,0,-11.7972,3.0314,t,5,37
+32,Atlantic herring,Clupea harengus,FALL,0,-11.576,2.9794,t,4,34
+32,Atlantic herring,Clupea harengus,SPRING,1,-11.5442,2.9545,t,10,37
+32,Atlantic herring,Clupea harengus,FALL,1,-11.346,2.9055,t,10,34
+32,Atlantic herring,Clupea harengus,SPRING,2,-11.56,2.957,t,10,34
+32,Atlantic herring,Clupea harengus,FALL,2,-11.6549,3.0065,t,11,34
+33,Alewife,Alosa pseudoharengus,SPRING,0,-13.3875,3.6716,t,10,27
+33,Alewife,Alosa pseudoharengus,FALL,0,-13.3875,3.6716,t,10,27
+34,Blueback herring,Alosa aestivalis,SPRING,0,-12.2146,3.2428,t,7,29
+34,Blueback herring,Alosa aestivalis,FALL,0,-12.2146,3.2428,t,7,29
+35,American shad,Alosa sapidissima,SPRING,0,-12.1377,3.2207,t,8,53
+35,American shad,Alosa sapidissima,FALL,0,-12.1377,3.2207,t,8,53
+69,Offshore hake,Merluccius albidus,SPRING,0,-12.2964,3.1323,t,8,51
+69,Offshore hake,Merluccius albidus,FALL,0,-12.2964,3.1323,t,8,51
+72,Silver hake,Merluccius bilinearis,SPRING,0,-12.4934,3.1512,t,4,58
+72,Silver hake,Merluccius bilinearis,FALL,0,-12.1353,3.0606,t,3,63
+72,Silver hake,Merluccius bilinearis,FALL,1,-12.2351,3.0869,t,7,41
+72,Silver hake,Merluccius bilinearis,FALL,2,-12.6439,3.2186,t,7,63
+73,Atlantic cod,Gadus morhua,SPRING,0,-11.7803,3.0606,t,4,141
+73,Atlantic cod,Gadus morhua,FALL,0,-11.992,3.1262,t,4,120
+74,Haddock,Melanogrammus aeglefinus,SPRING,0,-11.8062,3.0766,t,4,87
+74,Haddock,Melanogrammus aeglefinus,SPRING,1,-11.7438,3.0572,t,13,77
+74,Haddock,Melanogrammus aeglefinus,SPRING,2,-11.8655,3.0949,t,13,87
+74,Haddock,Melanogrammus aeglefinus,FALL,0,-11.8111,3.0888,t,7,88
+75,Pollock,Pollachius virens,SPRING,0,-11.9004,3.1024,t,13,105
+75,Pollock,Pollachius virens,FALL,0,-11.8353,3.1151,t,13,112
+76,White hake,Urophycis tenuis,SPRING,0,-12.95,3.2903,t,10,105
+76,White hake,Urophycis tenuis,FALL,0,-12.4,3.1715,t,4,126
+76,White hake,Urophycis tenuis,SPRING,1,-12.9063,3.2812,t,14,105
+76,White hake,Urophycis tenuis,FALL,1,-12.6846,3.2506,t,7,95
+76,White hake,Urophycis tenuis,SPRING,2,-13.0099,3.3039,t,12,104
+76,White hake,Urophycis tenuis,FALL,2,-12.6741,3.2407,t,7,126
+77,Red hake,Urophycis chuss,SPRING,0,-12.3743,3.0979,t,3,58
+77,Red hake,Urophycis chuss,FALL,0,-12.0276,3.0162,t,2,68
+77,Red hake,Urophycis chuss,SPRING,1,-12.4431,3.1139,t,6,52
+77,Red hake,Urophycis chuss,FALL,1,-12.172,3.0491,t,8,68
+77,Red hake,Urophycis chuss,SPRING,2,-12.6066,3.1684,t,6,58
+77,Red hake,Urophycis chuss,FALL,2,-12.4836,3.1533,t,7,62
+78,Spotted hake,Urophycis regia,SPRING,0,-11.9892,3.0823,t,3,42
+78,Spotted hake,Urophycis regia,FALL,0,-11.9634,3.0927,t,12,41
+78,Spotted hake,Urophycis regia,SPRING,1,-12.1924,3.1437,t,5,35
+78,Spotted hake,Urophycis regia,FALL,1,-11.0718,2.7812,t,13,32
+78,Spotted hake,Urophycis regia,SPRING,2,-12.0712,3.1139,t,4,42
+78,Spotted hake,Urophycis regia,FALL,2,-11.8596,3.0696,t,12,41
+84,Cusk,Brosme brosme,SPRING,0,-12.214,3.1785,t,6,95
+84,Cusk,Brosme brosme,FALL,0,-12.214,3.1785,t,6,95
+101,Atlantic halibut,Hippoglossus hippoglossus,SPRING,0,-12.5865,3.2674,t,31,154
+101,Atlantic halibut,Hippoglossus hippoglossus,FALL,0,-12.1813,3.1904,t,8,97
+102,American plaice,Hippoglossoides platessoides,SPRING,0,-12.8117,3.3125,t,5,62
+102,American plaice,Hippoglossoides platessoides,SPRING,1,-12.7168,3.279,t,6,48
+102,American plaice,Hippoglossoides platessoides,SPRING,2,-12.9811,3.3641,t,7,62
+102,American plaice,Hippoglossoides platessoides,FALL,0,-12.7492,3.3062,t,3,65
+103,Summer flounder,Paralichthys dentatus,SPRING,0,-12.1424,3.1651,t,15,72
+103,Summer flounder,Paralichthys dentatus,FALL,0,-12.2841,3.2156,t,12,74
+103,Summer flounder,Paralichthys dentatus,SPRING,1,-12.1197,3.1602,t,16,57
+103,Summer flounder,Paralichthys dentatus,FALL,1,-12.3572,3.2394,t,12,57
+103,Summer flounder,Paralichthys dentatus,SPRING,2,-12.1866,3.1759,t,16,72
+103,Summer flounder,Paralichthys dentatus,FALL,2,-12.4203,3.2488,t,13,74
+104,Fourspot flounder,Paralichthys oblongus,SPRING,0,-12.3202,3.1463,t,3,49
+104,Fourspot flounder,Paralichthys oblongus,FALL,0,-12.3202,3.1463,t,3,49
+104,Fourspot flounder,Paralichthys oblongus,SPRING,1,-12.2648,3.1239,t,7,42
+104,Fourspot flounder,Paralichthys oblongus,FALL,1,-12.2648,3.1239,t,7,42
+104,Fourspot flounder,Paralichthys oblongus,SPRING,2,-12.5568,3.2213,t,11,49
+104,Fourspot flounder,Paralichthys oblongus,FALL,2,-12.5568,3.2213,t,11,49
+105,Yellowtail flounder,Limanda ferruginea,SPRING,0,-12.3581,3.2099,t,6,55
+105,Yellowtail flounder,Limanda ferruginea,FALL,0,-11.8381,3.0559,t,4,50
+105,Yellowtail flounder,Limanda ferruginea,SPRING,1,-11.7347,3.0161,t,11,46
+105,Yellowtail flounder,Limanda ferruginea,FALL,1,-11.6605,2.9983,t,12,49
+105,Yellowtail flounder,Limanda ferruginea,SPRING,2,-12.7073,3.3235,t,6,55
+105,Yellowtail flounder,Limanda ferruginea,FALL,2,-11.9764,3.0995,t,9,50
+106,Winter flounder,Pseudopleuronectes americanus,SPRING,0,-11.4718,3.0431,t,5,59
+106,Winter flounder,Pseudopleuronectes americanus,FALL,0,-11.6356,3.1091,t,5,60
+106,Winter flounder,Pseudopleuronectes americanus,SPRING,1,-11.2363,2.9636,t,7,54
+106,Winter flounder,Pseudopleuronectes americanus,FALL,1,-11.4725,3.0584,t,5,53
+106,Winter flounder,Pseudopleuronectes americanus,SPRING,2,-11.4598,3.0457,t,9,59
+106,Winter flounder,Pseudopleuronectes americanus,FALL,2,-11.7022,3.1297,t,9,60
+107,Witch flounder,Glyptocephalus cynoglossus,SPRING,0,-13.2151,3.3289,t,6,64
+107,Witch flounder,Glyptocephalus cynoglossus,FALL,0,-12.7334,3.1997,t,4,63
+108,Windowpane flounder,Scophthalmus aquosus,SPRING,0,-11.3526,2.9982,t,3,39
+108,Windowpane flounder,Scophthalmus aquosus,FALL,0,-11.0093,2.8721,t,2,40
+108,Windowpane flounder,Scophthalmus aquosus,SPRING,1,-11.305,2.9781,t,6,36
+108,Windowpane flounder,Scophthalmus aquosus,FALL,1,-10.9828,2.8633,t,4,36
+108,Windowpane flounder,Scophthalmus aquosus,SPRING,2,-11.769,3.1293,t,9,39
+108,Windowpane flounder,Scophthalmus aquosus,FALL,2,-10.8411,2.8221,t,7,40
+112,Buckler dory,Zenopsis conchifera,SPRING,0,-11.3806,3.0387,t,9,53
+112,Buckler dory,Zenopsis conchifera,FALL,0,-11.3806,3.0387,t,9,53
+121,Atlantic mackerel,Scomber scombrus,SPRING,0,-12.6713,3.3119,t,16,45
+121,Atlantic mackerel,Scomber scombrus,SPRING,1,-12.7288,3.3305,t,16,42
+121,Atlantic mackerel,Scomber scombrus,SPRING,2,-12.6376,3.3006,t,16,45
+121,Atlantic mackerel,Scomber scombrus,FALL,0,-12.3766,3.2615,t,12,42
+131,Butterfish,Peprilus triacanthus,SPRING,0,-11.6824,3.293,t,3,23
+131,Butterfish,Peprilus triacanthus,FALL,0,-10.6315,2.9225,t,1,21
+131,Butterfish,Peprilus triacanthus,SPRING,1,-11.6824,3.293,f,3,23
+131,Butterfish,Peprilus triacanthus,FALL,1,-10.6315,2.9225,f,1,21
+135,Bluefish,Pomatomus saltatrix,SPRING,0,-10.5744,2.804,t,3,79
+135,Bluefish,Pomatomus saltatrix,FALL,0,-11.4296,3.0548,t,4,80
+136,Atlantic croaker,Micropogonias undulatus,SPRING,0,-11.5983,3.0924,f,6,44
+136,Atlantic croaker,Micropogonias undulatus,FALL,0,-11.5983,3.0924,t,6,44
+139,Striped bass,Morone saxatilis,SPRING,0,-11.7959,3.1383,t,23,93
+139,Striped bass,Morone saxatilis,FALL,0,-11.3773,3.0139,t,49,102
+139,Striped bass,Morone saxatilis,SPRING,1,-11.9776,3.1998,t,23,81
+139,Striped bass,Morone saxatilis,FALL,1,-10.8121,2.8888,t,49,85
+139,Striped bass,Morone saxatilis,SPRING,2,-11.5476,3.0627,t,24,93
+139,Striped bass,Morone saxatilis,FALL,2,-12.238,3.2072,t,50,102
+141,Black sea bass,Centropristis striata,SPRING,0,-11.5992,3.122,t,4,54
+141,Black sea bass,Centropristis striata,FALL,0,-11.2205,3.0225,t,3,45
+141,Black sea bass,Centropristis striata,FALL,1,-10.768,2.8679,t,6,44
+141,Black sea bass,Centropristis striata,FALL,2,-11.0314,2.9709,t,5,45
+145,WEAKFISH,CYNOSCION REGALIS,SPRING,0,-12.0264,3.1338,t,13,62
+145,WEAKFISH,CYNOSCION REGALIS,FALL,0,-11.4157,2.9575,t,3,70
+145,WEAKFISH,CYNOSCION REGALIS,FALL,1,-11.3755,2.9476,t,7,70
+145,WEAKFISH,CYNOSCION REGALIS,FALL,2,-11.4663,2.9724,t,10,70
+146,NORTHERN KINGFISH,MENTICIRRHUS SAXATILIS,SPRING,0,-12.4904,3.2785,f,24,29
+146,NORTHERN KINGFISH,MENTICIRRHUS SAXATILIS,FALL,0,-12.4904,3.2785,t,24,29
+149,SPOT,LEIOSTOMUS XANTHURUS,SPRING,0,-11.0401,2.9481,t,15,24
+149,SPOT,LEIOSTOMUS XANTHURUS,FALL,0,-11.8524,3.3175,t,9,26
+155,Acadian redfish,Sebastes fasciatus,SPRING,0,-11.7005,3.2036,t,3,47
+155,Acadian redfish,Sebastes fasciatus,SPRING,1,-11.4401,3.1151,t,6,44
+155,Acadian redfish,Sebastes fasciatus,SPRING,2,-11.7713,3.2297,t,7,47
+155,Acadian redfish,Sebastes fasciatus,FALL,0,-11.7005,3.2036,t,3,47
+155,Acadian redfish,Sebastes fasciatus,FALL,1,-11.4401,3.1151,t,6,44
+155,Acadian redfish,Sebastes fasciatus,FALL,2,-11.7713,3.2297,t,7,47
+156,Blackbelly rosefish,Helicolenus dactylopterus,SPRING,0,-11.1324,3.0512,t,4,35
+156,Blackbelly rosefish,Helicolenus dactylopterus,FALL,0,-11.1324,3.0512,t,4,35
+163,Longhorn sculpin,Myoxocephalus octodecemspinosus,SPRING,0,-11.8348,3.1067,t,5,37
+163,Longhorn sculpin,Myoxocephalus octodecemspinosus,FALL,0,-11.5589,3.025,t,4,37
+163,Longhorn sculpin,Myoxocephalus octodecemspinosus,FALL,1,-11.6352,3.0461,t,8,36
+163,Longhorn sculpin,Myoxocephalus octodecemspinosus,FALL,2,-11.733,3.08,t,6,37
+164,Sea raven,Hemitripterus americanus,SPRING,0,-11.3646,3.1551,t,8,64
+164,Sea raven,Hemitripterus americanus,FALL,0,-11.5001,3.1822,t,7,68
+164,Sea raven,Hemitripterus americanus,FALL,1,-11.1562,3.0726,t,9,53
+164,Sea raven,Hemitripterus americanus,FALL,2,-11.7441,3.259,t,7,68
+171,Northern searobin,Prionotus carolinus,SPRING,0,-12.9982,3.4712,t,21,34
+171,Northern searobin,Prionotus carolinus,FALL,0,-12.9982,3.4712,f,21,34
+176,Cunner,Tautogolabrus adspersus,SPRING,0,-11.1034,3.0162,t,19,44
+176,Cunner,Tautogolabrus adspersus,FALL,0,-11.3943,3.1311,t,10,36
+177,Tautog,Tautoga onitis,SPRING,0,-10.9649,3.0443,f,18,39
+177,Tautog,Tautoga onitis,FALL,0,-10.9649,3.0443,t,18,39
+192,Atlantic wolffish,Anarhichas lupus,SPRING,0,-12.2186,3.1439,t,24,107
+192,Atlantic wolffish,Anarhichas lupus,FALL,0,-12.2186,3.1439,t,24,107
+193,Ocean pout,Macrozoarces americanus,FALL,0,-13.5168,3.2995,t,10,84
+193,Ocean pout,Macrozoarces americanus,SPRING,0,-13.6429,3.3459,t,7,98
+193,Ocean pout,Macrozoarces americanus,SPRING,1,-13.686,3.3592,t,18,84
+193,Ocean pout,Macrozoarces americanus,SPRING,2,-13.6464,3.3442,t,15,76
+194,Fawn cusk-eel,Lepophidium profundorum,SPRING,0,-13.7333,3.2359,t,13,28
+194,Fawn cusk-eel,Lepophidium profundorum,FALL,0,-13.7333,3.2359,t,13,28
+197,Goosefish,Lophius americanus,FALL,0,-10.7106,2.9227,t,5,98
+197,Goosefish,Lophius americanus,SPRING,0,-10.7668,2.9302,t,9,101
+197,Goosefish,Lophius americanus,SPRING,1,-10.553,2.8696,t,10,74
+197,Goosefish,Lophius americanus,SPRING,2,-10.869,2.9608,t,11,101
+203,GREATER AMBERJACK,SERIOLA DUMERILI,SPRING,0,-9.8906,2.7221,f,30,80
+203,GREATER AMBERJACK,SERIOLA DUMERILI,FALL,0,-9.8906,2.7221,t,30,80
+270,COWNOSE RAY,RHINOPTERA BONASUS,SPRING,0,-7.8039,2.0958,t,43,51
+270,COWNOSE RAY,RHINOPTERA BONASUS,FALL,0,-11.8649,3.2327,t,34,103
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,SPRING,0,-12.8361,3.1069,f,50,100
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,FALL,0,-12.8361,3.1069,t,50,100
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,SPRING,1,-12.8361,3.1069,f,50,100
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,FALL,1,-12.8361,3.1069,f,50,100
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,SPRING,2,-12.8361,3.1069,f,50,100
+360,ATLANTIC SHARPNOSE SHARK,RHIZOPRIONODON TERRAENOVAE,FALL,2,-12.8361,3.1069,f,50,100
+375,SPINY BUTTERFLY RAY,GYMNURA ALTAVELA,SPRING,0,-13.0635,3.306,t,52,187
+375,SPINY BUTTERFLY RAY,GYMNURA ALTAVELA,FALL,0,-12.4197,3.1787,t,38,210
+376,SMOOTH BUTTERFLY RAY,GYMNURA MICRURA,SPRING,0,-11.7989,3.0742,f,40,84
+376,SMOOTH BUTTERFLY RAY,GYMNURA MICRURA,FALL,0,-11.7989,3.0742,t,40,84
+380,ATLANTIC STURGEON,ACIPENSER OXYRHYNCHUS,SPRING,0,-14.2902,3.4547,t,84,159
+380,ATLANTIC STURGEON,ACIPENSER OXYRHYNCHUS,FALL,0,-14.2902,3.4547,t,84,159
+428,ATLANTIC THREAD HERRING,OPISTHONEMA OGLINUM,SPRING,0,-12.9785,3.7242,f,5,18
+428,ATLANTIC THREAD HERRING,OPISTHONEMA OGLINUM,FALL,0,-12.9785,3.7242,t,5,18
+429,SPANISH SARDINE,SARDINELLA AURITA,SPRING,0,-11.8132,3.1463,f,8,18
+429,SPANISH SARDINE,SARDINELLA AURITA,FALL,0,-11.8132,3.1463,f,8,18
+596,Vermillion snapper,Rhomboplites aurorubens,SPRING,0,-11.2151,3.0106,t,8,21
+596,Vermillion snapper,Rhomboplites aurorubens,FALL,0,-11.2151,3.0106,f,8,21
+642,Scup,Stenotomus caprinus,SPRING,0,-11.5033,3.2446,t,6,38
+642,Scup,Stenotomus caprinus,FALL,0,-11.0698,3.1365,t,4,30
+652,SOUTHERN KINGFISH,MENTICIRRHUS AMERICANUS,SPRING,0,-12.9112,3.4493,f,17,39
+652,SOUTHERN KINGFISH,MENTICIRRHUS AMERICANUS,FALL,0,-12.9112,3.4493,t,17,39
+659,ATLANTIC SPADEFISH,CHAETODIPTERUS FABER,SPRING,0,-10.1466,2.938,t,22,43
+659,ATLANTIC SPADEFISH,CHAETODIPTERUS FABER,FALL,0,-10.1466,2.938,f,22,43
+745,SPANISH MACKEREL,SCOMBEROMORUS MACULATUS,SPRING,0,-11.6374,3.0242,f,18,59
+745,SPANISH MACKEREL,SCOMBEROMORUS MACULATUS,FALL,0,-11.6374,3.0242,t,18,59
