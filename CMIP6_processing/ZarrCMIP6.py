@@ -70,8 +70,8 @@ AllModels = pd.read_csv('https://storage.googleapis.com/cmip6/cmip6-zarr-consoli
 #Load data
 
 # To access an individual run
-# df = AllModels.query(f"source_id == 'MRI-ESM2-0' & variable_id == 'so' & experiment_id == 'ssp585' & member_id == 'r1i1p1f1' & table_id == 'Omon'")
-
+# df = AllModels.query(f"source_id == 'FIO-ESM-2-0' & variable_id == 'so' & experiment_id == 'historical' & member_id == 'r1i1p1f1' & table_id == 'Omon'")
+# filteredModels_grid = df.reset_index(drop=True)
 
 df_var = AllModels.query(f"variable_id == '{variable_id}' & table_id == '{table_id}' & experiment_id == @filter_list")
 filteredModels = fcts.ExperimentFilter(df_var, grp1, grp2)
@@ -81,10 +81,11 @@ filteredModels_grid = filteredModels.query(f"source_id == @source_list").reset_i
 
 # SST is at the bottom of the page
 
-TOP = True  # True if looking for surface, False for bottom
+TOP = False  # True if looking for surface, False for bottom
 
 # Only has to be defined once
 gcs = gcsfs.GCSFileSystem(token='anon')
+
 for i in range(len(filteredModels_grid)):
     source_id = filteredModels_grid.source_id[i]
     member_id = filteredModels_grid.member_id[i]
@@ -195,7 +196,7 @@ for i in range(len(filteredModels_grid)):
             dims0 = y_coord
             dims1 = x_coord
 
-        depth_indices = find_deepest_depth_indices_CMIP6(bottom_400, dims0, dims1)
+        depth_indices = fcts.find_deepest_depth_indices_CMIP6(bottom_400, dims0, dims1, variable_id, y_coord, x_coord)
         ind = xr.DataArray(depth_indices, dims=[dims0, dims1])
 
         kwdepth = {depth_coord: ind}

@@ -58,7 +58,7 @@ def nameFile(base_filename, Scenario):
     return base_filename
 
 # find bottom temp for CMIP6
-def find_deepest_depth_indices_CMIP6(ds, dims0, dims1):
+def find_deepest_depth_indices_CMIP6(ds, dims0, dims1, variable_id, y_coord, x_coord):
     # First get the vertical True/False of valid values
     idx = ds[variable_id].isel(time=0).isnull()
     idx_vals = idx.values
