@@ -63,7 +63,7 @@ oisst_clim_91 <- import_oisst_clim(climatology_period = "1991-2020")
 
 
 # Load a CMIP6 file for testing:
-cmip_cropped <- import_cmip_sst_test(cmip_file = "tester") 
+cmip_cropped <- import_cmip_sst(cmip_file = "tester") 
 
 # These have been cropped by default from the import functions
 

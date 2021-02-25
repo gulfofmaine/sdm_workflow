@@ -30,14 +30,15 @@ months_numeric <- str_pad(seq(from = 1, to = 12, by = 1), width = 2, side = "lef
 import_oisst_clim <- function(climatology_period = "1991-2020", os.use = "unix"){
   
   # Path to OISST on Box
-  oisst_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "OISST/oisst_mainstays")
+  oisst_path <- shared.path(os.use = os.use, group = "RES_Data", 
+                            folder = "OISST/oisst_mainstays/daily_climatologies/")
   
   # re-direct based on desired climatology
   if(climatology_period == "1991-2020"){
-    clim_stack <- stack(paste0(oisst_path, "daily_climatologies/daily_clims_1991to2020.nc"))
+    clim_stack <- stack(paste0(oisst_path, "daily_clims_1991to2020.nc"))
   
     }else if(climatology_period == "1982-2011"){
-      clim_stack <- stack(paste0(oisst_path, "daily_climatologies/daily_clims_1982to2011.nc"))}
+      clim_stack <- stack(paste0(oisst_path, "daily_clims_1982to2011.nc"))}
   
   # Crop it to study area
   clim_cropped <- crop(clim_stack, study_area)
@@ -56,7 +57,7 @@ import_oisst_clim <- function(climatology_period = "1991-2020", os.use = "unix")
 #'
 #' @return Raster stack of CMIP Data, cropped to study area.
 #'
-import_cmip_sst_test <- function(cmip_file = "tester"){
+import_cmip_sst <- function(cmip_file = "tester"){
   
   # General path to all the cmip data on Box
   cmip_path    <- shared.path(os.use = "unix", group = "RES_Data", folder = "CMIP6/")
@@ -84,6 +85,59 @@ import_cmip_sst_test <- function(cmip_file = "tester"){
   return(cmip_cropped)
   
 }
+
+
+
+#' @title Import Collection of CMIP Files
+#' 
+#' @description Load the collection of CMIP6 Scenarios for a selection of variables.
+#'
+#' @param cmip_var Indicaation of what variable you want to load with raster::stack()
+#'
+#' @return
+#' @export
+#'
+#' @examples
+import_cmip_collection <- function(cmip_var = c("bot_sal", "bot_temp", "surf_temp", "surf_sal"),
+                                   os.use = "unix"){
+  
+  # CMIP Folder Path
+  cmip_path  <- shared.path(os.use, "RES_Data", "CMIP6")
+  
+  
+  # Set folder path to single variable extractions
+  cmip_var_folder <-switch (pick_var,
+                            "bottom_sal" = paste0(cmip_path, "BottomSal/StGrid"),
+                            "bottom_sal" = paste0(cmip_path, "BottomT/StGrid"),
+                            "bottom_sal" = paste0(cmip_path, "SST/StGrid"),
+                            "bottom_sal" = paste0(cmip_path, "SurSalinity/StGrid"))  
+  
+  # Get File List, set the source names
+  cmip_names <- list.files(cmip_var_folder, full.names = F, pattern = ".nc") %>% str_remove(".nc")
+  cmip_files <- list.files(cmip_var_folder, full.names = T, pattern  = ".nc") %>% setNames(cmip_names)
+  
+  
+  # Open the files and crop them all in one go
+  cmip_data <- imap(cmip_files, function(cmip_file, cmip_name){
+    message(paste0("Opening File: ", cmip_name))
+    stack_out <- raster::stack(cmip_file)
+    
+    # Crop it to study area
+    stack_out <- crop(stack_out, study_area)
+    
+    return(stack_out)})
+  
+  
+  # Return the collection as a list
+  return(cmip_data)
+  
+  
+  
+}
+
+
+
+
 
 
 
@@ -136,31 +190,53 @@ months_from_clim <- function(clim_source, month_layer_key = NULL){
 
 
 
-
 #' @title Import SODA Monthly Climatology
 #' 
 #' @description Load raster stack of SODA climatology for desired variable. Choices
 #' are "surf_sal", "surf_temp", "bot_sal", "bot_temp". Area is also cropped to study area.
 #'
-#' @param var_name variable name to use when stacking data
+#' @param soda_var variable name to use when stacking data
 #' @param os.use windows mac toggle for box path
 #'
 #' @return Raster stack for monthly climatology, cropped to study area
 #' @export
 #'
 #' @examples
-import_soda_clim <- function(var_name = c("surf_sal", "surf_temp", "bot_sal", "bot_temp"), 
-                             os.use = "unix"){
+import_soda_clim <- function(soda_var = c("surf_sal", "surf_temp", "bot_sal", "bot_temp"),
+                        os.use = "unix"){
   
-  # Path to OISST on Box
+  # Variable key
+  var_key <- c("bot_sal" = "bottom salinity", "bot_temp" = "bottom temperature",
+               "surf_sal" = "surface salinity", "surf_temp" = "surface temperature")
+  
+  # Box path to SODA data
   soda_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "SODA")
   
-  # Load climatology for desired variable
-  clim_stack <- stack(paste0(soda_path, "SODA_monthly_climatology1990to2019.nc"), varname = var_name)
+  # Climatology Path
+  clim_path <- paste0(soda_path, "SODA_monthly_climatology1990to2019.nc")
   
-  # Crop it to study area
-  clim_cropped <- crop(clim_stack, study_area)
+  # message for what went on while testing
+  message(paste0("Loading 1990-2019 SODA Climatology Data for ", var_key[soda_var]))
+  
+  # Open Stack with selected variable
+  soda_clim_stack <- raster::stack(x = clim_path, varname = soda_var)
+  
+  # Crop it to study area - rotate here or no?
+  
+  # No rotation
+  # study_area_180 <- extent(c(-120, -60, 20, 70))
+  # clim_cropped <- crop(soda_clim_stack, study_area_180)
+  
+  # shift it to match 0-360
+  soda_clim_shifted <- map(unstack(soda_clim_stack), ~ shift(rotate(shift(.x, 180)), 180) ) %>% stack()
+  
+  # Crop it to study area - rotate here or no?
+  study_area <- extent(c(260, 320, 20, 70))
+  clim_cropped <- crop(soda_clim_shifted, study_area)
+  
   return(clim_cropped)
+  
+  
 }
 
 
@@ -202,6 +278,15 @@ cmip_to_clim <- function(cmip_stack = cmip_cropped, clim_years = NULL){
   # Pull out the names of the cmip layers for matching
   cmip_layers <- names(cmip_stack)
   
+  
+  
+  # Check the string length for the names to determine format
+  if(str_length(cmip_layers[1]) < 11){
+    message(paste0("Problem with CMIP Naming Structure"))
+    return("Ignoring for now")}
+  
+  
+  
   # Pull layers of cmip data for the years of interest for climatology
   cmip_clim_years  <- cmip_stack[[which(str_sub(cmip_layers, 2,5) %in% clim_years)]]
   clim_year_layers <- names(cmip_clim_years)
@@ -219,6 +304,7 @@ cmip_to_clim <- function(cmip_stack = cmip_cropped, clim_years = NULL){
     # Mean across years
     monthly_clim <- mean(cmip_clim_years[[cmip_month_indices]])
     return(monthly_clim)
+    
   }) %>% stack()
   
   # Return the new climatology stack
@@ -243,7 +329,8 @@ cmip_get_anomalies <- function(cmip_data, cmip_clim){
   # Map though the month key to pull their data, return quantile stack
   month_index <- str_pad(c(1:12), 2, "left", "0")
   
-  # Map through the months
+ 
+  ####  Map through the months
   # month_index are how they are as dates in Xyyyy.mm.dd
   # month abbrevs are how they are named in climatology
   monthly_anoms <- map2(month_index, month_abbrevs, function(month_index, month_abbrev){
@@ -262,6 +349,9 @@ cmip_get_anomalies <- function(cmip_data, cmip_clim){
     # Subtract climate average to get anomalies
     month_anoms <- month_layers - clim_month_data
     month_anoms <- setNames(month_anoms, cmip_month_labels)
+    
+    # Return anomalies for that month across years
+    return(month_anoms)
     
     
   }) %>% stack()
@@ -345,6 +435,11 @@ delta_method_bias_correct <- function(cmip_grid = cmip_anoms_regridded,
   
   # fix those names for consistency
   names(cmip_proj_out) <- cmip_dates
+  
+  # Sort the order so its in order by year and month
+  new_order <- sort(names(cmip_proj_out))
+  cmip_proj_out <- cmip_proj_out[[ new_order ]]
+  
   return(cmip_proj_out)
   
   
