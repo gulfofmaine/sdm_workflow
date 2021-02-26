@@ -2,6 +2,7 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 import gcsfs
+import os
 
 # functions
 def path_switch_unix(x, folder, user_name):
@@ -142,3 +143,25 @@ def CheckMeta(dfList):
         attr = ds.attrs
         meta.append(attr)
     res = list(map(operator.itemgetter('nominal_resolution'), meta))
+
+
+def checkDates(file):
+    name = os.path.basename(file)
+
+    try:
+        ds = xr.open_dataset(file)
+    except ValueError:
+        ds = xr.open_dataset(file, decode_times=False)
+
+    try:
+        minDate = str(ds.indexes['time'].to_datetimeindex().min())
+    except (AttributeError, ValueError):
+        minDate = str(ds.time.min())
+    try:
+        maxDate = str(ds.indexes['time'].to_datetimeindex().max())
+    except (AttributeError, ValueError):
+        maxDate = str(ds.time.max())
+    timeLayers = len(ds.time)
+    d = {'name': [name], 'minDate': [minDate], 'maxData': [maxDate], 'length': [timeLayers]}
+    df = pd.DataFrame(data=d)
+    return df

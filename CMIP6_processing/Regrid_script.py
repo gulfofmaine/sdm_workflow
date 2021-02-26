@@ -55,6 +55,7 @@ for file in dsThetao:
 
 dsSO = glob.glob(f'{path}RawTmpFiles/so*_ssp585*')
 dsSO = glob.glob(f'{path}RawTmpFiles/so*_historical*')
+file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/so_NorESM2-MM_r1i1p1f1_historical.nc"
 for file in dsSO:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
@@ -69,7 +70,6 @@ for file in dsSO:
 
 dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_ssp585*')
 dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_historical*')
-file = f'{path}RawTmpFiles/so_MRI-ESM2-0_r1i1p1f1_ssp585.nc'
 for file in dsSurSO:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
