@@ -1,0 +1,11 @@
+# In .dockerignore
+# Exclude everything:
+#
+*
+
+# Now un-exclude only those things we need to build the Dockerfile:
+#
+!./DockerConfig
+!./R
+!./pipelines
+!./tools
