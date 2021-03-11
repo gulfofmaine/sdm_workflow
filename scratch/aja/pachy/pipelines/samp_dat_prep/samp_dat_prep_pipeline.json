@@ -1,0 +1,15 @@
+{
+    "pipeline": {
+        "name": "samp_dat_prep"
+    },
+    "input": {
+        "pfs": {
+            "repo": "raw_dat",
+            "glob": "/"
+        }
+    },
+    "transform": {
+        "image": "ajall1985/pachy",
+        "cmd": ["./R/samp_dat_prep.R", "./pfs/raw_dat/samp_dat.csv", "1", "1985", "2005", "./pfs/samp_dat_prep/"]
+    }
+}
