@@ -5,7 +5,7 @@
     "input": {
         "pfs": {
             "repo": "raw_dat",
-            "glob": "/"
+            "glob": "/*"
         }
     },
     "transform": {
