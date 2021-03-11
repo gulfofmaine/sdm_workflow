@@ -50,7 +50,6 @@ samp_dat_prep<- function(in_csv_dir, species_vec, year_min, year_max, out_rds_di
   saveRDS(dat_temp, paste0(out_rds_dir, "samp_dat_prepped.rds"))
 }
 
-
 if(!interactive()){
   # Build up our command line argument parser
   parser<- arg_parser("Prep sample data")
