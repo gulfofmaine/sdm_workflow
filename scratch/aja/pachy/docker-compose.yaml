@@ -15,6 +15,7 @@ services:
     # Volumes for exposing local system within the container
     volumes:
       - ./pfs/raw_dat/raw_dat.csv:/pfs/raw_dat/raw_dat.csv
+      - ./pfs/samp_dat_prep:/pfs/out
     
     environment:
       PASSWORD: pw

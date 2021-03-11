@@ -12,7 +12,8 @@ COPY ./pipelines/samp_dat_prep/R/DockerConfig/add_requirements.R /home/$USER/add
 RUN Rscript /home/$USER/add_requirements.R
 
 # Copy all R functions for this pipeline step and drop in new directory
-COPY ./pipelines/samp_dat_prep/R/*.R /home/$USER/R/
+COPY ./pipelines/samp_dat_prep/R/ /home/$USER/R/
+COPY ./R/ /home/$USER/R/
 
 # Make them executable
 RUN ls -lR /home/$USER/R/
