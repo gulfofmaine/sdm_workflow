@@ -41,6 +41,7 @@ for file in dsTOS:
 
 dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_ssp585*')
 dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_historical*')
+file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/thetao_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
 for file in dsThetao:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
@@ -49,13 +50,14 @@ for file in dsThetao:
     ds = xr.open_dataset(fileout)
     savepath = f'{path}BottomT/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
+    #ds_cropped = ds_cropped.isel(time=slice(None, 1032))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsThetao))}')
 
 dsSO = glob.glob(f'{path}RawTmpFiles/so*_ssp585*')
 dsSO = glob.glob(f'{path}RawTmpFiles/so*_historical*')
-file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/so_NorESM2-MM_r1i1p1f1_historical.nc"
+file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/so_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
 for file in dsSO:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
@@ -64,21 +66,24 @@ for file in dsSO:
     ds = xr.open_dataset(fileout)
     savepath = f'{path}BottomSal/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
+    #ds_cropped = ds_cropped.isel(time=slice(None, 1032))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsSO))}')
 
 dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_ssp585*')
 dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_historical*')
+file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/Surface_so_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
 for file in dsSurSO:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
     fileout = f'{path}SurSalinity/tmpfiles/stGrid_{base_filename}'
     cdo.remapdis(gridfi,  input=file, output=fileout, options='-f nc')
-    ds = xr.open_dataset(fileout, decode_times=True)
+    ds = xr.open_dataset(fileout, decode_times=False)
     savepath = f'{path}SurSalinity/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsSurSO))}')
+
 
