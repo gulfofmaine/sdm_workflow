@@ -1,5 +1,5 @@
 ---
-title: "SODA Bias Correction Testing"
+title: "CMIP-OISST Bias Correciton"
 author: "Adam A. Kemberling"
 date: "`r Sys.Date()`"
 output: 
@@ -9,11 +9,6 @@ output:
         collapsed: FALSE
     code_folding: show
 params: 
-  variable: 
-    label: "Select a SODA Variable to Process:" 
-    value: "surf_sal"
-    input: select
-    choices: ["surf_sal", "bot_sal", "bot_temp"]
   climate_start: "1985"
   climate_stop: "2014"
 editor_options: 
@@ -56,11 +51,7 @@ temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
 source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
 ```
 
-
-
-
-
-## Load CMIP6 Data for Each Variable
+## Load CMIP6 Data for sea surface Temperature
 
 We've got 4 variables to bias correct from the CMIP data using SODA:
 
@@ -70,16 +61,15 @@ We've got 4 variables to bias correct from the CMIP data using SODA:
  4. Bottom Salinity
  
  
-The trickiest part will be managing the dimension and variable names, and either breaking the data up by variable or trying to do everything in a unified way.
+The only one we will use OISST for is sea surface temperature.
+
 
 
 ```{r load collection}
 
 ####  Choose a variable
-pick_var <- params$variable
-# pick_var <- "bot_temp"
-# pick_var <- "surf_sal"
-# pick_var <- "bot_sal"
+pick_var <- "surf_temp"
+
 
 # Load all the CMIP Scenarios - cropped to study area
 cmip_data <- import_cmip_collection(cmip_var = pick_var)
@@ -148,8 +138,6 @@ tdims <- tdims %>%
 # The code digging into the dates is no longer relevant, just need the scenario type info
 name_structure <- tdims
 ```
-
-
 
 
 ## Build CMIP Climatologies
@@ -248,28 +236,29 @@ plot(cmip_anoms[[1]][[1]],
 ```
 
 
-##  SODA Bias Correction
+##  OISSTv2 Bias Correction
 
-SODA data will be used to bias correct 3 variables:
- * Bottom Salinity   
- * Surface Salinity   
- * Bottom Temperature
- 
- 
 In order to do this we need the climatology for each of those variables for a reference period that aligns with the CMIP historical data
 
 
-### Import Soda Climatology
+### Import OISST Climatology
 
-The SODA climatologies were run in xarray in the `soda_climatology.py` file.
+The OISST climatology was processed using xarray in the oisst mainstays repository. Once it has been loaded we also need to convert it to monthly to match the CMIP data.
 
 ```{r import ref climatology}
 
 # Load SODA Climatology
-soda_clim <- import_soda_clim(soda_var = pick_var, 
-                              os.use = "unix", 
-                              start_yr = "1985")
+oisst_clim <- import_oisst_clim(climatology_period = c("1985-2014"), 
+                                os.use = "unix")
 
+```
+
+### Convert to Monthly Means
+
+```{r}
+# Convert to Monthly
+oisst_monthly <- months_from_clim(oisst_clim)
+rm(oisst_clim)
 ```
 
 ### Optional re-gridding
@@ -283,18 +272,18 @@ This step  is only necessary if the resolution across data sources is not the sa
 
 # cmip_anoms <- map(cmip_anoms, function(anom_grid){
 #   if(class(anom_grid) == "character"){return("Problem with CMIP Naming Structure")}
-#   resample_grid(starting_grid = anom_grid, desired_grid = soda_clim_shifted)})
+#   resample_grid(starting_grid = anom_grid, desired_grid = oisst_monthly)})
 
 ```
-
-
 
 ```{r}
 # Plot Check
-plot(soda_clim[[1]], 
+plot(oisst_monthly[[1]], 
      col = temp_pal, 
      main = "January Climatology")
 ```
+
+
 
 ### Bias Correction
 
@@ -310,13 +299,14 @@ cmip_anoms_bcorrect <- map(cmip_anoms, function(anom_grid){
   
   # run for data that passes check
   delta_method_bias_correct(cmip_grid = anom_grid, 
-                            reference_climatology = soda_clim)})
+                            reference_climatology = oisst_monthly)})
 
 
 
 # Historical Run
-plot(cmip_anoms_bcorrect[[1]][[1]])
+plot(cmip_anoms_bcorrect[[1]][[1]], col = temp_pal)
 ```
+
 
 
 ## Processing Mean/5th/95th
@@ -361,8 +351,8 @@ Now that all the CMIP6 data has been bias corrected using either OISST or SODA, 
 
 # Use the time-period length (in months) to Get the mean 5th 95th at each step
 historic_mean <- time_period_quantile(time_period = "historic",
-                                    time_period_collection = historic_bias_corr, 
-                                    quantile_product = "mean")
+                                      time_period_collection = historic_bias_corr, 
+                                      quantile_product = "mean")
 
 
 
@@ -451,8 +441,7 @@ var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
 
 
 # File Names
-writeRaster(full_5th, paste0(var_path, "_SODA_bias_corrected_5thpercentile.grd"))
-writeRaster(full_mean, paste0(var_path, "_SODA_bias_corrected_mean.grd"))
-writeRaster(full_95th, paste0(var_path, "_SODA_bias_corrected_95thpercentile.grd"))
+writeRaster(full_5th, paste0(var_path, "_OISST_bias_corrected_5thpercentile.grd"))
+writeRaster(full_mean, paste0(var_path, "_OISST_bias_corrected_mean.grd"))
+writeRaster(full_95th, paste0(var_path, "_OISST_bias_corrected_95thpercentile.grd"))
 ```
-

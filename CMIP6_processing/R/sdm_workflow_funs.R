@@ -15,6 +15,31 @@ month_abbrevs <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"
 months_numeric <- str_pad(seq(from = 1, to = 12, by = 1), width = 2, side = "left", pad = 0)
 
 
+# date keys for the different cmip runs
+cmip_date_key <- list(
+  "surf_temp" = list(
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_future_projections.csv', col_types = cols()),
+    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_over_run.csv', col_types = cols())),
+  "surf_sal" = list(
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_future_projections.csv', col_types = cols()),
+    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_over_run.csv', col_types = cols())),
+  "bot_temp" = list(
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_future_projections.csv', col_types = cols()),
+    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_over_run.csv', col_types = cols())),
+  "bot_sal" = list(
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_future_projections.csv', col_types = cols()),
+    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_over_run.csv', col_types = cols())
+  )
+  
+  
+  
+  )
+
+
 ####  OISST Processing  ####
 
 
@@ -27,20 +52,23 @@ months_numeric <- str_pad(seq(from = 1, to = 12, by = 1), width = 2, side = "lef
 #'
 #' @return Rster stack of OISST Daily Climatology cropped to study area
 
-import_oisst_clim <- function(climatology_period = "1991-2020", os.use = "unix"){
+import_oisst_clim <- function(climatology_period = "1985-2014", 
+                              os.use = "unix"){
   
   # Path to OISST on Box
   oisst_path <- shared.path(os.use = os.use, group = "RES_Data", 
                             folder = "OISST/oisst_mainstays/daily_climatologies/")
   
-  # re-direct based on desired climatology
-  if(climatology_period == "1991-2020"){
-    clim_stack <- stack(paste0(oisst_path, "daily_clims_1991to2020.nc"))
+  # Path to specific climatology
+  climatology_path <- switch(climatology_period,
+    "1991-2020" = paste0(oisst_path, "daily_clims_1991to2020.nc"),
+    "1982-2011" = paste0(oisst_path, "daily_clims_1982to2011.nc"),
+    "1985-2014" = paste0(oisst_path, "daily_clims_1985to2014.nc"))
   
-    }else if(climatology_period == "1982-2011"){
-      clim_stack <- stack(paste0(oisst_path, "daily_clims_1982to2011.nc"))}
+  # Load the Raster Stack
+  clim_stack <- stack(climatology_path)
   
-  # Crop it to study area
+  # Crop it to study area and return
   clim_cropped <- crop(clim_stack, study_area)
   return(clim_cropped)
 }
@@ -48,43 +76,7 @@ import_oisst_clim <- function(climatology_period = "1991-2020", os.use = "unix")
 
 
 
-#' @title Load CMIP6 NetCDF data.
-#' 
-#' @description Load CMIP6 data off BOX by path to specific file(s) in RES_Data/CMIP6/.
-#' Default loads the CMIP6 SST subset used for testing. 
-#'
-#' @param cmip_file Either "tester", or path to cmip stack within RES_Data/CMIP6
-#'
-#' @return Raster stack of CMIP Data, cropped to study area.
-#'
-import_cmip_sst <- function(cmip_file = "tester"){
-  
-  # General path to all the cmip data on Box
-  cmip_path    <- shared.path(os.use = "unix", group = "RES_Data", folder = "CMIP6/")
-  
-  # Load the stack(s) cropped to the study area
-  if(cmip_file == "tester"){
-    message(paste0("Loading CMIP6 File: tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc"))
-    cmip_full   <- stack(paste0(cmip_path, "TestFiles/tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc"))
-    cmip_cropped <- crop(cmip_full, study_area)
-  
-    } else if(length(cmip_file) == 1){
-        message(paste0("Loading CMIP6 File: ", cmip_file))
-        cmip_full <- stack(paste0(cmip_path, cmip_file))
-        cmip_cropped <- crop(cmip_full, study_area)
-  
-      } else if(length(cmip_file > 1)){
-          cmip_cropped <- map(cmip_file, function(x){
-            message(paste0("Loading Multiple CMIP Files, Returning List"))
-            cmip_full   <- stack(paste0(cmip_path, x))
-            cmip_cropped <- crop(cmip_full, study_area)}) %>% 
-            setNames(cmip_file)
-  }
-  
-  
-  return(cmip_cropped)
-  
-}
+
 
 
 
@@ -106,21 +98,28 @@ import_cmip_collection <- function(cmip_var = c("bot_sal", "bot_temp", "surf_tem
   
   
   # Set folder path to single variable extractions
-  cmip_var_folder <-switch (pick_var,
-                            "bottom_sal" = paste0(cmip_path, "BottomSal/StGrid"),
-                            "bottom_sal" = paste0(cmip_path, "BottomT/StGrid"),
-                            "bottom_sal" = paste0(cmip_path, "SST/StGrid"),
-                            "bottom_sal" = paste0(cmip_path, "SurSalinity/StGrid"))  
+  cmip_var_folder <- switch (cmip_var,
+                             "bot_sal"   = paste0(cmip_path, "BottomSal/StGrid"),
+                             "bot_temp"  = paste0(cmip_path, "BottomT/StGrid"),
+                             "surf_temp" = paste0(cmip_path, "SST/StGrid"),
+                             "surf_sal"  = paste0(cmip_path, "SurSalinity/StGrid"))  
   
   # Get File List, set the source names
   cmip_names <- list.files(cmip_var_folder, full.names = F, pattern = ".nc") %>% str_remove(".nc")
   cmip_files <- list.files(cmip_var_folder, full.names = T, pattern  = ".nc") %>% setNames(cmip_names)
   
+  # Set variable name for the different CMIP netcdf files
+  var_name <- switch(cmip_var,
+                     "bot_sal"   = "so",
+                     "bot_temp"  = "thetao",
+                     "surf_temp" = "tos",
+                     "surf_sal"  = "so")
+  
   
   # Open the files and crop them all in one go
   cmip_data <- imap(cmip_files, function(cmip_file, cmip_name){
     message(paste0("Opening File: ", cmip_name))
-    stack_out <- raster::stack(cmip_file)
+    stack_out <- raster::stack(cmip_file, varname = var_name)
     
     # Crop it to study area
     stack_out <- crop(stack_out, study_area)
@@ -197,13 +196,15 @@ months_from_clim <- function(clim_source, month_layer_key = NULL){
 #'
 #' @param soda_var variable name to use when stacking data
 #' @param os.use windows mac toggle for box path
+#' @param start_yr Starting year for climatology, 1985 or 1990
 #'
 #' @return Raster stack for monthly climatology, cropped to study area
 #' @export
 #'
 #' @examples
 import_soda_clim <- function(soda_var = c("surf_sal", "surf_temp", "bot_sal", "bot_temp"),
-                        os.use = "unix"){
+                             os.use = "unix",
+                             start_yr = "1985"){
   
   # Variable key
   var_key <- c("bot_sal" = "bottom salinity", "bot_temp" = "bottom temperature",
@@ -213,10 +214,16 @@ import_soda_clim <- function(soda_var = c("surf_sal", "surf_temp", "bot_sal", "b
   soda_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "SODA")
   
   # Climatology Path
-  clim_path <- paste0(soda_path, "SODA_monthly_climatology1990to2019.nc")
-  
+  clim_path <- switch(start_yr,
+                      "1985" = paste0(soda_path, "SODA_monthly_climatology1985to2014.nc"),
+                      "1990" = paste0(soda_path, "SODA_monthly_climatology1990to2019.nc") )
+    
   # message for what went on while testing
-  message(paste0("Loading 1990-2019 SODA Climatology Data for ", var_key[soda_var]))
+  load_message <- switch(start_yr,
+                         "1985" = paste0("Loading 1985-2014 SODA Climatology Data for ", var_key[soda_var]),
+                         "1990" = paste0("Loading 1990-2019 SODA Climatology Data for ", var_key[soda_var]) )
+  message(load_message)
+  
   
   # Open Stack with selected variable
   soda_clim_stack <- raster::stack(x = clim_path, varname = soda_var)
@@ -254,6 +261,43 @@ import_soda_clim <- function(soda_var = c("surf_sal", "surf_temp", "bot_sal", "b
 #### CMIP Processing  ####
 
 
+#' @title Get CMIP Dates from DateKeys
+#' 
+#' @description Use the date keys that were made using xarray to correctly match the raster
+#' names to the dates they should be.
+#'
+#' @param cmip_source name of the cmip file
+#' @param cmip_var name of the variable/folder 
+#' @param time_dim the length of the time dimension as a back up check for wonky files
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_cmip_dates <- function(cmip_source, cmip_var, time_dim){
+  if(cmip_source %in% names(cmip_date_key[[cmip_var]]$historic_runs)){ 
+    cmip_dates <- cmip_date_key[[cmip_var]][["historic_runs"]][, cmip_source] %>% 
+      pull(1) %>% 
+      as.Date() } else if(cmip_source %in% names(cmip_date_key[[cmip_var]]$future_projections)){ 
+        cmip_dates <- cmip_date_key[[cmip_var]][["future_projections"]][, cmip_source] %>% 
+          pull(1) %>% 
+          as.Date() } else if(cmip_source %in% names(cmip_date_key[[cmip_var]]$extended_projections)){ 
+            cmip_dates <- cmip_date_key[[cmip_var]][["extended_projections"]][, cmip_source] %>% 
+              pull(1) %>% 
+              as.Date() 
+            
+            # What to do if not any of them?
+          } else if(time_dim == 780){
+            cmip_dates <- map(str_pad(c(1:12), 2, pad = "0", side = "left"), ~ paste0("X", c(1950:2014), ".", .x)) %>% unlist() %>% sort()
+          } else if(time_dim == 1032){
+            cmip_dates <- map(str_pad(c(1:12), 2, pad = "0", side = "left"), ~ paste0("X", c(2015:2100), ".", .x)) %>% unlist() %>% sort()
+          }
+  
+  return(cmip_dates)}
+
+
+
+
 #' @title Get Climate Reference from CMIP6
 #' 
 #' @description Return monthly climatology from CMIP6 Data for specified reference period.
@@ -265,7 +309,7 @@ import_soda_clim <- function(soda_var = c("surf_sal", "surf_temp", "bot_sal", "b
 #'
 cmip_to_clim <- function(cmip_stack = cmip_cropped, clim_years = NULL){
   
-  # Use 1982:2011 as default
+  # Use 1982:2011 as default years unless specified
   if(is.null(clim_years)){
     clim_years <- as.character(c(1991:2020))
     message("Using 1991-2020 as Climate Reference Period")
@@ -280,10 +324,10 @@ cmip_to_clim <- function(cmip_stack = cmip_cropped, clim_years = NULL){
   
   
   
-  # Check the string length for the names to determine format
-  if(str_length(cmip_layers[1]) < 11){
-    message(paste0("Problem with CMIP Naming Structure"))
-    return("Ignoring for now")}
+  # # Check the string length for the names to determine format
+  # if(str_length(cmip_layers[1]) < 11){
+  #   message(paste0("Problem with CMIP Naming Structure"))
+  #   return("Ignoring for now")}
   
   
   
@@ -400,32 +444,25 @@ resample_grid <- function(starting_grid = cmip_anoms,
 delta_method_bias_correct <- function(cmip_grid = cmip_anoms_regridded, 
                                       reference_climatology = oisst_month_avgs_91){
   
-  ####  Objective:
-  # Add CMIP monthly anomalies directly to the climate reference monthly averages
-  
-  
-  #### Do Some work with the names so we can find matches between the cmip anoms and the reference climatology 
-  
-  # change oisst names to the numeric ones to streamline the matching
+  # 1. Change climatology names to the numeric ones to streamline the matching
   reference_climatology <- setNames(reference_climatology, months_numeric)
   
-  # Get dates from cmip in non-raster format
-  cmip_dates  <- as.Date(gsub("[.]", "-", gsub("X", "", names(cmip_grid))))
   
-  # For each time step, add the anomalies to the
-  # Alright, apply the anomalies (deltas) of the climate model to OISST climatology. The code below "loops" over each of the layers in the climate model anomalies stack and then adds those values to the matching oisst monthly climatology bsased on the month of the climate model anomalies stack
-  cmip_proj_out <- lapply(seq(1:nlayers(cmip_grid)), function(layer_index) { 
+  # 2. Get dates from cmip in non-raster format - necessary?
+  # cmip_dates  <- as.Date(gsub("[.]", "-", gsub("X", "", names(cmip_grid)))) # as dates
+  # cmip_dates  <- gsub("[.]", "-", gsub("X", "", names(cmip_grid)))          # as char
+  cmip_dates  <- names(cmip_grid)
+  
+  
+  # 3. For each time step, add the anomalies to the climate average from ref data
+  # Alright, apply the anomalies (deltas) of the climate model to OISST climatology. 
+  cmip_proj_out <- map(seq(1:nlayers(cmip_grid)), function(layer_index) { 
     
     # Grab the first CMIP layer
     cmip_anom_layer <- cmip_grid[[layer_index]]
     
     # Get the corresponding layer number for the reference climatology
-    
-    # Pull month from Z, use to match reference climatology names
-    # month_digits   <- format(getZ(cmip_grid)[layer_index], "%m")
-    # layer_match    <- match(month_digits, gsub("X", "", names(reference_climatology)))
-    
-    month_digits   <- str_sub(names(cmip_anom_layer)[1], 7,8)
+    month_digits   <- str_sub( names(cmip_anom_layer)[1] , 7,8)
     layer_match    <- which(str_detect(names(reference_climatology), month_digits))
     ref_clim_layer <- reference_climatology[[layer_match]]
     
@@ -433,7 +470,7 @@ delta_method_bias_correct <- function(cmip_grid = cmip_anoms_regridded,
     delta_out <- cmip_anom_layer + ref_clim_layer}) %>% 
       stack()
   
-  # fix those names for consistency
+  # Add their names back
   names(cmip_proj_out) <- cmip_dates
   
   # Sort the order so its in order by year and month
@@ -457,29 +494,68 @@ delta_method_bias_correct <- function(cmip_grid = cmip_anoms_regridded,
 
 ####  Processing Mean/5th/95th  ####
 
-# Re-stack all the bias-corrected cmip datasets by time step
-# stores years in a list
 
 
-#' @title Re-Stack CMIP Delta Bias Corrected Data
-#' 
-#' @description Takes bias corrected data sources and re-stacks them to align on the same 
-#' time steps. This sets up the stacks for assessing 5th and 95th percentile and mean data.
+
+#' @title Return Desired Quantile from Collection of Bias Corrected Data
 #'
-#' @param cmip_inputs 
-#' 
+#' @param time_period String determining behavior for historic or projection data. Impacts date 
+#' names and subsetting.
+#' @param time_period_collection The list of raster stacks corresponding to a collection of bias 
+#' corrected historic or projected climate
+#' @param quantile_product The desired quantile to return from the function
 #'
 #' @return
-#' 
-restack_cmip_projections <- function(cmip_inputs = cmip_delta_bias_corrected){
+#' @export
+#'
+#' @examples
+time_period_quantile <- function(time_period = c("historic", "projection"),
+                                 time_period_collection = historic_bias_corr,
+                                 quantile_product = c("mean", "5th", "95th")){
   
-  # Get the number of total time steps from a given stack
+  # Number of time steps
+  ts_vector <- switch(
+    EXPR = time_period,
+    "historic" = c(1:780),
+    "projection" = c(1:1032)
+  )
+  
+  # What the names should be for output stack, year and month
+  name_key <- switch(
+    EXPR = time_period,
+    "historic"   = map(str_pad(c(1:12), 2, pad = "0", side = "left"), ~ paste0("X", c(1950:2014), ".", .x)) %>% unlist() %>% sort(),
+    "projection" = map(str_pad(c(1:12), 2, pad = "0", side = "left"), ~ paste0("X", c(2015:2100), ".", .x)) %>% unlist() %>% sort()
+  )
+  
+  # What quantile function to use
+  quant_fun <- switch(
+    EXPR = quantile_product,
+    "mean" = function(month_subset_ras){calc(month_subset_ras, fun = mean,  na.rm = T)},
+    "5th"  = function(month_subset_ras){calc(month_subset_ras, function(rasters){
+      quantile(rasters, probs = 0.05, na.rm = T)})},
+    "95th" = function(month_subset_ras){calc(month_subset_ras, function(rasters){
+      quantile(rasters, probs = 0.95, na.rm = T)})}
+  )
   
   
-  # map around that length and pull out the layers of each
-  # Put them in stacks by time step, try to keep the names of their sources?
+
+  # Map through the time steps getting the desired quantile at each step
+  time_period_quantile <- map(ts_vector, function(time_step){
+    
+    # Pull the time step
+    month_subset_ras <- map(time_period_collection, ~ .x[[time_step]]) %>% stack()
+    
+    # Grab the desired quantile
+    ras_quant <- quant_fun(month_subset_ras)
+    return(ras_quant)
+    
+  }) %>% setNames(name_key) # Set the layer names
   
   
+  # return the quantile
+  return(time_period_quantile)
+
+
 }
 
 
@@ -488,104 +564,234 @@ restack_cmip_projections <- function(cmip_inputs = cmip_delta_bias_corrected){
 
 
 
-#' @title Raster Quantiles from Timestep Stacks
-#' 
-#' @description Get the Mean/5th/95th percentile at each time step from an ensemble of climate
-#' projections. Typically used with map() to iterate through years. This function operates on
-#' the name structure of the months.
-#'
-#' @param year_stacks Raster stack containing a full year of each CMIP model's data
-#'
-#' @return
-#' 
-timestep_stats <- function(year_stacks){
-  
-  # Map though the month key to pull their data, return quantile stack
-  month_key <- str_pad(c(1:12), 2, "left", "0")
-  month_labels <- paste0("X", month_key)
-  
-  
-  # Get stack containing mean values
-  monthly_percentiles_05 <- map(month_key, function(month_index){
-    
-    # What layers match the month
-    raster_layers <- str_sub(names(year_stacks), 7, 8) #month letters in X2020.01.01
-    which_days    <- which(str_detect(raster_layers, month_index) == TRUE)
-    
-    # Pull the days out
-    month_subset_ras <- year_stacks[[which_days]]
-    
-    # Use calc to get mean + percentiles
-    ras.quant <- calc(month_subset_ras, mean,  na.rm = T)
-    
-  }) %>% 
-    setNames(month_labels) %>% 
-    stack()
-  
-  # Get stack containing 5th percentile values
-  monthly_percentiles_mean <- map(month_key, function(month_index){
-    
-    # What layers match the month
-    raster_layers <- names(year_stacks)
-    which_days <- which(str_detect(raster_layers, month_index) == TRUE)
-    
-    # Pull the days out
-    month_subset_ras <- year_stacks[[which_days]]
-    
-    # Use calc to get mean + percentiles
-    ras.05   <- calc(month_subset_ras, quantile, probs = 0.05, na.rm = T)
-    
-  }) %>% 
-    setNames(month_labels) %>% 
-    stack()
-  
-  # 95th percentile stack
-  monthly_percentiles_95 <- map(month_key, function(month_index){
-    
-    # What layers match the month
-    raster_layers <- names(year_stacks)
-    which_days <- which(str_detect(raster_layers, month_index) == TRUE)
-    
-    # Pull the days out
-    month_subset_ras <- year_stacks[[which_days]]
-    
-    # Use calc to get mean + percentiles
-    ras.95   <- calc(month_subset_ras, quantile, probs = 0.95, na.rm = T)
-  }) %>% 
-    setNames(month_labels) %>% 
-    stack()
-  
-  # For each year return a list of each month for the three quantiles
-  year_quants <- list(
-    "percentile_05" = monthly_percentiles_05,
-    "mean"          = monthly_percentiles_mean,
-    "percentile_95" = monthly_percentiles_95)
-  
-  
-  return(year_quants)
-  
-  
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Function to re-stack the different scenarios as singular timelines by stat/quantile:
 #takes the list of raster stacks, organized by year, and the corresponding names as a vector or 
 # by passing the named list to imap()
 
 
-#' @title Reassemble Timeseries from List of Ensemble Quantiles
-#' 
-#' @description 
-#'
-#' @param year_stack Output Raster stack or list of raster stacks from timestep_stats()
-#' @param year_lab Matching string indicating the year or timestep to go with each list item
-#' @param stat_group String indicating which statistic to extract ("mean", "percentile05", 
-#' "percentile95")
-#'
-#' @return
-#' 
-timestep_to_full <- function(year_stack, year_lab, stat_group){
-  stat_out   <- year_stack[[stat_group]] 
-  orig_names <- str_replace(names(stat_out), "X", "")
-  new_names  <- paste0(paste0("X", year_lab, "_"), orig_names)
-  stat_out   <- setNames(stat_out, new_names)
+
+####  Memory Checking  ####
+
+####  Memory check Functions  ####
+# Source: https://medium.com/@williamr/reducing-memory-usage-in-r-especially-for-regressions-8ed8070ae4d8
+# Main function 
+.ls.objects <- function (pos = 1, pattern, order.by,
+                         decreasing=FALSE, head=FALSE, n=5) {
+  napply <- function(names, fn) sapply(names, function(x)
+    fn(get(x, pos = pos)))
+  names <- ls(pos = pos, pattern = pattern)
+  obj.class <- napply(names, function(x) as.character(class(x))[1])
+  obj.mode <- napply(names, mode)
+  obj.type <- ifelse(is.na(obj.class), obj.mode, obj.class)
+  obj.prettysize <- napply(names, function(x) {
+    capture.output(format(utils::object.size(x), units = "auto")) })
+  obj.size <- napply(names, object.size)
+  obj.dim <- t(napply(names, function(x)
+    as.numeric(dim(x))[1:2]))
+  vec <- is.na(obj.dim)[, 1] & (obj.type != "function")
+  obj.dim[vec, 1] <- napply(names, length)[vec]
+  out <- data.frame(obj.type, obj.size, obj.prettysize, obj.dim)
+  names(out) <- c("Type", "Size", "PrettySize", "Rows", "Columns")
+  if (!missing(order.by))
+    out <- out[order(out[[order.by]], decreasing=decreasing), ]
+  if (head)
+    out <- head(out, n)
+  out
 }
+
+
+# Shorthand function for easy accessof memory use
+lsos <- function(..., n = 10) {
+  .ls.objects(..., order.by = "Size", decreasing = TRUE, head = TRUE, n = n)
+}
+
+
+
+
+
+#### Prototypes  ####
+
+
+# Was used for the cmip data, but creates more work than time_period_quantile
+
+#' #' @title Raster Quantiles from Timestep Stacks
+#' #' 
+#' #' @description Get the Mean/5th/95th percentile at each time step from an ensemble of climate
+#' #' projections. Typically used with map() to iterate through years. This function operates on
+#' #' the name structure of the months.
+#' #'
+#' #' @param year_stacks Raster stack containing a full year of each CMIP model's data
+#' #'
+#' #' @return
+#' #' 
+#' timestep_stats <- function(year_stacks){
+#'   
+#'   # Map though the month key to pull their data, return quantile stack
+#'   month_key <- str_pad(c(1:12), 2, "left", "0")
+#'   month_labels <- paste0("X", month_key)
+#'   
+#'   
+#'   # Get stack containing mean values
+#'   monthly_percentiles_05 <- map(month_key, function(month_index){
+#'     
+#'     # What layers match the month
+#'     raster_layers <- str_sub(names(year_stacks), 7, 8) #month letters in X2020.01.01
+#'     which_days    <- which(str_detect(raster_layers, month_index) == TRUE)
+#'     
+#'     # Pull the days out
+#'     month_subset_ras <- year_stacks[[which_days]]
+#'     
+#'     # Use calc to get mean + percentiles
+#'     ras.quant <- calc(month_subset_ras, mean,  na.rm = T)
+#'     
+#'   }) %>% 
+#'     setNames(month_labels) %>% 
+#'     stack()
+#'   
+#'   # Get stack containing 5th percentile values
+#'   monthly_percentiles_mean <- map(month_key, function(month_index){
+#'     
+#'     # What layers match the month
+#'     raster_layers <- names(year_stacks)
+#'     which_days <- which(str_detect(raster_layers, month_index) == TRUE)
+#'     
+#'     # Pull the days out
+#'     month_subset_ras <- year_stacks[[which_days]]
+#'     
+#'     # Use calc to get mean + percentiles
+#'     ras.05   <- calc(month_subset_ras, quantile, probs = 0.05, na.rm = T)
+#'     
+#'   }) %>% 
+#'     setNames(month_labels) %>% 
+#'     stack()
+#'   
+#'   # 95th percentile stack
+#'   monthly_percentiles_95 <- map(month_key, function(month_index){
+#'     
+#'     # What layers match the month
+#'     raster_layers <- names(year_stacks)
+#'     which_days <- which(str_detect(raster_layers, month_index) == TRUE)
+#'     
+#'     # Pull the days out
+#'     month_subset_ras <- year_stacks[[which_days]]
+#'     
+#'     # Use calc to get mean + percentiles
+#'     ras.95   <- calc(month_subset_ras, quantile, probs = 0.95, na.rm = T)
+#'   }) %>% 
+#'     setNames(month_labels) %>% 
+#'     stack()
+#'   
+#'   # For each year return a list of each month for the three quantiles
+#'   year_quants <- list(
+#'     "percentile_05" = monthly_percentiles_05,
+#'     "mean"          = monthly_percentiles_mean,
+#'     "percentile_95" = monthly_percentiles_95)
+#'   
+#'   
+#'   return(year_quants)
+#'   
+#'   
+#' }
+
+
+# Was also used for OISST, but is not necessary with time_period_quantile
+
+
+#' #' @title Reassemble Timeseries from List of Ensemble Quantiles
+#' #' 
+#' #' @description 
+#' #'
+#' #' @param year_stack Output Raster stack or list of raster stacks from timestep_stats()
+#' #' @param year_lab Matching string indicating the year or timestep to go with each list item
+#' #' @param stat_group String indicating which statistic to extract ("mean", "percentile05", 
+#' #' "percentile95")
+#' #'
+#' #' @return
+#' #' 
+#' timestep_to_full <- function(year_stack, year_lab, stat_group){
+#'   stat_out   <- year_stack[[stat_group]] 
+#'   orig_names <- str_replace(names(stat_out), "X", "")
+#'   new_names  <- paste0(paste0("X", year_lab, "_"), orig_names)
+#'   stat_out   <- setNames(stat_out, new_names)
+#' }
+
+
+#' #' @title Load CMIP6 NetCDF data.
+#' #' 
+#' #' @description Load CMIP6 data off BOX by path to specific file(s) in RES_Data/CMIP6/.
+#' #' Default loads the CMIP6 SST subset used for testing. 
+#' #'
+#' #' @param cmip_file Either "tester", or path to cmip stack within RES_Data/CMIP6
+#' #'
+#' #' @return Raster stack of CMIP Data, cropped to study area.
+#' #'
+#' import_cmip_sst <- function(cmip_file = "tester"){
+#'   
+#'   # General path to all the cmip data on Box
+#'   cmip_path    <- shared.path(os.use = "unix", group = "RES_Data", folder = "CMIP6/")
+#'   
+#'   # Load the stack(s) cropped to the study area
+#'   if(cmip_file == "tester"){
+#'     message(paste0("Loading CMIP6 File: tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc"))
+#'     cmip_full   <- stack(paste0(cmip_path, "TestFiles/tos_Omon_CanESM5_historical_r1i1p2f1_gn_195501-201412.nc.1x1.nc"))
+#'     cmip_cropped <- crop(cmip_full, study_area)
+#'   
+#'     } else if(length(cmip_file) == 1){
+#'         message(paste0("Loading CMIP6 File: ", cmip_file))
+#'         cmip_full <- stack(paste0(cmip_path, cmip_file))
+#'         cmip_cropped <- crop(cmip_full, study_area)
+#'   
+#'       } else if(length(cmip_file > 1)){
+#'           cmip_cropped <- map(cmip_file, function(x){
+#'             message(paste0("Loading Multiple CMIP Files, Returning List"))
+#'             cmip_full   <- stack(paste0(cmip_path, x))
+#'             cmip_cropped <- crop(cmip_full, study_area)}) %>% 
+#'             setNames(cmip_file)
+#'   }
+#'   
+#'   
+#'   return(cmip_cropped)
+#'   
+#' }
+#' 
+#' 
+#' 
+#' # Never used
+#' #' # Re-stack all the bias-corrected cmip datasets by time step
+#' # stores years in a list
+#' 
+#' 
+#' #' @title Re-Stack CMIP Delta Bias Corrected Data
+#' #' 
+#' #' @description Takes bias corrected data sources and re-stacks them to align on the same 
+#' #' time steps. This sets up the stacks for assessing 5th and 95th percentile and mean data.
+#' #'
+#' #' @param cmip_inputs 
+#' #' 
+#' #'
+#' #' @return
+#' #' 
+#' restack_cmip_projections <- function(cmip_inputs = cmip_delta_bias_corrected){
+#'   
+#'   # Get the number of total time steps from a given stack
+#'   
+#'   
+#'   # map around that length and pull out the layers of each
+#'   # Put them in stacks by time step, try to keep the names of their sources?
+#'   
+#'   
+#' }

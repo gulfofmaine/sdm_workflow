@@ -25,8 +25,8 @@ box_root = root_locations[workspace]
 print(f"Working via {workspace} directory at: {box_root}")
 
 # Set start and end year for climatology
-start_year = 1990
-end_year   = 2019
+start_year = 1985
+end_year   = 2014
 
 
 # Path to SODA data sources on BOX
@@ -60,13 +60,9 @@ botsal = botsal.rename_vars({"salt" : "bot_sal"}).drop("st_ocean")
 
 
 
-# ####  Merge them in? - Not yet
-# # keeps st_ocean around because surface files still have depth dimension
-# soda_full = surftemp.merge(surfsal).merge(bottemp).merge(botsal)
-# soda_full
 
 
-# Build xr.Dataset from pieces of each
+####  Build xr.Dataset from pieces of each  ####
 # Drop the depth dimension where it exists, then rebuild
 def remove_st_ocean(xr_ds, var):
   """Pull out data as an array, drop st_ocean dimension, rebuild xr.array. 
@@ -103,8 +99,9 @@ plt.show()
 plt.clf()
 
 
-# Make them into a dataset from all fouur
-# Adding in the other variables
+
+
+####  Build a dataset from all four  ####
 soda_manual = xr.Dataset({"surf_temp" : surftemp_manual,
                           "surf_sal"  : surfsal_manual,
                           "bot_temp"  : bottemp_manual,
@@ -115,6 +112,8 @@ soda_manual = xr.Dataset({"surf_temp" : surftemp_manual,
 # Inspect it
 soda_full = soda_manual
 type(soda_full)
+
+soda_full.bot_sal.range()
 
 
 ####  Subset Years
