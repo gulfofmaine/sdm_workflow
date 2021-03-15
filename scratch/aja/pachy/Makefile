@@ -1,8 +1,8 @@
 # Docker bits
-build-push: down
-	docker-compose build
-	docker push ajall1985/pachy
-
+up: down
+	docker-compose up -d --build
+	docker-compose logs -f
+	
 down:
 	docker-compose down
 
@@ -16,5 +16,5 @@ prune:
 #####
 ## Workflow pipeline steps
 # Sample data prep
-#samp_dat_prepped.rds: 
-#	./pipelines/samp_dat_prep/R/samp_dat_prep.R "./pfs/raw_dat/" 1 1985 2005 "./pfs/samp_dat_prep/"
+samp_dat_prepped.rds: 
+	./pipelines/samp_dat_prep/R/samp_dat_prep.R "./pfs/raw_dat/" 1 1985 2005 "./pfs/samp_dat_prep/"

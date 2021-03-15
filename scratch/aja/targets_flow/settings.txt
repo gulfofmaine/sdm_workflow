@@ -37,8 +37,10 @@ $vars_to_correct
 [1] "Index_cyl" "Index_ctl"
 
 $Options
-        SD_site_logdensity            Calculate_Range   Calculate_effective_area treat_nonencounter_as_zero 
-                     FALSE                       TRUE                       TRUE                       TRUE 
+        SD_site_logdensity            Calculate_Range   Calculate_effective_area 
+                     FALSE                       TRUE                       TRUE 
+treat_nonencounter_as_zero 
+                      TRUE 
 
 $grid_size_km
 [1] 25

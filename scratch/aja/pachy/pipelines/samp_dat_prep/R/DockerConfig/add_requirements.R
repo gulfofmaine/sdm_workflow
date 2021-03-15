@@ -2,4 +2,5 @@
 install.packages("devtools")
 install.packages("argparser")
 install.packages("here")
+install.packages("mgcv")
 

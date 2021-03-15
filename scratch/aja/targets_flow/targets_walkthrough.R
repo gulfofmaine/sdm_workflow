@@ -1,6 +1,22 @@
 ##########
 ##### Walking through steps of _targets.R
 ##########
+install.packages("usethis")
+install.packages("devtools")
+library(devtools)
+install_version("Matrix", version = "1.2.8")
+library(Matrix)
+install_version("TMB", "1.7.18")
+# Now VAST and FishStatsUtils, do NOT update TMB
+devtools::install_github("James-Thorson-NOAA/FishStatsUtils", ref = "development", force = TRUE)
+devtools::install_github("James-Thorson-NOAA/VAST", ref = "development", force = TRUE)
+library(VAST)
+library(FishStatsUtils)
+library(profvis)
+library(future)
+library(sf)
+library(tidyverse)
+
 source(here::here("scratch/aja/targets_flow/R/vast_functions.R"))
 
 # Data prep

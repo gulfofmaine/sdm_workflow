@@ -5,34 +5,13 @@ library(here, quietly = TRUE)
 
 #####
 ## Workhorse function
-#' @title Prep sample dataframe
-#' 
-#' @description This function takes in a cleaned csv file from a specific directory and subsets it to include only observations for species designated by species_vec and for observations made within a certain time span
-#'
-#' @param in_csv_dir Directory that has the cleaned sample csv file, where each row constitutes a unique tow-species occurrence observation
-#' @param species_vec A vector of svspp species identifying code. If NULL, then all species are kept.
-#' @param year_min An integer value specifying the minimum year to keep observations. If NULL, then all years are kept.
-#' @param year_max An integer value specifying the maximum year to keep observations. If NULL, then all years are kept.
-#' @param out_rds_dir Directory to save prepped sample rdata file.
-#' 
-#' @return sample data frame 
-#' 
-samp_dat_prep<- function(in_csv_dir, species_vec, year_min, year_max, out_rds_dir){
-
-  # For debugging and walking through the function
-  if(FALSE){
-    in_csv_dir = "~/GitHub/sdm_workflow/scratch/aja/pachy/pfs/samp_dat_prep"
-    species_vec = 
-    year_min = 
-    year_max = 
-    out_rds_dir = "~/GitHub/sdm_workflow/scratch/aja/pachy/pfs/samp_dat_prep"
-  }
+samp_dat_prep<- function(in_csv_dir, species_vec, year_min, year_max){
 
   # Get full file path from the directory
   in_csv_path<- list.files(in_csv_dir, full.names = TRUE)
 
   # Read it in
-  dat_temp<- read.csv(in_csv_path[[1]])
+  dat_temp<- read.csv(in_csv_path)
 
   # Filter if necessary, species first
   if(!is.null(species_vec)){
@@ -47,7 +26,19 @@ samp_dat_prep<- function(in_csv_dir, species_vec, year_min, year_max, out_rds_di
   }
 
   # Return and save
-  saveRDS(dat_temp, paste0(out_rds_dir, "samp_dat_prepped.rds"))
+  return(dat_temp)
+}
+
+#####
+## Wrapper function for writing out
+samp_dat_prep_out_rds<- function(in_csv_dir, species_vec, year_min, year_max, out_rds_dir){
+  
+  # Run samp_dat_prep
+  samp_dat_prep_out<- samp_dat_prep(in_csv_dir, species_vec, year_min, year_max)
+  
+  # Save it
+  saveRDS(samp_dat_prep_out, file = paste0(out_rds_dir, "samp_dat_prep_new3.rds"))
+  
 }
 
 if(!interactive()){
@@ -68,6 +59,11 @@ if(!interactive()){
   args<- parse_args(parser)
   print(args)
   
+  print("You got the change incorporated")
+  print("You did it again, nice job!")
+  print("You did it again and again, finally!!!")
+
+
   # Prep sample data
-  samp_dat_prep(args$in_csv_dir, args$species_vec, args$year_min, args$year_max, args$out_rds_dir)
+  samp_dat_prep_out_rds(args$in_csv_dir, args$species_vec, args$year_min, args$year_max, args$out_rds_dir)
 }
