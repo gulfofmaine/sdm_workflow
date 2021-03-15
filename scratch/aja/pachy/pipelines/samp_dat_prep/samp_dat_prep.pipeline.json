@@ -9,7 +9,7 @@
         }
     },
     "transform": {
-        "image": "ajall1985/pachy:v5",
+        "image": "ajall1985/pachy:edit2",
         "cmd": ["./R/samp_dat_prep.R", "/pfs/raw_dat/", "1", "1985", "2005", "/pfs/out/"]
     }
 }

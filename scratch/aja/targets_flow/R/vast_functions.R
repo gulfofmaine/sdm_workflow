@@ -115,7 +115,6 @@ vast_make_extrap_grid<- function(shapefile, cell_size){
   
   # Now get only the points that fall within the shape polygon
   points_keep<- data.frame("pt_row" = seq(from = 1, to = nrow(region_grid), by = 1), "in_out" = st_intersects(region_grid, shape_utm, sparse = FALSE))            
-  
   region_grid<- region_grid %>%
     mutate(., "in_poly" = st_intersects(region_grid, shape_utm, sparse = FALSE)) %>%
     filter(., in_poly == TRUE)
@@ -179,8 +178,8 @@ vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec){
   
   # For debugging
   if(FALSE){
-   X1_coveff_vec = c(2, 3, 3, 0, rep(1, 32))
-   X2_coveff_vec = c(0, 3, 3, 0, rep(1, 32))
+   X1_coveff_vec = c(2, 3, 3, 2, rep(3, 32))
+   X2_coveff_vec = c(2, 3, 3, 2, rep(3, 32))
   }
   
   # Combine into a list and name it 
@@ -238,7 +237,7 @@ vast_build_sdm <- function(settings, extrap_grid, samp_dat, cov_dat, X1_formula,
   }
   
   # Run VAST::fit_model with correct info and settings
-  vast_build_out<- fit_model("settings" = settings, input_grid = extrap_grid, "Lat_i" = samp_dat[, 'Lat'], "Lon_i" = samp_dat[, 'Lon'], "t_i" = samp_dat[, 'Year'], "c_i" = rep(0, nrow(samp_dat)), "b_i" = samp_dat[, 'Response'], "a_i" = samp_dat[, 'Swept'], "PredTF_i" = samp_dat[, 'PredTF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = cov_dat, "X1_formula" = X1_formula, "X2_formula" = X2_formula, X_contrasts = X_contrasts, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
+  vast_build_out<- fit_model("settings" = settings, input_grid = as.matrix(extrap_grid, ncol = 3), "Lat_i" = samp_dat[, 'Lat'], "Lon_i" = samp_dat[, 'Lon'], "t_i" = samp_dat[, 'Year'], "c_i" = rep(0, nrow(samp_dat)), "b_i" = samp_dat[, 'Response'], "a_i" = samp_dat[, 'Swept'], "PredTF_i" = samp_dat[, 'PredTF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = cov_dat, "X1_formula" = X1_formula, "X2_formula" = X2_formula, X_contrasts = X_contrasts, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
   
   # Return it
   return(vast_build_out)

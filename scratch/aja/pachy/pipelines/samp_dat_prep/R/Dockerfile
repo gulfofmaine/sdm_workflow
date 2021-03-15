@@ -17,4 +17,4 @@ COPY ./R/ /home/$USER/R/
 
 # Make them executable
 RUN ls -lR /home/$USER/R/
-RUN chmod +x  /home/$USER/R/*.R
+RUN chmod +x /home/$USER/R/*.R
