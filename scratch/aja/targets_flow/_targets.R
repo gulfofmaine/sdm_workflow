@@ -44,7 +44,7 @@ list(
   # Make extrapolation grid
   tar_target(
     name = vast_extrap_grid,
-    command = vast_make_extrap_grid(shapefile = shapefile, cell_size = 25000)
+    command = vast_make_extrap_grid(shapefile = shapefile, cell_size = 50000)
   ),
   
   # Make settings
@@ -56,7 +56,7 @@ list(
   # Make covariate effect vectors
   tar_target(
     name = vast_coveff,
-    command = vast_make_coveff(X1_coveff_vec = c(2, 3, 3, 0, rep(1, 32)), X2_coveff_vec = c(0, 3, 3, 0, rep(1, 32)))
+    command = vast_make_coveff(X1_coveff_vec = c(2, 3, 3, 2, rep(3, 32)), X2_coveff_vec = c(2, 3, 3, 2, rep(3, 32)))
   ),
   
   # Build base model
@@ -68,7 +68,7 @@ list(
   # Make adjustments
   tar_target(
     name = vast_adjust,
-    command = vast_make_adjustments(vast_build, adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, 3), rep(NA, 33))), "log_sigmaXi1_cp" = factor(c(rep(1, 3), rep(NA, 33)))))
+    command = vast_make_adjustments(vast_build, adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, 3), rep(4, 33))), "log_sigmaXi2_cp" = factor(c(rep(1, 3), rep(4, 33)))))
   ),
   
   # Fit model, either the base model OR by making some adjustments

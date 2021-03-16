@@ -2,14 +2,15 @@ $Version
 [1] "VAST_v13_0_0"
 
 $n_x
-[1] 432
+[1] 100
 
 $Region
-[1] "User"
+[1] "northwest_atlantic"
 
 $strata.limits
-     STRATA
-1 All_areas
+$strata.limits[[1]]
+[1] 1130 1140 1150 1160 1170 1180 1190 1200 1210
+
 
 $zone
 [1] NA
@@ -37,8 +38,6 @@ $vars_to_correct
 [1] "Index_cyl" "Index_ctl"
 
 $Options
-        SD_site_logdensity            Calculate_Range   Calculate_effective_area 
-                     FALSE                       TRUE                       TRUE 
 treat_nonencounter_as_zero 
                       TRUE 
 
@@ -46,7 +45,7 @@ $grid_size_km
 [1] 25
 
 $max_cells
-[1] 4320
+[1] 2000
 
 $knot_method
 [1] "grid"
