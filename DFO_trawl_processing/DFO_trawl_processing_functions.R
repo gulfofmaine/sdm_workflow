@@ -1,4 +1,4 @@
-
+## Functions for processing DFO bottom trawl surveys for SDM workflow
 
 # Setup ---------------------------------------------------------
 # Detect the operating system
@@ -11,7 +11,7 @@ computer.name<- "lcarlson" # Needed for PC users
 
 shared.path<- switch(os.use, 
                      "unix" = paste("~/Box/", user.name, sep = ""),
-                     "windows" = paste("C:/Users/", computer.name, "/Box/", sep = ""))
+                     "windows" = paste("C:/Users/", computer.name, "/Box/Mills Lab/Projects/DFO_survey_data/", sep = ""))
 
 
 
@@ -51,8 +51,8 @@ create_demographic<-function(datapath,outpath){
   # This function reads in DFO bottom trawl survey data from the Mar.datawrangling package (download using devtools). The function then merges the GSINF and GSMISSIONS dataframes and adds/renames/reorders columns to mirror NMFS survey data formatting
   
   # Args:
-  # datapath = path to DFO datafile
-  # outpath = path to save processed dataset
+  # datapath = path to DFO datafile which is stored in: Box\Mills Lab\Projects\DFO_survey_data\original_data
+  # outpath = path to save processed dataset, suggested: Box\Mills Lab\Projects\DFO_survey_data\processed_data
   
   
   # Returns:
@@ -67,8 +67,13 @@ create_demographic<-function(datapath,outpath){
   
   
   # Load in data
-  
-  Mar.datawrangling::get_data(db='rv', data.dir = datapath)
+
+  load(file = paste(datapath, "RV.GSINF.RData", sep = "/"))
+  load(file = paste(datapath, "RV.GSMISSIONS.RData", sep = "/"))
+
+  # Can use the get_data function to source all RV data (either using Oracle server privelages) or (as shown below) from a local folder
+  # A recent version of this package contains and error, so it is not used here
+  # Mar.datawrangling::get_data(db='rv', data.dir = datapath)
   
   
   # will need GSINF dataframe from DFO bottom trawl survey (Maritimes package)
@@ -113,7 +118,7 @@ create_demographic<-function(datapath,outpath){
     dplyr::filter(EST_YEAR >= 1982) %>%                                   #data pre-1982 used different methods
     dplyr::rename("TOWDUR" = "DUR", "RPM" = "SPEED",  
                   "DECDEG_BEGLAT" = "LATITUDE", "DECDEG_BEGLONG" = "LONGITUDE") %>% 
-    dplyr::select(ID, DATE, EST_YEAR, SEASON, SVVESSEL, TOWDUR, RPM, DECDEG_BEGLAT, DECDEG_BEGLONG)
+    dplyr::select(ID, DATE, EST_YEAR, SEASON, SVVESSEL, TOWDUR, RPM, AREA, DECDEG_BEGLAT, DECDEG_BEGLONG)
   
   
   # write data file
@@ -124,10 +129,11 @@ create_demographic<-function(datapath,outpath){
   
 }
 
+readRDS(paste(outpath,"DFO_demographic.dat",sep = "/"))
 
 
-
-
+#example function call:   create_demographic(datapath = paste(shared.path,"original_data",sep = ""), 
+                       #              outpath = paste(shared.path,"processed_data",sep = ""))
 
 
 
@@ -138,17 +144,17 @@ create_demographic<-function(datapath,outpath){
 
 
 # Presence/Absence, Biomass, Abundance Function ---------------------------------------------------------
-create_presence_absence<-function(datapath,demopath,specpath,outpath){
+create_presence_absence<-function(datapath,outpath){
   
   # Details
   
   # This function reads in DFO bottom trawl survey data from the Mar.datawrangling package (download using devtools) as well as the processed demographic dataset (created with create_demographic) and a supporting dataset (species_conversion). The function then creates a long dataset containing presence/absence for all possible combinations of survey ID and species; plus associated biomass and abundance data
   
   # Args:
-  # datapath = path to DFO datafile
-  # demopath = path to processed demographic dataset
-  # specpath = path to supporting species dataset
-  # outpath = path to save processed dataset
+  # datapath = path to DFO datafile which is stored in: Box\Mills Lab\Projects\DFO_survey_data\original_data
+  # demopath = path to processed demographic dataset which is stored in: Box\Mills Lab\Projects\DFO_survey_data\processed_data
+  # specpath = path to supporting species dataset: Box\Mills Lab\Projects\DFO_survey_data\supporting_data
+  # outpath = path to save processed dataset, suggested: Box\Mills Lab\Projects\DFO_survey_data\processed_data
   
   # Returns:
   # RDS Data file, which is also saved in folder specified by outpath
@@ -163,9 +169,11 @@ create_presence_absence<-function(datapath,demopath,specpath,outpath){
   
   # Load in data
   
-  Mar.datawrangling::get_data(db='rv', data.dir = datapath)
-  DFO_demographic<-readRDS(file=paste(demopath,"DFO_demographic.dat",sep = "/"))
-  species_conversion<-read_csv(file=paste(specpath,"species_naming_conversion.csv",sep = "/"))
+  
+  load(file = paste(datapath, "RV.GSCAT.RData", sep = "/"))
+
+  DFO_demographic<-readRDS(file=paste(shared.path,"processed_data/DFO_demographic.dat",sep = "/"))
+  species_conversion<-read_csv(file=paste(shared.path,"supporting_data/species_naming_conversion.csv",sep = "/"))
   
   
   # create a long dataframe containing biomass and abundance data for all ID/species; this should be a presence only dataset
@@ -208,3 +216,7 @@ create_presence_absence<-function(datapath,demopath,specpath,outpath){
   ## End function
   
 }
+
+
+#example function call:   create_presence_absence(datapath = paste(shared.path,"original_data",sep = ""),
+                      #      outpath = paste(shared.path,"processed_data",sep = ""))
