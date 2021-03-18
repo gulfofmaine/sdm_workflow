@@ -9,6 +9,8 @@ from numpy import unique
 import cf_xarray
 import operator
 import fcts
+import glob
+import os
 
 # models we care about
 source_list = ['IPSL-CM6A-LR',
@@ -32,16 +34,16 @@ source_list = ['IPSL-CM6A-LR',
 'FIO-ESM-2-0',
 'GISS-E2-1-G',
 'INM-CM4-8',
-'INM-CM5-0',
-'MIROC-ES2L',
+'INM-CM5-0',2L',
 'MRI-ESM2-0',
 'NESM3',
 'NorESM2-LM',
-'NorESM2-MM',
+'NorESM2-
+'MIROC-ESMM',
 'UKESM1-0-LL']
 
 # enter the var of interest
-variable_id = 'thetao'
+variable_id = 'so'
 
 # enter the table (based on the frequency of measurements)
 table_id = 'Omon'
@@ -70,8 +72,8 @@ AllModels = pd.read_csv('https://storage.googleapis.com/cmip6/cmip6-zarr-consoli
 #Load data
 
 # To access an individual run
-# df = AllModels.query(f"source_id == 'FIO-ESM-2-0' & variable_id == 'so' & experiment_id == 'historical' & member_id == 'r1i1p1f1' & table_id == 'Omon'")
-# filteredModels_grid = df.reset_index(drop=True)
+df = AllModels.query(f"source_id == 'CESM2' & variable_id == 'thetao' & experiment_id == 'historical' & member_id == 'r4i1p1f1' & table_id == 'Omon'")
+filteredModels_grid = df.reset_index(drop=True)
 
 df_var = AllModels.query(f"variable_id == '{variable_id}' & table_id == '{table_id}' & experiment_id == @filter_list")
 filteredModels = fcts.ExperimentFilter(df_var, grp1, grp2)
@@ -85,7 +87,7 @@ TOP = False  # True if looking for surface, False for bottom
 
 # Only has to be defined once
 gcs = gcsfs.GCSFileSystem(token='anon')
-
+i=0
 for i in range(len(filteredModels_grid)):
     source_id = filteredModels_grid.source_id[i]
     member_id = filteredModels_grid.member_id[i]
@@ -285,3 +287,20 @@ if variable_id == 'tos':
 
 
 
+
+names = {'name': [], 'minDate': [], 'maxData': [], 'length': []}
+ncTimes = pd.DataFrame(data=names)
+
+folder = glob.glob(f'{path}SurSalinity/StGrid/*')
+for file in folder:
+    df = fcts.checkDates(file)
+    ncTimes = ncTimes.append(df, ignore_index=True)
+
+
+folder = glob.glob(f'{path}BottomT/StGrid/*')
+variable_id = "thetao"
+minmax = {'name': [name], 'minVal': [minVal], 'maxVal': [maxVal]}
+minmaxdf = pd.DataFrame(data=minmax)
+for file in folder:
+    df = fcts.checkMinMax(file, variable_id)
+    minmaxdf = minmaxdf.append(df, ignore_index=True)
