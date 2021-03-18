@@ -46,11 +46,12 @@ getTrawlPoints <- function(climData, survey, time){
     group_by(!!time, yr, ID, LAT, LON) %>% 
     summarise(temp = mean(temp), 
               Date = paste(!!time, yr, sep = "-"),
-              .groups = "drop") %>% 
-    pivot_wider(cols = c(-ID, -LON, -LAT), names_from = Date, values_from = temp)
+              .groups = "drop") %>% dplyr::select(-!!time, -yr) %>% 
+    pivot_wider(names_from = Date, values_from = temp)
     
   return(locTSdf)
 }
+
 
 trawlLocsTemp <- getTrawlPoints(climData, survey, time="qt")
 

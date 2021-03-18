@@ -41,7 +41,7 @@ for file in dsTOS:
 
 dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_ssp585*')
 dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_historical*')
-file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/thetao_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
+file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/thetao_CESM2_r4i1p1f1_historical.nc"
 for file in dsThetao:
     gridfi = f'{path}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)

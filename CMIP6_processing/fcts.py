@@ -74,7 +74,7 @@ def find_deepest_depth_indices_CMIP6(ds, dims0, dims1, variable_id, y_coord, x_c
             try:
                 depth_indices[j, i] = int(located[-1][-1])
             except IndexError:
-                depth_indices[j, i] = 1
+                depth_indices[j, i] = 0
 
     return depth_indices
 
@@ -165,3 +165,19 @@ def checkDates(file):
     d = {'name': [name], 'minDate': [minDate], 'maxData': [maxDate], 'length': [timeLayers]}
     df = pd.DataFrame(data=d)
     return df
+
+def checkMinMax(file, variable_id):
+    name = os.path.basename(file)
+
+    try:
+        ds = xr.open_dataset(file)
+    except ValueError:
+        ds = xr.open_dataset(file, decode_times=False)
+    minVal = ds.variables[variable_id].min()
+
+    maxVal = ds.variables[variable_id].max()
+
+    d = {'name': [name], 'minVal': [minVal], 'maxVal': [maxVal]}
+    df = pd.DataFrame(data=d)
+    return df
+

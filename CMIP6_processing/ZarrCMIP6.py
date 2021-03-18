@@ -72,7 +72,7 @@ AllModels = pd.read_csv('https://storage.googleapis.com/cmip6/cmip6-zarr-consoli
 #Load data
 
 # To access an individual run
-df = AllModels.query(f"source_id == 'MRI-ESM2-0' & variable_id == 'so' & experiment_id == 'ssp585' & member_id == 'r1i1p1f1' & table_id == 'Omon'")
+df = AllModels.query(f"source_id == 'CESM2' & variable_id == 'thetao' & experiment_id == 'historical' & member_id == 'r4i1p1f1' & table_id == 'Omon'")
 filteredModels_grid = df.reset_index(drop=True)
 
 df_var = AllModels.query(f"variable_id == '{variable_id}' & table_id == '{table_id}' & experiment_id == @filter_list")
@@ -83,7 +83,7 @@ filteredModels_grid = filteredModels.query(f"source_id == @source_list").reset_i
 
 # SST is at the bottom of the page
 
-TOP = True  # True if looking for surface, False for bottom
+TOP = False  # True if looking for surface, False for bottom
 
 # Only has to be defined once
 gcs = gcsfs.GCSFileSystem(token='anon')
@@ -295,3 +295,12 @@ folder = glob.glob(f'{path}SurSalinity/StGrid/*')
 for file in folder:
     df = fcts.checkDates(file)
     ncTimes = ncTimes.append(df, ignore_index=True)
+
+
+folder = glob.glob(f'{path}BottomT/StGrid/*')
+variable_id = "thetao"
+minmax = {'name': [name], 'minVal': [minVal], 'maxVal': [maxVal]}
+minmaxdf = pd.DataFrame(data=minmax)
+for file in folder:
+    df = fcts.checkMinMax(file, variable_id)
+    minmaxdf = minmaxdf.append(df, ignore_index=True)
