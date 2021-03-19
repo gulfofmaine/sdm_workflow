@@ -1,0 +1,497 @@
+---
+title: "CMIP-OISST Bias Correciton"
+author: "Adam A. Kemberling"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+        collapsed: FALSE
+    code_folding: show
+params: 
+  climate_start: "1985"
+  climate_stop: "2014"
+editor_options: 
+  chunk_output_type: console
+
+---
+
+```{r setup, include=FALSE}
+
+# Set knitr options
+knitr::opts_chunk$set(echo = TRUE, message = T, warning = F, comment = NA)
+options(knitr.kable.NA = '')
+
+###__ Packages  ####
+library(here)
+library(ncdf4)
+library(RNetCDF)
+library(raster)
+library(janitor)
+library(gmRi)
+library(patchwork)
+library(tidyverse)
+library(knitr)
+
+
+
+# Load the build code and stratification function
+box_paths  <- research_access_paths(os.use = "unix")
+res_path   <- box_paths$res
+oisst_path <- box_paths$oisst_mainstays
+cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
+
+#### Set theme  ####
+theme_set(theme_minimal())
+
+#  color palette for quick raster displays
+temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
+
+####  Functions  ####
+source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
+```
+
+
+
+`r use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")`
+
+
+## Load CMIP6 Data for sea surface Temperature
+
+ 
+The only variable we will use OISSTv2 data to bias correct for is sea surface temperature.
+
+
+
+```{r load collection}
+
+####  Choose a variable
+pick_var <- "surf_temp"
+
+
+# Load all the CMIP Scenarios - cropped to study area
+cmip_data <- import_cmip_collection(cmip_var = pick_var)
+```
+
+
+### Match Dates to Xarray
+
+Sometimes the raster package has an issue with the dates used by the climate models, more specifically how its a non-standard calendar without leap years. Xarray doesn't really have an issue for some reason, so this step matches the file to what the dates should be, to ensure proper date comparisons down the line.
+
+```{r get layer names}
+
+# Get the cftime dates from the date key - this ensures proper date matching
+# the fallback is to assign year and month generally based on if its an historic run or not
+cmip_data <- imap(.x = cmip_data, 
+                  .f = function(cmip_dataset, cmip_source){
+  message(paste("Setting Names for: ", cmip_source))
+  names(cmip_dataset) <- get_cmip_dates(cmip_source = cmip_source, 
+                                        cmip_var = pick_var,
+                                        time_dim = dim(cmip_dataset)[3])
+  return(cmip_dataset)})
+
+```
+
+
+
+```{r}
+plot(cmip_data[[1]][[1]],
+     main = "Single Month of CMIP6 Data",
+     col = temp_pal)
+```
+
+### Screening Strange Values
+
+There is the possibility that in some data sources or different raster layers within them that values that are exceptionally high or low may be used in place of an explicit `NA`. These will be issues when we look across models to get summary metrics.
+
+
+```{r}
+# Checking min and max values
+
+# # can use clamp to set limits around plausible values
+# clamp_test <- clamp(cmip_data[[1]], lower = -50, upper = 100, useValues = FALSE)
+
+# boiling water seems like a reasonable limit
+cmip_data <- imap(cmip_data, function(ras_brick, ras_lab){ 
+  message(paste0("Screening Values for:  ", ras_lab))
+  clamp(ras_brick, lower = -50, upper = 100, useValues = FALSE) 
+})
+
+```
+
+
+
+
+
+
+
+### Build Lookup Table of Historic and Projected Climate Runs
+
+The cmip to anomalies function relies on a consistent naming structure of XYYYYMMDD to pull out the correct years and months. If this isn't the case the function as currently written will break.
+
+This table is also used to match climatologies to their historic periods.
+
+```{r name structure table}
+#####  Build table of name structure and length dimension and file source type
+
+
+#### 1. Get the start and end time dimensions that R gives
+tdims <- map_dfr(cmip_data, function(cmip_stack){
+    # Pull out some descriptive aspects of each
+    # Assemble as a table
+    time_dims  <- dim(cmip_stack)[3]
+    summary_table <- data.frame( "time_dim"  = time_dims)}
+    # collapse to dataframe
+    , .id = "file_name")
+
+
+#### 2. Do some formatting and rearranging to label historic etc.
+tdims <- tdims %>%
+  mutate(
+    scenario_type = ifelse(str_detect(file_name, "historic"), "historic", "projection"),
+    cmip_scenario = ifelse(str_detect(file_name, "historic"),
+                           str_remove(file_name, "_historical"),
+                           str_remove(file_name, "_ssp...")),
+    nc_name = paste0(file_name, ".nc")) %>% 
+  select(cmip_scenario, scenario_type, time_dim, file_name, nc_name)
+
+# The code digging into the dates is no longer relevant, just need the scenario type info
+name_structure <- tdims
+```
+
+
+## Build CMIP Climatologies
+
+Need two things now:
+
+ 1. CMIP6 Climatology for the variables we loaded
+ 2. The corresponding anomalies
+
+
+```{r}
+
+# Set start and end year for climatology - needs to match SODA climatology reference period
+start_year <- params$climate_start
+end_year   <- params$climate_stop
+
+
+# Determine which netcdf files cover the reference period and should be used for the climatologies
+historic_runs <- which(str_detect(names(cmip_data), "historic"))
+
+
+# Run the climatologies for the historic runs only
+cmip_clims <- imap(cmip_data[historic_runs], function(cmip_stack, cmip_name){
+  
+  # Get monthly climatology
+  message(paste0("Processing Climatology: ", cmip_name))
+  cmip_clim <- suppressMessages(cmip_to_clim(cmip_stack = cmip_stack, 
+                                             clim_years = c(start_year, end_year)))
+  
+  # return the climatology (should work b/c smaller)
+  return(cmip_clim)})
+
+
+```
+
+
+
+```{r}
+plot(cmip_clims[[1]][[1]],
+     main = "Single Month of a CMIP6 Climatology",
+     col = temp_pal)
+```
+
+
+
+## Get CMIP Scenario Anomalies (deltas)
+
+Now the climatologies are matched up with the correct data sets to get anomalies for both the historic periods as well as the matching climate projections.
+
+
+```{r get cmip anomalies}
+cmip_anoms <- imap(cmip_data, function(cmip_data, cmip_name){
+  
+  # Check for those trouble files
+  if(class(cmip_clims) == "character"){
+    return("Problem with CMIP Naming Structure")}
+  
+  
+  # Identify root cmip file & its number in the list
+  cmip_root <- str_replace(cmip_name, "_ssp...", "_historical")
+  clim_id <- which(names(cmip_clims) == cmip_root)
+  
+  # # Get the matching climatology
+  if(length(clim_id) != 0){
+    
+    # Grab the climatology
+    clim_use <- cmip_clims[[clim_id]]
+
+    # print progress
+    message(paste0(cmip_name, " has matching climatology, processing anomalies."))
+    
+    # Use sdm_workflow function to match months and return anomalies
+    cmip_anomalies <- cmip_get_anomalies(cmip_data, clim_use)
+    return(cmip_anomalies)
+    
+  } else if(length(clim_id) == 0) {
+    message(paste0("No matching climate reference for: ", cmip_name))
+    cmip_anomalies <- "ugly duckling"
+    return(cmip_anomalies)}
+  
+})
+
+
+
+
+# Pull out the cases without historical matches
+no_matches <- which(map_chr(cmip_anoms, class) == "character")
+good_data <- which(names(cmip_anoms) %not in% names(no_matches))
+
+# and subset
+cmip_anoms <- cmip_anoms[good_data]
+
+
+# clean up memory
+rm(cmip_data)
+```
+
+
+```{r}
+# Plot Check
+plot(cmip_anoms[[1]][[1]], 
+     main = "Single Month of CMIP6 Anomalies",
+     col = temp_pal)
+```
+
+
+##  OISSTv2 Bias Correction
+
+In order to do this we need the climatology for each of those variables for a reference period that aligns with the CMIP historical data
+
+
+### Import OISST Climatology
+
+The OISST climatology was processed using xarray in the oisst mainstays repository. Once it has been loaded we also need to convert it to monthly to match the CMIP data.
+
+```{r import ref climatology}
+
+# Load SODA Climatology
+oisst_clim <- import_oisst_clim(climatology_period = c("1985-2014"), 
+                                os.use = "unix")
+
+
+
+# Use clamp if necessary?
+range_mets <- range(oisst_clim)
+range(values(range_mets$range_min), na.rm = T) # how annoying it is to just get 2 values
+range(values(range_mets$range_max), na.rm = T) # how annoying it is to just get 2 values
+```
+
+### Convert to Monthly Means
+
+```{r}
+# Convert to Monthly
+oisst_monthly <- months_from_clim(oisst_clim)
+rm(oisst_clim)
+```
+
+### Optional re-gridding
+
+This step  is only necessary if the resolution across data sources is not the same. The re-sample grid function just takes an input gridded dataset and re-samples it to match the resolution of a second gridded dataset, uses bi-linear interpolation for re-sampling.
+
+```{r}
+# ####  Check/Resample Grids  ####
+# not needed since Matt does this ahead of time
+
+
+# cmip_anoms <- map(cmip_anoms, function(anom_grid){
+#   if(class(anom_grid) == "character"){return("Problem with CMIP Naming Structure")}
+#   resample_grid(starting_grid = anom_grid, desired_grid = oisst_monthly)})
+
+```
+
+```{r}
+# Plot Check
+plot(oisst_monthly[[1]], 
+     col = temp_pal, 
+     main = "January Climatology")
+```
+
+
+
+### Bias Correction
+
+This is the step where the anomalies/deltas from each CMIP6 run are applied to the climatology of the reference data climatology, either SODA/OISST.
+
+```{r perform bias correction}
+####  Match and Bias Correct
+cmip_anoms_bcorrect <- map(cmip_anoms, function(anom_grid){
+  
+  # check for problem data
+  if(class(anom_grid) == "character"){
+    return("Problem with CMIP Naming Structure")}
+  
+  # run for data that passes check
+  delta_method_bias_correct(cmip_grid = anom_grid, 
+                            reference_climatology = oisst_monthly)})
+
+
+
+
+# remove regular anomalies
+rm(cmip_anoms)
+```
+
+
+
+
+```{r}
+# Single Run
+plot(cmip_anoms_bcorrect[[1]][[1]], 
+     main = "Single Month of Bias Corrected Data", 
+     col = temp_pal)
+```
+
+
+
+## Processing Mean/5th/95th
+
+The following code sets up the sub-setting and matching components to process comparable model runs. Since the historical period and future projections cover different periods, they get run separately here, to be combined again after different data representing across-model quantiles have been pulled from them.
+
+```{r quantile setup}
+
+####  Different Treatments for Historical / Projections
+
+# Get the names for historic and future runs
+historic_names     <- filter(name_structure, scenario_type == "historic") %>% pull(file_name)
+projection_names   <- filter(name_structure, scenario_type == "projection") %>% pull(file_name)
+
+# Their matching index numbers
+historic_sources   <- which(names(cmip_anoms_bcorrect) %in% historic_names)
+projection_sources <- which(names(cmip_anoms_bcorrect) %in% projection_names)
+
+# Use those to separate the two groups
+historic_bias_corr   <- cmip_anoms_bcorrect[historic_sources]
+projection_bias_corr <- cmip_anoms_bcorrect[projection_sources]
+
+# Will need a year-month key for all the time steps for historic and projected data
+historic_key   <- names(historic_bias_corr[[1]]) %>% str_sub(1,8)
+projection_key <- names(projection_bias_corr[[1]]) %>% str_sub(1,8)
+
+# can also manufacture them since we have a thousand time checked the dates
+
+
+
+```
+
+
+### Process Historical Period Climate Quantiles
+
+Now that all the CMIP6 data has been bias corrected using either OISST or SODA, we can take the bias corrected data and build arrays that capture the variability across all models by pulling out values at each time step that represent different measures of the collection. So at each cell for every time step we now take the value from whichever model represents the 5th percentile, the mean, or the 95th percentile.
+
+```{r historic quants}
+
+####  Historic Quantiles
+
+
+# Use the time-period length (in months) to Get the mean 5th 95th at each step
+historic_mean <- time_period_quantile(time_period = "historic",
+                                      time_period_collection = historic_bias_corr, 
+                                      quantile_product = "mean")
+
+
+
+# 5th Percentile
+historic_05 <- time_period_quantile(time_period = "historic",
+                                    time_period_collection = historic_bias_corr, 
+                                    quantile_product = "5th")
+
+
+# 95th Percentile
+historic_95 <- time_period_quantile(time_period = "historic",
+                                    time_period_collection = historic_bias_corr, 
+                                    quantile_product = "95th")
+
+
+
+# clean up
+rm(historic_bias_corr)
+```
+
+
+```{r, fig.height = 8}
+# Plot check
+par(mfrow = c(3, 1))
+plot(historic_mean$X1950.01, main = "Historic Mean", col = temp_pal)
+plot(historic_05$X1950.01,   main = "Historic 5th Percentile", col = temp_pal)
+plot(historic_95$X1950.01,   main = "Historic 95th Percentile", col = temp_pal)
+```
+
+
+### Process Climate Projection Period Quantiles
+
+Repeat what we just did for the historical periods for the future projections. At each cell for every time step get the value from whichever model represents the 5th percentile, the mean, or the 95th percentile.
+
+```{r projection quants}
+
+####  Projection Quantiles
+
+
+# Mean
+projection_mean <- time_period_quantile(time_period = "projection",
+                                    time_period_collection = projection_bias_corr, 
+                                    quantile_product = "mean")
+
+
+# 5th Percentile
+projection_05 <- time_period_quantile(time_period = "projection",
+                                     time_period_collection = projection_bias_corr, 
+                                     quantile_product = "5th")
+
+
+# 9th Percentile
+projection_95 <- time_period_quantile(time_period = "projection",
+                                    time_period_collection = projection_bias_corr, 
+                                    quantile_product = "95th")
+
+
+# clean up
+rm(projection_bias_corr)
+```
+
+
+```{r, fig.height=8}
+# Plot check
+par(mfrow = c(3,1))
+plot(projection_mean$X2015.01, main = "Projection Mean", col = temp_pal)
+plot(projection_05$X2015.01,   main = "Projection 5th Percentile", col = temp_pal)
+plot(projection_95$X2015.01,   main = "Projection 95th Percentile", col = temp_pal)
+
+```
+
+### Assemble complete Timelines
+
+Once the different quantiles have been run for both the historical periods and the future projections, these two periods can be joined together to create a complete stack with time from 1950-2100.
+
+```{r}
+full_5th  <- stack(stack(historic_05), stack(projection_05))
+full_mean <- stack(stack(historic_mean), stack(projection_mean))
+full_95th <- stack(stack(historic_95), stack(projection_95))
+```
+
+
+## Export Quantiles
+
+```{r}
+# Path to the bias correction folder
+var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
+
+
+# File Names
+writeRaster(full_5th, paste0(var_path, "_OISST_bias_corrected_5thpercentile.grd"), overwrite = T)
+writeRaster(full_mean, paste0(var_path, "_OISST_bias_corrected_mean.grd"), overwrite = T)
+writeRaster(full_95th, paste0(var_path, "_OISST_bias_corrected_95thpercentile.grd"), overwrite = T)
+```
+
+
+`r insert_gmri_footer()`
