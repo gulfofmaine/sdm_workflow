@@ -58,11 +58,17 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
     sf_points = trawl_covs
     out_path = here::here("/scratch/aja/data/")
     new_file_name = NULL
+    
+    rast_ts_stack = oisst_stack
+    stack_name = "sst"
+    t_summ = "seasonal"
+    t_position = NULL
+    sf_points = cov_sf
+    df_sf = df
+    out_path = here::here("scratch/aja/data")
   }
   
   # A few checks...
-  # Check to make sure the dates of rast_ts_stack make sense AND that there is a DATE column in the sf_points?
-  
   # If t_summ is a character, does it match one of "daily", monthly", "seasonal", or "annual" AND is t_position set to NULL?
   if(is.character(t_summ)){
     t_summ_check<- t_summ %in% c("monthly", "seasonal", "annual") & is.null(t_position)
@@ -79,11 +85,11 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
     stop()
   }
   
-  # Are there duplicate records?
-  if(any(duplicated(sf_points, by = c(EST_DATE, geometry)))){
-    print("Check `sf_points` and remove duplicated observations to reduce extraction time")
-    stop()
-  }
+  # # Are there duplicate records?
+  # if(any(duplicated(sf_points, by = c(EST_DATE, geometry)))){
+  #   print("Check `sf_points` and remove duplicated observations to reduce extraction time")
+  #   stop()
+  # }
   
   # Finally, do the projections match?
   if(!st_crs(rast_ts_stack) == st_crs(sf_points)){

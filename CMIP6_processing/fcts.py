@@ -1,4 +1,8 @@
 import numpy as np
+import xarray as xr
+import pandas as pd
+import gcsfs
+import os
 
 # functions
 def path_switch_unix(x, folder, user_name):
@@ -10,7 +14,7 @@ def path_switch_unix(x, folder, user_name):
         'NSF OKN': "".join(["/Users/", user_name, "/Box/NSF OKN Demo Data/", folder]),
         'root': "".join(["/Users/", user_name, "/Box/", folder])
     }
-    return (paths.get(x, "".join(default)))
+    return paths.get(x, "".join(default))
 
 
 def path_switch_windows(x, folder, user_name):
@@ -22,7 +26,7 @@ def path_switch_windows(x, folder, user_name):
         'NSF OKN': "".join(["C:/Users/", user_name, "/Box/NSF OKN Demo Data/", folder]),
         'root': "".join(["C:/Users/", user_name, "/Box/", folder])
     }
-    return (paths.get(x, "".join(default)))
+    return paths.get(x, "".join(default))
 
 
 def shared_path(os_use="unix",
@@ -38,30 +42,7 @@ def shared_path(os_use="unix",
     else:
         print("OS not recognized")
 
-    return (path_out)
-
-
-def find_deepest_depth_indices(ds):
-    # First get the vertical True/False of valid values
-    idx = ds["thetao"].isel(time = 0).isnull()
-    idx_vals = idx.values
-    # Create the initial final array to store indices (integer type)
-    depth_indices = np.zeros((len(idx.j), len(idx.i))).astype(int)
-
-    # Now find the deepest depth where values are True and store in indices array
-    for i in range(len(ds.i.values)):
-        for j in range(len(ds.j.values)):
-            located = np.where(idx_vals[:, j, i] == False)
-            try:
-                depth_indices[j, i] = int(located[-1][-1])
-            except IndexError:
-                depth_indices[j, i] = 1
-
-    return depth_indices
-
-# Eventually try to remove the nested for loop using .map
-# dask (with xarray) has implicit parallelism
-# numba can take a for loop and create a parallel process with @numba.jit
+    return path_out
 
 
 def nameFile(base_filename, Scenario):
@@ -75,4 +56,128 @@ def nameFile(base_filename, Scenario):
     else:
         print("not recognized")
 
-    return (base_filename)
+    return base_filename
+
+# find bottom temp for CMIP6
+def find_deepest_depth_indices_CMIP6(ds, dims0, dims1, variable_id, y_coord, x_coord):
+    # First get the vertical True/False of valid values
+    idx = ds[variable_id].isel(time=0).isnull()
+    idx_vals = idx.values
+
+    # Create the initial final array to store indices (integer type)
+    depth_indices = np.zeros((len(idx[y_coord][dims0]), len(idx[x_coord][dims1]))).astype(int)
+
+    # Now find the deepest depth where values are True and store in indices array
+    for i in range(len(ds[dims1].values)):
+        for j in range(len(ds[dims0].values)):
+            located = np.where(idx_vals[:, j, i] == False)
+            try:
+                depth_indices[j, i] = int(located[-1][-1])
+            except IndexError:
+                depth_indices[j, i] = 0
+
+    return depth_indices
+
+
+# find bottom temp for any netcdf with depth
+def find_deepest_depth_indices(ds, variable_id, y_coord, x_coord, depth_coord, maxDepth=400):
+
+    kwargs = {depth_coord: slice(0, maxDepth)}
+    bottom_400 = ds.sel(**kwargs)
+
+    # First get the vertical True/False of valid values
+    idx = bottom_400[variable_id].isel(time=0).isnull()
+    idx_vals = idx.values
+
+
+    if len(bottom_400[variable_id][x_coord].dims) == 2:
+        multiIndex = True
+    else:
+        multiIndex = False
+
+    if multiIndex == True:
+        dims0 = bottom_400[y_coord].dims[0]
+        dims1 = bottom_400[y_coord].dims[1]
+    else:
+        dims0 = y_coord
+        dims1 = x_coord
+
+    # Create the initial final array to store indices (integer type)
+    depth_indices = np.zeros((len(idx[y_coord][dims0]), len(idx[x_coord][dims1]))).astype(int)
+
+    # Now find the deepest depth where values are True and store in indices array
+    # numba can take a for loop and create a parallel process with @numba.jit
+    for i in range(len(bottom_400[dims1].values)):
+        for j in range(len(bottom_400[dims0].values)):
+            located = np.where(idx_vals[:, j, i] == False)
+            try:
+                depth_indices[j, i] = int(located[-1][-1])
+            except IndexError:
+                depth_indices[j, i] = 1
+
+    ind = xr.DataArray(depth_indices, dims=[dims0, dims1])
+
+    return ind
+
+def countExp(x):
+    return len(np.unique(x['experiment_id']))
+
+def ExperimentFilter(df, grp1, grp2):
+
+    df3 = df.groupby([grp1, grp2]).apply(lambda x: countExp(x)).reset_index(name='Number_of_exp')  #.query(f'Number_of_exp == {len(filter_list)}')
+    df4 = pd.merge(df3, df, how="left", on=['source_id', 'member_id'])
+    df5 = df4.groupby([grp1, 'experiment_id']).apply(lambda x: x.iloc[0]).droplevel(0).reset_index(drop=True)
+    return df5
+
+def CheckMeta(dfList):
+    meta = []
+    for i in range(len(filteredModels)):
+        # get the path to a specific zarr store 0 index is first on list
+        zstore = filteredModels.zstore.values[i]
+
+        # create a mutable-mapping-styly interface to the store
+        mapper = gcs.get_mapper(zstore)
+
+        # open it using xarray and zarr
+        ds = xr.open_zarr(mapper, consolidated=True)
+        attr = ds.attrs
+        meta.append(attr)
+    res = list(map(operator.itemgetter('nominal_resolution'), meta))
+
+
+def checkDates(file):
+    name = os.path.basename(file)
+
+    try:
+        ds = xr.open_dataset(file)
+    except ValueError:
+        ds = xr.open_dataset(file, decode_times=False)
+
+    try:
+        minDate = str(ds.indexes['time'].to_datetimeindex().min())
+    except (AttributeError, ValueError):
+        minDate = str(ds.time.min())
+    try:
+        maxDate = str(ds.indexes['time'].to_datetimeindex().max())
+    except (AttributeError, ValueError):
+        maxDate = str(ds.time.max())
+    timeLayers = len(ds.time)
+    d = {'name': [name], 'minDate': [minDate], 'maxData': [maxDate], 'length': [timeLayers]}
+    df = pd.DataFrame(data=d)
+    return df
+
+def checkMinMax(file, variable_id):
+    name = os.path.basename(file)
+
+    try:
+        ds = xr.open_dataset(file)
+    except ValueError:
+        ds = xr.open_dataset(file, decode_times=False)
+    minVal = ds.variables[variable_id].min()
+
+    maxVal = ds.variables[variable_id].max()
+
+    d = {'name': [name], 'minVal': [minVal], 'maxVal': [maxVal]}
+    df = pd.DataFrame(data=d)
+    return df
+

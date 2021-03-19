@@ -5,6 +5,14 @@
 .rds
 model_dat.rds
 
+.grd
+.tiff
 
-# Targets data
-_targets/
+# Ignore _targets files
+_targets*/
+_targetsdm*/
+_targets_flow/*
+
+# Ignore pachyderm file system files
+_pfs/*
+

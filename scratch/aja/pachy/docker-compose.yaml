@@ -1,0 +1,22 @@
+services:
+  samp_dat_prep:
+    # Build the Dockerfile in this directory
+    build: 
+      context: .
+      dockerfile: ./pipelines/samp_dat_prep/R/Dockerfile
+    
+    # Port
+    ports: 
+      - "8787:8787"
+
+    # Tag the built Dockerfile this name
+    image: ajall1985/pachy
+
+    # Volumes for exposing local system within the container
+    volumes:
+      - ./pfs/raw_dat/raw_dat.csv:/pfs/raw_dat/raw_dat.csv
+      - ./pfs/samp_dat_prep:/pfs/out
+    
+    environment:
+      PASSWORD: pw
+    
