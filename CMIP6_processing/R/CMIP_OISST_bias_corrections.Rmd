@@ -51,17 +51,15 @@ temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
 source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
 ```
 
+
+
+`r use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")`
+
+
 ## Load CMIP6 Data for sea surface Temperature
 
-We've got 4 variables to bias correct from the CMIP data using SODA:
-
- 1. Sea Surface Temperature   
- 2. Bottom Temperature   
- 3. Surface Salinity   
- 4. Bottom Salinity
  
- 
-The only one we will use OISST for is sea surface temperature.
+The only variable we will use OISSTv2 data to bias correct for is sea surface temperature.
 
 
 
@@ -73,11 +71,6 @@ pick_var <- "surf_temp"
 
 # Load all the CMIP Scenarios - cropped to study area
 cmip_data <- import_cmip_collection(cmip_var = pick_var)
-```
-
-```{r}
-plot(cmip_data[[1]][[1]],
-     col = temp_pal)
 ```
 
 
@@ -99,10 +92,37 @@ cmip_data <- imap(.x = cmip_data,
 
 ```
 
+
+
 ```{r}
 plot(cmip_data[[1]][[1]],
+     main = "Single Month of CMIP6 Data",
      col = temp_pal)
 ```
+
+### Screening Strange Values
+
+There is the possibility that in some data sources or different raster layers within them that values that are exceptionally high or low may be used in place of an explicit `NA`. These will be issues when we look across models to get summary metrics.
+
+
+```{r}
+# Checking min and max values
+
+# # can use clamp to set limits around plausible values
+# clamp_test <- clamp(cmip_data[[1]], lower = -50, upper = 100, useValues = FALSE)
+
+# boiling water seems like a reasonable limit
+cmip_data <- imap(cmip_data, function(ras_brick, ras_lab){ 
+  message(paste0("Screening Values for:  ", ras_lab))
+  clamp(ras_brick, lower = -50, upper = 100, useValues = FALSE) 
+})
+
+```
+
+
+
+
+
 
 
 ### Build Lookup Table of Historic and Projected Climate Runs
@@ -174,10 +194,13 @@ cmip_clims <- imap(cmip_data[historic_runs], function(cmip_stack, cmip_name){
 ```
 
 
+
 ```{r}
 plot(cmip_clims[[1]][[1]],
+     main = "Single Month of a CMIP6 Climatology",
      col = temp_pal)
 ```
+
 
 
 ## Get CMIP Scenario Anomalies (deltas)
@@ -226,12 +249,17 @@ good_data <- which(names(cmip_anoms) %not in% names(no_matches))
 
 # and subset
 cmip_anoms <- cmip_anoms[good_data]
+
+
+# clean up memory
+rm(cmip_data)
 ```
 
 
 ```{r}
 # Plot Check
 plot(cmip_anoms[[1]][[1]], 
+     main = "Single Month of CMIP6 Anomalies",
      col = temp_pal)
 ```
 
@@ -251,6 +279,12 @@ The OISST climatology was processed using xarray in the oisst mainstays reposito
 oisst_clim <- import_oisst_clim(climatology_period = c("1985-2014"), 
                                 os.use = "unix")
 
+
+
+# Use clamp if necessary?
+range_mets <- range(oisst_clim)
+range(values(range_mets$range_min), na.rm = T) # how annoying it is to just get 2 values
+range(values(range_mets$range_max), na.rm = T) # how annoying it is to just get 2 values
 ```
 
 ### Convert to Monthly Means
@@ -303,8 +337,19 @@ cmip_anoms_bcorrect <- map(cmip_anoms, function(anom_grid){
 
 
 
-# Historical Run
-plot(cmip_anoms_bcorrect[[1]][[1]], col = temp_pal)
+
+# remove regular anomalies
+rm(cmip_anoms)
+```
+
+
+
+
+```{r}
+# Single Run
+plot(cmip_anoms_bcorrect[[1]][[1]], 
+     main = "Single Month of Bias Corrected Data", 
+     col = temp_pal)
 ```
 
 
@@ -356,12 +401,6 @@ historic_mean <- time_period_quantile(time_period = "historic",
 
 
 
-# # Testing Percentiles
-# test_stack <- historic_bias_corr$stGrid_Surface_so_CanESM5_r10i1p1f1_historical
-# test_quant <- calc(test_stack, function(rasters){
-#   quantile(rasters, probs = 0.05, na.rm = T)})
-# plot(test_quant)
-
 # 5th Percentile
 historic_05 <- time_period_quantile(time_period = "historic",
                                     time_period_collection = historic_bias_corr, 
@@ -372,12 +411,17 @@ historic_05 <- time_period_quantile(time_period = "historic",
 historic_95 <- time_period_quantile(time_period = "historic",
                                     time_period_collection = historic_bias_corr, 
                                     quantile_product = "95th")
+
+
+
+# clean up
+rm(historic_bias_corr)
 ```
 
 
-```{r, fig.height=8}
+```{r, fig.height = 8}
 # Plot check
-par(mfrow = c(3,1))
+par(mfrow = c(3, 1))
 plot(historic_mean$X1950.01, main = "Historic Mean", col = temp_pal)
 plot(historic_05$X1950.01,   main = "Historic 5th Percentile", col = temp_pal)
 plot(historic_95$X1950.01,   main = "Historic 95th Percentile", col = temp_pal)
@@ -389,9 +433,8 @@ plot(historic_95$X1950.01,   main = "Historic 95th Percentile", col = temp_pal)
 Repeat what we just did for the historical periods for the future projections. At each cell for every time step get the value from whichever model represents the 5th percentile, the mean, or the 95th percentile.
 
 ```{r projection quants}
-####  Projection Quantiles
 
-# assess what the issue is with invalid subsets
+####  Projection Quantiles
 
 
 # Mean
@@ -410,6 +453,10 @@ projection_05 <- time_period_quantile(time_period = "projection",
 projection_95 <- time_period_quantile(time_period = "projection",
                                     time_period_collection = projection_bias_corr, 
                                     quantile_product = "95th")
+
+
+# clean up
+rm(projection_bias_corr)
 ```
 
 
@@ -441,7 +488,10 @@ var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
 
 
 # File Names
-writeRaster(full_5th, paste0(var_path, "_OISST_bias_corrected_5thpercentile.grd"))
-writeRaster(full_mean, paste0(var_path, "_OISST_bias_corrected_mean.grd"))
-writeRaster(full_95th, paste0(var_path, "_OISST_bias_corrected_95thpercentile.grd"))
+writeRaster(full_5th, paste0(var_path, "_OISST_bias_corrected_5thpercentile.grd"), overwrite = T)
+writeRaster(full_mean, paste0(var_path, "_OISST_bias_corrected_mean.grd"), overwrite = T)
+writeRaster(full_95th, paste0(var_path, "_OISST_bias_corrected_95thpercentile.grd"), overwrite = T)
 ```
+
+
+`r insert_gmri_footer()`

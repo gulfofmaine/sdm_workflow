@@ -42,7 +42,7 @@ cmip_path = {"surf_sal"  : f"{box_root}RES_Data/CMIP6/SurSalinity/StGrid/",
 
 
 # Pick a variable
-cmip_var = "bot_sal"
+cmip_var = "bot_temp"
 
            
            

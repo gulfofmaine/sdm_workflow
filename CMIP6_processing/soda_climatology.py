@@ -63,11 +63,19 @@ botsal = botsal.rename_vars({"salt" : "bot_sal"}).drop("st_ocean")
 
 
 ####  Build xr.Dataset from pieces of each  ####
+
+
 # Drop the depth dimension where it exists, then rebuild
 def remove_st_ocean(xr_ds, var):
   """Pull out data as an array, drop st_ocean dimension, rebuild xr.array. 
   Need to pull surface measurement from surface data arrays so depth coordinate
-  becomes unnecessary."""
+  becomes unnecessary.
+  
+  Args:
+    xr_ds      : xr.ArrayDataset
+    var (str)  : String indicating variable to pull and process
+  
+  """
   
   # Take the data values out as an array
   data = xr_ds[var].values 
@@ -89,9 +97,10 @@ def remove_st_ocean(xr_ds, var):
 
 # Remove st_ocean from each of them
 surftemp_manual = remove_st_ocean(surftemp, "surf_temp")
-bottemp_manual = remove_st_ocean(bottemp, "bot_temp")
-surfsal_manual = remove_st_ocean(surfsal, "surf_sal")
-botsal_manual = remove_st_ocean(botsal, "bot_sal")
+bottemp_manual  = remove_st_ocean(bottemp, "bot_temp")
+surfsal_manual  = remove_st_ocean(surfsal, "surf_sal")
+botsal_manual   = remove_st_ocean(botsal, "bot_sal")
+
 
 # Plot check
 botsal_manual.isel(time = 0).plot()
@@ -113,11 +122,60 @@ soda_manual = xr.Dataset({"surf_temp" : surftemp_manual,
 soda_full = soda_manual
 type(soda_full)
 
-soda_full.bot_sal.range()
+# plot
+soda_full.bot_sal.isel(time = 0).plot()
+plt.show()
+plt.clf()
 
 
-####  Subset Years
-soda_slice = soda_full.sel(time = slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+
+####  Screening Odd Values  ####
+
+# This step is to catch instances where unreasonably
+# high or low values are used to flag NA's
+
+def drop_extremes(xr_ds, soda_var, clamp_low, clamp_high):
+  """
+  Drop values outside of desired range from xarray dataset.
+  
+  Args:
+    xr_ds              : xr.ArrayDataset to apply data screen to
+    soda_var (str)     : variable to screen 
+    clamp_low (float)  : lower limit to use for data screen
+    clamp_high (float) : upper limit to use for data screen
+  
+  """
+  # Use soda var to pull attribute data
+  soda_da = xr_ds[soda_var]
+  
+  # Set condition flags
+  lower_cond = soda_da > clamp_low
+  upper_cond = soda_da <  clamp_high
+  
+  # Reassign to nan where those flags are not true
+  soda_da = soda_da.where(lower_cond) 
+  soda_da = soda_da.where(upper_cond) 
+  
+  xr_ds[soda_var] = soda_da
+  return xr_ds
+
+
+
+# test it
+soda_filtered = drop_extremes(xr_ds = soda_full, soda_var = "bot_temp", clamp_low = -50, clamp_high = 100)
+soda_filtered = drop_extremes(xr_ds = soda_filtered, soda_var = "bot_sal", clamp_low = -50, clamp_high = 100)
+soda_filtered = drop_extremes(xr_ds = soda_filtered, soda_var = "surf_temp", clamp_low = -50, clamp_high = 100)
+soda_filtered = drop_extremes(xr_ds = soda_filtered, soda_var = "surf_sal", clamp_low = -50, clamp_high = 100)
+soda_filtered
+
+
+
+
+
+
+
+####  Subset Years  ####
+soda_slice = soda_filtered.sel(time = slice(f"{start_year}-01-01", f"{end_year}-12-31"))
 
 
 # Use groupby to get average for each month in reference period
@@ -132,11 +190,11 @@ plt.clf()
 
 
 
-# # What does the timeline for the whole area look like?:
-# area_ts = getattr(monthly_clim, "surf_sal").mean(dim = ("yt_ocean", "xt_ocean"))
-# area_ts.plot()
-# plt.show()
-# plt.clf()
+# What does the timeline for the whole area look like?:
+area_ts = getattr(monthly_clim, "surf_sal").mean(dim = ("yt_ocean", "xt_ocean"))
+area_ts.plot()
+plt.show()
+plt.clf()
 
 
 
@@ -156,6 +214,8 @@ monthly_clim.attrs = {
   'CDO'                     : 'Climate Data Operators version 1.9.9 (https://mpimet.mpg.de/cdo)'
 }
 
+# Review Climatology
+monthly_clim
 
 # save to box
 monthly_clim.to_netcdf(f"{box_root}RES_Data/SODA/SODA_monthly_climatology{start_year}to{end_year}.nc")

@@ -16,8 +16,6 @@ params:
     choices: ["surf_sal", "bot_sal", "bot_temp"]
   climate_start: "1985"
   climate_stop: "2014"
-editor_options: 
-  chunk_output_type: console
 
 ---
 
@@ -57,7 +55,7 @@ source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
 ```
 
 
-
+`r use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")`
 
 
 ## Load CMIP6 Data for Each Variable
@@ -72,23 +70,30 @@ We've got 4 variables to bias correct from the CMIP data using SODA:
  
 The trickiest part will be managing the dimension and variable names, and either breaking the data up by variable or trying to do everything in a unified way.
 
+###  Select CMIP Variable
 
 ```{r load collection}
 
-####  Choose a variable
+####  Choose a variable - using rmarkdown parameter
 pick_var <- params$variable
+
+# Manual selection
 # pick_var <- "bot_temp"
 # pick_var <- "surf_sal"
 # pick_var <- "bot_sal"
 
+
+message(paste0("Loading CMIP6 Data for:  ", pick_var ))
+```
+
+###  Load Collection
+
+```{r}
 # Load all the CMIP Scenarios - cropped to study area
 cmip_data <- import_cmip_collection(cmip_var = pick_var)
 ```
 
-```{r}
-plot(cmip_data[[1]][[1]],
-     col = temp_pal)
-```
+
 
 
 ### Match Dates to Xarray
@@ -109,10 +114,51 @@ cmip_data <- imap(.x = cmip_data,
 
 ```
 
+
+
 ```{r}
 plot(cmip_data[[1]][[1]],
+     main = "Single Month of CMIP6 Data",
      col = temp_pal)
 ```
+
+
+### Screening Strange Values
+
+There is the possibility that in some data sources or different raster layers within them that values that are exceptionally high or low may be used in place of an explicit `NA`. These will be issues when we look across models to get summary metrics.
+
+
+```{r, eval = TRUE}
+# Checking min and max values
+
+# Set upper and lower bounds depending on variable
+clamp_low <- switch (pick_var,
+  "bot_temp"  = -50,
+  "surf_temp" = -50,
+  "surf_sal"  = -50,
+  "bot_sal"   = -50 )
+
+clamp_high <- switch (pick_var,
+  "bot_temp"  = 100,
+  "surf_temp" = 100,
+  "surf_sal"  = 100,
+  "bot_sal"   = 100 )
+
+
+# boiling water seems like a reasonable limit
+cmip_data <- imap(cmip_data, function(ras_brick, ras_lab){ 
+  message(paste0("Screening Values for:  ", ras_lab))
+  clamp(ras_brick, 
+        lower = clamp_low, 
+        upper = clamp_high, 
+        useValues = FALSE) 
+})
+
+```
+
+
+
+
 
 
 ### Build Lookup Table of Historic and Projected Climate Runs
@@ -188,6 +234,7 @@ cmip_clims <- imap(cmip_data[historic_runs], function(cmip_stack, cmip_name){
 
 ```{r}
 plot(cmip_clims[[1]][[1]],
+     main = "Single Month of a CMIP6 Climatology",
      col = temp_pal)
 ```
 
@@ -223,8 +270,11 @@ cmip_anoms <- imap(cmip_data, function(cmip_data, cmip_name){
     return(cmip_anomalies)
     
   } else if(length(clim_id) == 0) {
+    
+    # Print status of ones that fail
     message(paste0("No matching climate reference for: ", cmip_name))
     cmip_anomalies <- "ugly duckling"
+    
     return(cmip_anomalies)}
   
 })
@@ -238,12 +288,18 @@ good_data <- which(names(cmip_anoms) %not in% names(no_matches))
 
 # and subset
 cmip_anoms <- cmip_anoms[good_data]
+
+
+
+# clean up
+rm(cmip_data)
 ```
 
 
 ```{r}
 # Plot Check
 plot(cmip_anoms[[1]][[1]], 
+     main = "Single Month of CMIP6 Anomalies",
      col = temp_pal)
 ```
 
@@ -270,7 +326,33 @@ soda_clim <- import_soda_clim(soda_var = pick_var,
                               os.use = "unix", 
                               start_yr = "1985")
 
+
+
+# how annoying it is to just get 2 values
+range_mets <- range(soda_clim)
+
+# range of minimum values
+range(values(range_mets$range_min), na.rm = T) 
+
+# range of max values
+range(values(range_mets$range_max), na.rm = T) 
+
+rm(range_mets)
 ```
+
+### Screen Strange Values in CMIP
+
+```{r}
+
+# Use clamp if necessary to screen odd values? may as well
+soda_clim <- clamp(soda_clim, 
+                   lower = clamp_low, 
+                   upper = clamp_high, 
+                   useValues = FALSE)
+```
+
+
+
 
 ### Optional re-gridding
 
@@ -293,7 +375,7 @@ This step  is only necessary if the resolution across data sources is not the sa
 # Plot Check
 plot(soda_clim[[1]], 
      col = temp_pal, 
-     main = "January Climatology")
+     main = "January SODA Climatology")
 ```
 
 ### Bias Correction
@@ -314,8 +396,17 @@ cmip_anoms_bcorrect <- map(cmip_anoms, function(anom_grid){
 
 
 
-# Historical Run
-plot(cmip_anoms_bcorrect[[1]][[1]])
+# clean up
+rm(cmip_anoms)
+```
+
+
+
+```{r}
+# Single Run
+plot(cmip_anoms_bcorrect[[1]][[1]], 
+     main = "Single Month of Bias Corrected Data", 
+     col = temp_pal)
 ```
 
 
@@ -366,12 +457,6 @@ historic_mean <- time_period_quantile(time_period = "historic",
 
 
 
-# # Testing Percentiles
-# test_stack <- historic_bias_corr$stGrid_Surface_so_CanESM5_r10i1p1f1_historical
-# test_quant <- calc(test_stack, function(rasters){
-#   quantile(rasters, probs = 0.05, na.rm = T)})
-# plot(test_quant)
-
 # 5th Percentile
 historic_05 <- time_period_quantile(time_period = "historic",
                                     time_period_collection = historic_bias_corr, 
@@ -382,6 +467,10 @@ historic_05 <- time_period_quantile(time_period = "historic",
 historic_95 <- time_period_quantile(time_period = "historic",
                                     time_period_collection = historic_bias_corr, 
                                     quantile_product = "95th")
+
+
+# clean up
+rm(historic_bias_corr)
 ```
 
 
@@ -401,9 +490,6 @@ Repeat what we just did for the historical periods for the future projections. A
 ```{r projection quants}
 ####  Projection Quantiles
 
-# assess what the issue is with invalid subsets
-
-
 # Mean
 projection_mean <- time_period_quantile(time_period = "projection",
                                     time_period_collection = projection_bias_corr, 
@@ -420,6 +506,10 @@ projection_05 <- time_period_quantile(time_period = "projection",
 projection_95 <- time_period_quantile(time_period = "projection",
                                     time_period_collection = projection_bias_corr, 
                                     quantile_product = "95th")
+
+
+# clean up
+rm(projection_bias_corr)
 ```
 
 
@@ -451,8 +541,9 @@ var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
 
 
 # File Names
-writeRaster(full_5th, paste0(var_path, "_SODA_bias_corrected_5thpercentile.grd"))
-writeRaster(full_mean, paste0(var_path, "_SODA_bias_corrected_mean.grd"))
-writeRaster(full_95th, paste0(var_path, "_SODA_bias_corrected_95thpercentile.grd"))
+writeRaster(full_5th,  paste0(var_path, "_SODA_bias_corrected_5thpercentile.grd"), overwrite = T)
+writeRaster(full_mean, paste0(var_path, "_SODA_bias_corrected_mean.grd"), overwrite = T)
+writeRaster(full_95th, paste0(var_path, "_SODA_bias_corrected_95thpercentile.grd"), overwrite = T)
 ```
 
+`r insert_gmri_footer()`
