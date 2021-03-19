@@ -1,8 +1,136 @@
-####  Common Resources  ####
 
 
-####  Functions  ####
-####
+#' @title Make VAST dataset
+#' 
+#' @description 
+#'
+#' @param tidy_mod_data
+#' @param year_min
+#' @param year_max
+#' @param out_dir
+#' 
+#' @return  
+#' 
+#' @export
+
+process_vast_seasonal_data<- function(tidy_mod_data, year_min, year_max, out_dir){
+  
+  # For debugging
+  if(FALSE){
+    tidy_mod_data = readRDS(here::here("scratch/aja/targets_flow/data/combined/tidy_mod_data.rds"))
+  }
+  
+  # Some work on the time span and seasons
+  data_temp<- tidy_mod_data %>%
+    filter(., EST_YEAR >= year_min & EST_YEAR <= year_max) %>%
+    filter(., SEASON %in% c("SPRING", "FALL")) %>%
+    mutate(., "VAST_SEASON" = case_when(
+      SEASON == "SPRING" & SURVEY == "DFO" ~ "DFO",
+      SEASON == "SPRING" & SURVEY == "NMFS" ~ "SPRING",
+      SEASON == "FALL" & SURVEY == "NMFS" ~ "FALL"))
+  data_temp$VAST_SEASON<- ifelse(data_temp$SEASON == "SPRING" & data_temp$SURVEY == "DFO", "DFO", data_temp$SEASON)
+  
+  # Set of years and seasons. The DFO spring survey usually occurs before the NOAA NEFSC spring survey, so ordering accordingly.
+  year_set<- sort(unique(data_temp$EST_YEAR))
+  season_set<- c("DFO", "SPRING", "FALL")
+  
+  # Create a grid with all unique combinations of seasons and years and then combine these into one "year_season" variable
+  yearseason_grid<- expand.grid("SEASON" = season_set, "EST_YEAR" = year_set)
+  yearseason_levels<- apply(yearseason_grid[, 2:1], MARGIN = 1, FUN = paste, collapse = "_")
+  yearseason_labels<- round(yearseason_grid$EST_YEAR + (as.numeric(factor(yearseason_grid$SEASON, levels = season_set))-1)/length(season_set), digits = 1)
+  
+  # Similar process, but for the observations
+  yearseason_i<- apply(data_temp[, c("EST_YEAR", "SEASON")], MARGIN = 1, FUN = paste, collapse = "_")
+  yearseason_i<- factor(yearseason_i, levels = yearseason_levels)
+  
+  # Add the year_season factor column to our sampling_data data set
+  data_temp$YEAR_SEASON<- yearseason_i
+  data_temp$VAST_SEASON = factor(data_temp$VAST_SEASON, levels = season_set)
+  
+  # Make dummy data for all year_seasons to estimate gaps in sampling if needed
+  dummy_data<- data.frame(ID = sample(data_temp$ID, size = 1), Year = yearseason_grid[,'EST_YEAR'], Season = yearseason_grid[,'SEASON'], Year_Season = yearseason_levels, Lat = mean(data_temp$Lat, na.rm = TRUE), Lon = mean(data_temp$Lon, na.rm = TRUE), Biomass = 0, Swept = 0.05, PredTF = TRUE)
+  
+  # Combine with original dataset
+  vast_data_out<- rbind(cbind(data_temp, PredTF = FALSE), dummy_data)
+
+  # Save and return it
+  saveRDS(vast_cov_out, file = paste(out_dir, "vast_cov.rds", sep = "/"))
+  return(vast_cov_out)
+}
+
+#' @title Make VAST sample dataset
+#' 
+#' @description A short function that processes a sample dataset to work with VAST function and, if needed, extraction functions to get other covariate values before being used to fit VAST model
+#'
+#' @param all_sample_dir
+#' @param year_min
+#' @param year_max
+#' @param out_dir
+#' 
+#' @return Combined sample data frame 
+#' 
+#' @export
+
+vast_make_sample_data<- function(all_sample_dir, year_min, year_max, nmfs_species_code, out_dir){
+  
+  # For debugging
+  if(FALSE){
+    all_sample_dir = here::here("scratch/aja/targets_flow/data/combined")
+    year_min = 1985
+    year_max = 2015
+    nmfs_species_code = 105
+    out_dir = here::here("scratch/aja/targets_flow/data/dfo/combined")
+  }
+  
+  # Bring in the data
+  all_samp<- readRDS(here::here(all_sample_dir, "all_sample.rds"))
+  
+  # Some work on the time span and seasons
+  samp_sub<- all_samp %>%
+    filter(., EST_YEAR >= year_min & EST_YEAR <= year_max) %>%
+    filter(., SEASON %in% c("SPRING", "FALL"))
+  samp_sub$SEASON<- ifelse(samp_sub$SEASON == "SPRING" & samp_sub$SURVEY == "DFO", "DFO", samp_sub$SEASON)
+  
+  # Set of years and seasons. The DFO spring survey usually occurs before the NOAA NEFSC spring survey, so ordering accordingly.
+  year_set<- sort(unique(samp_sub$EST_YEAR))
+  season_set<- c("DFO", "SPRING", "FALL")
+  
+  # Create a grid with all unique combinations of seasons and years and then combine these into one "year_season" variable
+  yearseason_grid<- expand.grid("SEASON" = season_set, "EST_YEAR" = year_set)
+  yearseason_levels<- apply(yearseason_grid[, 2:1], MARGIN = 1, FUN = paste, collapse = "_")
+  yearseason_labels<- round(yearseason_grid$EST_YEAR + (as.numeric(factor(yearseason_grid$SEASON, levels = season_set))-1)/length(season_set), digits = 1)
+  
+  # Similar process, but for the observations
+  yearseason_i<- apply(samp_sub[, c("EST_YEAR", "SEASON")], MARGIN = 1, FUN = paste, collapse = "_")
+  yearseason_i<- factor(yearseason_i, levels = yearseason_levels)
+  
+  # Add the year_season factor column to our sampling_data data set
+  samp_sub$YEAR_SEASON<- yearseason_i
+  samp_sub$SEASON = factor(samp_sub$SEASON, levels = season_set)
+  
+  # Subset and renaming...
+  samp_sub2<- samp_sub %>%
+    filter(., NMFS_SVSPP == nmfs_species_code) %>%
+    select(., ID, EST_YEAR, SEASON, YEAR_SEASON, DECDEG_BEGLON, DECDEG_BEGLAT, BIOMASS) %>%
+    rename(., c(Year = EST_YEAR, Season = SEASON, Year_Season = YEAR_SEASON, Lat = DECDEG_BEGLAT, Lon = DECDEG_BEGLON, Biomass = BIOMASS))
+  samp_sub2$Swept = rep(0.05, nrow(samp_sub2))
+  
+  # Make dummy data for all year_seasons to estimate gaps in sampling if needed
+  dummy_data<- data.frame(ID = sample(samp_sub2$ID, size = 1), Year = yearseason_grid[,'EST_YEAR'], Season = yearseason_grid[,'SEASON'], Year_Season = yearseason_levels, Lat = mean(samp_sub2$Lat, na.rm = TRUE), Lon = mean(samp_sub2$Lon, na.rm = TRUE), Biomass = 0, Swept = 0.05, PredTF = TRUE)
+  
+  # Combine with sampling data
+  vast_samp_out<- rbind(cbind(samp_sub2, PredTF = FALSE), dummy_data)
+  
+  # Final step
+  vast_samp_out<- vast_samp_out %>%
+    mutate(., Year = as.numeric(Year_Season)-1) %>%
+    select(., Year, Lat, Lon, Biomass, Swept, PredTF)
+  
+  # Save and return it
+  saveRDS(vast_samp_out, file = paste(out_dir, "vast_sample.rds", sep = "/"))
+  return(vast_samp_out)
+}
+
 #' @title Read in sample dataset 
 #' 
 #' @description A short function to read in sample data given a file path to csv
@@ -11,6 +139,7 @@
 #' 
 #' @return sample data frame 
 #' 
+#' @export
 
 read_samp_dat_csv<- function(samp_dat_path){
   
@@ -37,6 +166,7 @@ read_samp_dat_csv<- function(samp_dat_path){
 #' 
 #' @return covariate data frame
 #' 
+#' @export
 
 read_cov_dat_csv<- function(cov_dat_path){
   
@@ -66,6 +196,7 @@ read_cov_dat_csv<- function(cov_dat_path){
 #' 
 #' @return SF poylgon 
 #' 
+#' @export
 
 read_polyshape<- function(polyshape_path){
   
@@ -90,6 +221,8 @@ read_polyshape<- function(polyshape_path){
 #' @param cell_size The size of grid in meters (since working in UTM). This will control the resolution of the extrapolation grid.
 #'
 #' @return Tagged list containing extrapolation grid settings needed to fit a VAST model of species occurrence.
+#' 
+#' @export
 
 vast_make_extrap_grid<- function(shapefile, cell_size){
   
@@ -143,6 +276,8 @@ vast_make_extrap_grid<- function(shapefile, cell_size){
 #' @param bias.correct Logical boolean determining if Epsilon bias-correction should be done. 
 #'
 #' @return Tagged list containing settings needed to fit a VAST model of species occurrence.
+#' 
+#' @export
 
 vast_make_settings <- function(extrap_grid, FieldConfig, RhoConfig, bias.correct){
   
@@ -173,6 +308,8 @@ vast_make_settings <- function(extrap_grid, FieldConfig, RhoConfig, bias.correct
 #' @param X2_coveff_vec A vector specifying the covariate effects for second linear predictor. 
 #'
 #' @return A list with covariate effects for the first linear predictor (first list slot) and second linear predictor (second list slot). 
+#'
+#' @export
 
 vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec){
   
@@ -204,6 +341,8 @@ vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec){
 #' @param Xconfig_list A tagged list specifying the covariate effects for first and second linear predictors.
 #'
 #' @return A VAST `fit_model` object, with the inputs and built TMB object components.
+#'
+#' @export
 
 vast_build_sdm <- function(settings, extrap_grid, samp_dat, cov_dat, X1_formula, X2_formula, X_contrasts, Xconfig_list){
   
@@ -220,7 +359,7 @@ vast_build_sdm <- function(settings, extrap_grid, samp_dat, cov_dat, X1_formula,
   }
   
   # Check names
-  samp_dat_names<- c("Lat", "Lon", "Year", "Response", "Swept", "PredTF")
+  samp_dat_names<- c("Lat", "Lon", "Year", "Biomass", "Swept", "PredTF")
   if(!(all(samp_dat_names %in% names(samp_dat)))){
     stop(paste("Check names in sample data. Must include:", paste0(samp_dat_names, collapse = ","), sep = " "))
   }
@@ -237,7 +376,7 @@ vast_build_sdm <- function(settings, extrap_grid, samp_dat, cov_dat, X1_formula,
   }
   
   # Run VAST::fit_model with correct info and settings
-  vast_build_out<- fit_model("settings" = settings, input_grid = as.matrix(extrap_grid, ncol = 3), "Lat_i" = samp_dat[, 'Lat'], "Lon_i" = samp_dat[, 'Lon'], "t_i" = samp_dat[, 'Year'], "c_i" = rep(0, nrow(samp_dat)), "b_i" = samp_dat[, 'Response'], "a_i" = samp_dat[, 'Swept'], "PredTF_i" = samp_dat[, 'PredTF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = cov_dat, "X1_formula" = X1_formula, "X2_formula" = X2_formula, X_contrasts = X_contrasts, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
+  vast_build_out<- fit_model("settings" = settings, input_grid = as.matrix(extrap_grid, ncol = 3), "Lat_i" = samp_dat[, 'Lat'], "Lon_i" = samp_dat[, 'Lon'], "t_i" = samp_dat[, 'Year'], "c_i" = rep(0, nrow(samp_dat)), "b_i" = samp_dat[, 'Biomass'], "a_i" = samp_dat[, 'Swept'], "PredTF_i" = samp_dat[, 'PredTF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = cov_dat, "X1_formula" = X1_formula, "X2_formula" = X2_formula, X_contrasts = X_contrasts, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
   
   # Return it
   return(vast_build_out)
@@ -252,6 +391,8 @@ vast_build_sdm <- function(settings, extrap_grid, samp_dat, cov_dat, X1_formula,
 #' @param adjustments Either NULL (default) or a tagged list identifying adjustments that should be made to the vast_build `fit_model` object. If NULL, the identical model defined by the `vast_build` is run and fitted.
 #'
 #' @return A VAST fit_model object, with the inputs and built TMB object components.
+#' 
+#' @export
 
 vast_make_adjustments <- function(vast_build, adjustments = NULL){
   
@@ -334,6 +475,8 @@ vast_make_adjustments <- function(vast_build, adjustments = NULL){
 #' @param vast_build A VAST `fit_model` object.
 #'
 #' @return A VAST fit_model object, with the inputs and and outputs, including parameter estimates, extrapolation gid info, spatial list info, data info, and TMB info.
+#'
+#' @export
 
 vast_fit_sdm <- function(vast_build_adjust){
   

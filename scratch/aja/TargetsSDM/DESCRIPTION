@@ -1,0 +1,29 @@
+Package: TargetsSDM
+Version: 0.1
+Date: 2021-03-18
+Title: Gulf of Maine Research Institutes Species Distribution Modeling Workflow
+Description: Add description
+Authors@R:
+    c(person(given = "Andrew",
+             family = "Allyn",
+             role = c("aut", "cre"),
+             email = "aallyn@gmri.org"),
+    person(given = "Lindsay",
+             family = "Carlson",
+             role = c("aut"),
+             email = "lcarlson@gmri.org"),
+    person(given = "Matt",
+             family = "Dzaugis",
+             role = c("aut"),
+             email = "mdzaugis@gmri.org"),
+    person(given = "Kemberling",
+             family = "Adam",
+             role = c("aut"),
+             email = "akemberling@gmri.org"),
+    person(given = "Kathy",
+             family = "Mills",
+             role = c("aut"),
+             email = "kmills@gmri.org"))
+Maintainer: Andrew Allyn <aallyn@gmri.org>
+License: GPL-3
+RoxygenNote: 7.1.1
