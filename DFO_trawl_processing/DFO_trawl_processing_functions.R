@@ -1,5 +1,4 @@
 
-
 # Setup ---------------------------------------------------------
 # Detect the operating system
 os.use<- .Platform$OS.type
@@ -12,11 +11,6 @@ computer.name<- "lcarlson" # Needed for PC users
 shared.path<- switch(os.use, 
                      "unix" = paste("~/Box/", user.name, sep = ""),
                      "windows" = paste("C:/Users/", computer.name, "/Box/", sep = ""))
-
-
-
-
-
 
 # Helper Function ---------------------------------------------------------
 library_check<- function(libraries) {
