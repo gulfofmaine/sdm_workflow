@@ -1,0 +1,267 @@
+---
+title: "Bias Correction Validations"
+author: "Adam A. Kemberling"
+date: "3/26/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+        collapsed: FALSE
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+
+---
+
+```{r setup, include=FALSE}
+# Set knitr options
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F, comment = NA)
+options(knitr.kable.NA = '')
+
+###__ Packages  ####
+library(here)
+library(ncdf4)
+library(RNetCDF)
+library(raster)
+library(janitor)
+library(gmRi)
+library(patchwork)
+library(tidyverse)
+library(knitr)
+library(sf)
+
+
+
+# Load the build code and stratification function
+box_paths  <- research_access_paths(os.use = "unix")
+res_path   <- box_paths$res
+oisst_path <- box_paths$oisst_mainstays
+cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
+soda_path  <- shared.path("unix", "RES_Data", "SODA")
+
+#### Set theme  ####
+theme_set(theme_minimal())
+
+#  color palette for quick raster displays
+temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
+
+####  Functions  ####
+source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
+```
+
+
+
+`r use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")`
+
+
+# Validating Bias-Correction of CMIP6 Data
+
+Bias corrected timelines for the Northeast Shelf will be compared against the reference observations (OISSTv2, SODA) to check how accurrately they represent observed conditions.
+
+
+## Load Data
+
+**SODA**
+
+```{r}
+
+# gom mask
+gom_mask <- read_sf(str_c(res_path, "Shapefiles/NELME_regions/GoM_sf.shp"))
+
+
+# SODA vars
+soda_ssal  <- stack(str_c(soda_path, "SODA_Salt_Red.nc"))
+soda_bsal  <- stack(str_c(soda_path, "SODA_Salt_Red_bottomLayer.nc"))
+soda_btemp <- stack(str_c(soda_path, "SODA_Temp_Red_bottomLayer.nc"))
+
+# masking function
+mask_gom <- function(in_ras, gom_mask){
+  r1 <- crop(in_ras, gom_mask)
+  r2 <- mask(r1, gom_mask)
+  return(r2)}
+
+# mask them
+soda_ssal  <- mask_gom(soda_ssal, gom_mask)
+soda_bsal  <- mask_gom(soda_bsal, gom_mask)
+soda_btemp <- mask_gom(soda_btemp, gom_mask)
+
+# Plot Check
+plot(soda_btemp[[1]], col = temp_pal)
+```
+
+
+
+**OISSTv2**
+
+```{r}
+
+# OISST 
+data_window <- data.frame(lon = c(-72, -61),
+                          lat = c(39, 46.1),
+                          time = as.Date(c("1981-09-01", "2020-12-31")))
+
+# Load Data
+oisst <- oisst_window_load(oisst_path = oisst_path, 
+                           data_window = data_window, 
+                           anomalies = FALSE)
+
+
+# Convert to Monthly
+oisst <- stack(oisst)
+month_key <- seq.Date(min(data_window$time), max(data_window$time), by = "month")
+month_key <- str_c("X", month_key) %>% str_replace_all("-", ".")
+month_key <- str_sub(month_key, 1, -4)
+oisst_monthly <- map(month_key, function(wut_month){
+  
+  # Identify corresponding days in month
+  which_layers  <- str_detect(names(oisst), wut_month)
+  layer_indices <- which(which_layers)
+  
+  if(length(layer_indices) == 0) {
+  print(str_c(length(layer_indices), " days for ", wut_month))
+  }
+  
+  # Get mean
+  month_mean <- calc(oisst[[layer_indices]], fun = mean, na.rm = T)
+
+  # set month as name
+  month_mean <- setNames(month_mean, wut_month)
+  return(month_mean)
+  
+  
+}) 
+
+# Crop them
+oisst_monthly <- stack(oisst_monthly)
+oisst_monthly <- mask_gom(oisst_monthly, gom_mask = gom_mask)
+
+# Plot check
+plot(oisst_monthly[[1]], col = temp_pal)
+
+```
+
+
+**CMIP6 Bias-Corrected**
+
+```{r}
+
+
+# CMIP Bias Corrected
+cmip_stemp <- stack(str_c(cmip_path, "BiasCorrected/surf_temp_OISST_bias_corrected_mean.grd"))
+cmip_btemp <- stack(str_c(cmip_path, "BiasCorrected/bot_temp_SODA_bias_corrected_mean.grd"))
+cmip_ssal  <- stack(str_c(cmip_path, "BiasCorrected/surf_sal_SODA_bias_corrected_mean.grd"))
+cmip_bsal  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_corrected_mean.grd"))
+
+# Rotate them:
+cmip_stemp <- raster::rotate(cmip_stemp)
+cmip_btemp <- raster::rotate(cmip_btemp)
+cmip_ssal  <- raster::rotate(cmip_ssal)
+cmip_bsal  <- raster::rotate(cmip_bsal)
+
+
+# Crop them all
+cmip_stemp <- mask_gom(cmip_stemp , gom_mask)
+cmip_btemp <- mask_gom(cmip_btemp , gom_mask)
+cmip_ssal  <- mask_gom(cmip_ssal  , gom_mask)
+cmip_bsal  <- mask_gom(cmip_bsal  , gom_mask)
+
+# Plot Check
+plot(cmip_stemp[[1]], col = temp_pal)
+
+```
+# Visual Comparisons {.tabset .tabset-pills}
+
+**Processing and Plotting Functions**
+
+```{r}
+# Make dataframe using cellStats
+ras_timeline <- function(named_ras){
+  data.frame(ras_date = names(named_ras),
+             mean_val = cellStats(named_ras, stat = "mean", na.rm = T)) %>% 
+    mutate(ras_date = str_sub(ras_date, 2, -1),
+           ras_date = str_replace_all(ras_date, "[.]", "/"),
+           ras_date = str_c(ras_date, "/15"),
+           ras_date = as.Date(ras_date))
+}
+
+# Plot Comparison
+timeline_compare <- function(data1, data2, name1, name2, variable){ 
+  ggplot() +
+    geom_line(data = data1, aes(ras_date, mean_val, color = name1)) +
+    geom_line(data = data2, aes(ras_date, mean_val, color = name2)) +
+    scale_color_gmri() +
+    labs(x = "", y = variable, color = "Data Source") +
+    theme(legend.position = "bottom")
+}
+```
+
+
+
+## Surface Temperature
+
+```{r}
+
+# Make timelines
+cmip_stemp_tl <- ras_timeline(cmip_stemp)
+oisst_tl      <- ras_timeline(oisst_monthly)
+
+# Compare
+timeline_compare(data1 = cmip_stemp_tl, 
+                 data2 = oisst_tl, 
+                 name1 = "CMIP Bias Corrected", 
+                 name2 = "OISSTv2", 
+                 variable = "Surface Temperature")
+
+
+```
+
+
+## Surface Salinity
+
+```{r}
+# Make timelines
+cmip_ssal_tl <- ras_timeline(cmip_ssal)
+soda_ssal_tl <- ras_timeline(soda_ssal)
+
+# Compare
+timeline_compare(data1 = cmip_ssal_tl, 
+                 data2 = soda_ssal_tl, 
+                 name1 = "CMIP Bias Corrected", 
+                 name2 = "SODA", 
+                 variable = "Surface Salinity")
+```
+
+
+## Bottom Temperature
+
+```{r}
+# Make timelines
+cmip_btemp_tl <- ras_timeline(cmip_btemp)
+soda_btemp_tl <- ras_timeline(soda_btemp)
+
+# Compare
+timeline_compare(data1 = cmip_btemp_tl, 
+                 data2 = soda_btemp_tl, 
+                 name1 = "CMIP Bias Corrected", 
+                 name2 = "SODA", 
+                 variable = "Bottom Temperature")
+```
+
+
+## Bottom Salinity
+
+```{r}
+# Make timelines
+cmip_bsal_tl <- ras_timeline(cmip_bsal)
+soda_bsal_tl <- ras_timeline(soda_bsal)
+
+# Compare
+timeline_compare(data1 = cmip_bsal_tl, 
+                 data2 = soda_bsal_tl, 
+                 name1 = "CMIP Bias Corrected", 
+                 name2 = "SODA", 
+                 variable = "Bottom Salinity")
+```
+
+
+`r insert_gmri_footer()`
