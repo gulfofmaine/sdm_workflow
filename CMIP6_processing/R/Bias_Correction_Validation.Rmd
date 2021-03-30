@@ -29,6 +29,7 @@ library(patchwork)
 library(tidyverse)
 library(knitr)
 library(sf)
+library(ggforce)
 
 
 
@@ -40,7 +41,7 @@ cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
 soda_path  <- shared.path("unix", "RES_Data", "SODA")
 
 #### Set theme  ####
-theme_set(theme_minimal())
+theme_set(theme_bw())
 
 #  color palette for quick raster displays
 temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
@@ -59,9 +60,9 @@ source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
 Bias corrected timelines for the Northeast Shelf will be compared against the reference observations (OISSTv2, SODA) to check how accurrately they represent observed conditions.
 
 
-## Load Data
+## Load Data {.tabset}
 
-**SODA**
+### SODA
 
 ```{r}
 
@@ -86,12 +87,12 @@ soda_bsal  <- mask_gom(soda_bsal, gom_mask)
 soda_btemp <- mask_gom(soda_btemp, gom_mask)
 
 # Plot Check
-plot(soda_btemp[[1]], col = temp_pal)
+plot(soda_btemp[[1]], col = temp_pal, main = "SODA Bottom Temp. Example")
 ```
 
 
 
-**OISSTv2**
+### OISSTv2
 
 ```{r}
 
@@ -136,12 +137,12 @@ oisst_monthly <- stack(oisst_monthly)
 oisst_monthly <- mask_gom(oisst_monthly, gom_mask = gom_mask)
 
 # Plot check
-plot(oisst_monthly[[1]], col = temp_pal)
+plot(oisst_monthly[[1]], col = temp_pal, main = "OISSTv2 Example")
 
 ```
 
 
-**CMIP6 Bias-Corrected**
+### CMIP6 Bias-Corrected
 
 ```{r}
 
@@ -166,9 +167,11 @@ cmip_ssal  <- mask_gom(cmip_ssal  , gom_mask)
 cmip_bsal  <- mask_gom(cmip_bsal  , gom_mask)
 
 # Plot Check
-plot(cmip_stemp[[1]], col = temp_pal)
+plot(cmip_stemp[[1]], col = temp_pal, main = "CMIP6 Surf Temp Example.")
 
 ```
+
+
 # Visual Comparisons {.tabset .tabset-pills}
 
 **Processing and Plotting Functions**
@@ -191,7 +194,8 @@ timeline_compare <- function(data1, data2, name1, name2, variable){
     geom_line(data = data2, aes(ras_date, mean_val, color = name2)) +
     scale_color_gmri() +
     labs(x = "", y = variable, color = "Data Source") +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    facet_zoom(xlim =c(as.Date("2000-01-01"), as.Date("2002-12-31")), zoom.size = .5)
 }
 ```
 
