@@ -32,7 +32,7 @@ specifications:
  
  2. SODA
  
- SODA data was accessed via
+ SODA monthly data were downloaded as annual NetCDF files from the [University of Maryland](https://www2.atmos.umd.edu/~ocean/index_files/soda3.4.2_mn_download_b.htm) server, using their linux wget commands.
  
  **Preparing Date Keys for CMIP6 Models**
 
