@@ -12,7 +12,8 @@ tar_manifest(fields = "command")
 
 # Graph
 tar_glimpse()
-tar_visnetwork(label = "time", reporter = "forecast")
+tar_visnetwork(label = "time", reporter = "forecast", targets_only = )
 
 # Run it
 tar_make()
+
