@@ -21,8 +21,7 @@ Python functions used to download and process cmip data can be found [here](http
 
 **Downloading CMIP6 Data**
 
-CMIP6 data was downloaded using climate data operator (CDO) command line tools using the following 
-specifications:
+CMIP6 data were accessed as Zarr files from Pangeo's [CMIP6 Google Cloud collection](https://cloud.google.com/blog/products/data-analytics/new-climate-model-data-now-google-public-datasets) using Python. Prior to downloading, the spatial (latitude, longitude, and depth) and temporal extent of the data were cropped to the bounds specified in [ZarrCMIP6.py](https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/ZarrCMIP6.py) (western Atlantic from Florida to the Labrador Sea for the surface and bottom depths). The data were downloaded as a netCDF file in the original grid and regridded ([Regrid_script.py](https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/Regrid_script.py)) using the inverse distance weighted method from the climate data operator command line tools.
 
 **Downloading Reference Data for Bias Corrections**
 
