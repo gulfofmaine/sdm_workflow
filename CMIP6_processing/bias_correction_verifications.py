@@ -2,6 +2,8 @@
 # Goal: Side-by-side display of CMIP6 Bias Corrected Data to
 # observational data resources for a region/area of interest
 
+# Note: this file was replaced by Bias_Correction_Validation.rmd
+
 ####  Load Libraries  
 import xarray as xr
 import cartopy.crs as crs
