@@ -127,7 +127,7 @@ cmip_data <- imap(cmip_data, function(ras_brick, ras_lab){
 
 ### Build Lookup Table of Historic and Projected Climate Runs
 
-The cmip to anomalies function relies on a consistent naming structure of XYYYYMMDD to pull out the correct years and months. If this isn't the case the function as currently written will break.
+The CMIP to anomalies function relies on a consistent naming structure of XYYYYMMDD to pull out the correct years and months. If this isn't the case the function as currently written will break.
 
 This table is also used to match climatologies to their historic periods.
 
@@ -275,16 +275,16 @@ The OISST climatology was processed using xarray in the oisst mainstays reposito
 
 ```{r import ref climatology}
 
-# Load SODA Climatology
+# Load OISST Climatology
 oisst_clim <- import_oisst_clim(climatology_period = c("1985-2014"), 
                                 os.use = "unix")
 
 
 
-# Use clamp if necessary?
-range_mets <- range(oisst_clim)
-range(values(range_mets$range_min), na.rm = T) # how annoying it is to just get 2 values
-range(values(range_mets$range_max), na.rm = T) # how annoying it is to just get 2 values
+# # Use clamp if necessary?
+# range_mets <- range(oisst_clim)
+# range(values(range_mets$range_min), na.rm = T) # how annoying it is to just get 2 values
+# range(values(range_mets$range_max), na.rm = T) # how annoying it is to just get 2 values
 ```
 
 ### Convert to Monthly Means
@@ -351,6 +351,22 @@ plot(cmip_anoms_bcorrect[[1]][[1]],
      main = "Single Month of Bias Corrected Data", 
      col = temp_pal)
 ```
+
+
+
+### Saving Bias Corrected CMIP6 Runs
+
+```{r, eval = FALSE}
+# iwalk(cmip_anoms_bcorrect, function(bias_corrections, run_name){
+#    paste0(cmip_path, "BiasCorrected/", pick_var)
+#    out_location <- paste0(cmip_path, "BiasCorrected/", pick_var, "/", run_name, ".grd")
+#    message(paste0("Saving ", run_name, " at: \n", out_location))
+#    # writeRaster(bias_corrections, out_location, overwrite = T)
+#   
+# })
+```
+
+
 
 
 
