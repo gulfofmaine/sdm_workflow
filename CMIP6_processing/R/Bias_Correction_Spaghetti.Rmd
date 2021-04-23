@@ -1,5 +1,5 @@
 ---
-title: "Regional Spaghetti Plots"
+title: "Bias-Corrected Regional CMIP Projections"
 author: "Adam A. Kemberling"
 date: "`r Sys.Date()`"
 output: 
@@ -83,23 +83,6 @@ region_lookup <- map(region_groups, function(region_group){
 
 # Grab a couple to use from each as contenders
 
-# # NELME_regions
-# nelme_gom   <- read_sf(region_lookup$nelme_regions$GoM$shape_path)
-# nelme_mab   <- read_sf(region_lookup$nelme_regions$SNEandMAB$shape_path) 
-# nelme_nelme <- read_sf(region_lookup$nelme_regions$NELME$shape_path) 
-# 
-# # These have exaggerated detail and take forever to plot
-# nelme_gom   <- st_simplify(nelme_gom)
-# nelme_mab   <- st_simplify(nelme_mab)
-# nelme_nelme <- st_simplify(nelme_nelme)
-# 
-# # SST Focal Areas
-# gmri_nwa <- read_sf(region_lookup$gmri_sst_focal_areas$aak_northwest_atlantic$shape_path)
-# gmri_gom <- read_sf(region_lookup$gmri_sst_focal_areas$apershing_gulf_of_maine$shape_path)
-# gmri_cpr <- read_sf(region_lookup$gmri_sst_focal_areas$cpr_gulf_of_maine$shape_path)
-# 
-# # Large Marine Ecosystem
-# lme_neus <- read_sf(region_lookup$lme$northeast_us_continental_shelf$shape_path)
 
 # NMFS Trawl Regions
 trawl_gb  <- read_sf(region_lookup$nmfs_trawl_regions$georges_bank$shape_path) 
@@ -107,12 +90,6 @@ trawl_gom <- read_sf(region_lookup$nmfs_trawl_regions$gulf_of_maine$shape_path)
 trawl_mab <- read_sf(region_lookup$nmfs_trawl_regions$mid_atlantic_bight$shape_path)
 trawl_sne <- read_sf(region_lookup$nmfs_trawl_regions$southern_new_england$shape_path)
 
-# # Rebuild entire trawl area - internal structures removed
-# trawl_full <- st_union(trawl_gb)  %>% 
-#   st_union(st_union(trawl_gom)) %>% 
-#   st_union(st_union(trawl_mab)) %>% 
-#   st_union(st_union(trawl_sne)) %>% 
-#   st_union()
 
 # Load all the strata and just filter out the crap ones
 trawl_full <- read_sf(str_c(res_path, "Shapefiles/BottomTrawlStrata/BTS_Strata.shp"))  %>% 
@@ -126,7 +103,6 @@ trawl_full <- read_sf(str_c(res_path, "Shapefiles/BottomTrawlStrata/BTS_Strata.s
          strata != 1410,
          strata != 1420,
          strata != 1490) 
-
 
 
 # DFO Data
@@ -269,6 +245,15 @@ timeseries_from_mask <- function(ras_in, var_name){
     mutate(date = str_remove(date, "X"),
            date = str_replace_all(date, "[.]", "-"))
   
+  date_len <- str_length(ts$date[1])
+  if(date_len == 7){
+    ts <- ts %>% 
+      mutate(date = str_c(date, "-15"),
+             date = as.Date(date))
+  } else{
+    ts <- mutate(ts, date = as.Date(date))
+  }
+  
   return(ts)
 }
 ```
@@ -335,10 +320,11 @@ oisst_index <- which(str_sub(names(cmip_stemp), 2, 5) %in% oisst_years)
 
 # Put them in a list
 cmip_vars <- list(
-  bot_temp  = cmip_btemp[[soda_index]],
-  bot_sal   = cmip_bsal[[soda_index]],
-  surf_sal  = cmip_ssal[[soda_index]],
-  surf_temp = cmip_stemp[[oisst_index]])
+  bot_temp  = cmip_btemp,#[[soda_index]],
+  bot_sal   = cmip_bsal,#[[soda_index]],
+  surf_sal  = cmip_ssal,#[[soda_index]],
+  surf_temp = cmip_stemp#[[oisst_index]]
+  )
 
 # Rotate them:
 cmip_vars <- map(cmip_vars, raster::rotate)
@@ -378,10 +364,11 @@ cmip_bsal_5  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_correcte
 
 # Put them in a list
 cmip_vars_5 <- list(
-  bot_temp  = cmip_btemp_5[[soda_index]],
-  bot_sal   = cmip_bsal_5[[soda_index]],
-  surf_sal  = cmip_ssal_5[[soda_index]],
-  surf_temp = cmip_stemp_5[[oisst_index]])
+  bot_temp  = cmip_btemp_5,#[[soda_index]],
+  bot_sal   = cmip_bsal_5,#[[soda_index]],
+  surf_sal  = cmip_ssal_5,#[[soda_index]],
+  surf_temp = cmip_stemp_5#[[oisst_index]]
+  )
 
 # Rotate them:
 cmip_vars_5 <- map(cmip_vars_5, raster::rotate)
@@ -420,10 +407,11 @@ cmip_bsal_95  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_correct
 
 # Put them in a list
 cmip_vars_95 <- list(
-  bot_temp  = cmip_btemp_95[[soda_index]],
-  bot_sal   = cmip_bsal_95[[soda_index]],
-  surf_sal  = cmip_ssal_95[[soda_index]],
-  surf_temp = cmip_stemp_95[[oisst_index]])
+  bot_temp  = cmip_btemp_95,#[[soda_index]],
+  bot_sal   = cmip_bsal_95,#[[soda_index]],
+  surf_sal  = cmip_ssal_95,#[[soda_index]],
+  surf_temp = cmip_stemp_95#[[oisst_index]]
+  )
 
 # Rotate them:
 cmip_vars_95 <- map(cmip_vars_95, raster::rotate)
@@ -451,7 +439,7 @@ masked_cmip_95 <- imap(cmip_vars_95, function(masking_var, var_name){
 ```
 
 
-# Visual Comparisons {.tabset .tabset-pills}
+# Validating Seasonality {.tabset .tabset-pills}
 
 ```{r}
 comparison_plot <- function(var_option, mask_option){
@@ -466,20 +454,35 @@ comparison_plot <- function(var_option, mask_option){
   cmip_5$data_source    <- "CMIP 5th Perc."
   cmip_95$data_source   <- "CMIP 95th Perc."
   
-  # Format dates  
-  cmip_mean$date <- as.Date(str_c(cmip_mean$date, "-15"))
-  cmip_5$date    <- as.Date(str_c(cmip_5$date, "-15"))
-  cmip_95$date   <- as.Date(str_c(cmip_95$date, "-15"))
-
-  # Separate action for oisst/soda
+  # # Format dates  
+  # cmip_mean$date <- as.Date(str_c(cmip_mean$date, "-15"))
+  # cmip_5$date    <- as.Date(str_c(cmip_5$date, "-15"))
+  # cmip_95$date   <- as.Date(str_c(cmip_95$date, "-15"))
+  # 
+  # # Separate action for oisst/soda
+  # if(var_option == "surf_temp"){
+  #   obs_data$date <- as.Date(str_c(obs_data$date, "-15"))
+  #   obs_data$data_source <- "OISSTv2"
+  # 
+  #   } else{
+  #   obs_data$date <- as.Date(obs_data$date)
+  #   obs_data$data_source <- "SODA"
+  #   }
+  
+    # Separate action for labeling oisst/soda
   if(var_option == "surf_temp"){
-    obs_data$date <- as.Date(str_c(obs_data$date, "-15"))
     obs_data$data_source <- "OISSTv2"
 
     } else{
-    obs_data$date <- as.Date(obs_data$date)
-    obs_data$data_source <- "SODA"
-  }
+   obs_data$data_source <- "SODA"
+    }
+  
+  
+  # Filter Dates to focus on shared timeperiod
+  cmip_mean <- filter(cmip_mean, between(date, min(obs_data$date), max(obs_data$date)))
+  cmip_5 <- filter(cmip_5, between(date, min(obs_data$date), max(obs_data$date)))
+  cmip_95 <- filter(cmip_95, between(date, min(obs_data$date), max(obs_data$date)))
+  
   
   # format variable for display on axis
   var_label <- str_replace(var_option, "_", " ")
@@ -634,4 +637,80 @@ comparison_plot(var_option = var_option, mask_option = mask_option)
 mask_option <- "dfo_full"
 
 comparison_plot(var_option = var_option, mask_option = mask_option)
+```
+
+
+# Regional Trajectories {.tabset .tabset-pills}
+
+
+```{r}
+# Function to Plot Single Variable Trajectories for the Different Regions
+clim_futures <- function(var_option){
+  
+  # Subset the variables
+  cmip_mean <- masked_cmip[[var_option]]
+  cmip_5    <- masked_cmip_5[[var_option]]
+  cmip_95   <- masked_cmip_95[[var_option]]
+  
+  # Label the sources for the CMIP Data, process areas
+  cmip_mean <- map_dfr(cmip_mean, ~ mutate(.x, data_source = "CMIP Mean"), .id = "area")
+  cmip_5    <- map_dfr(cmip_5, ~ mutate(.x, data_source = "CMIP 5th Perc."), .id = "area")
+  cmip_95 <- map_dfr(cmip_95, ~ mutate(.x, data_source = "CMIP 95th Perc."), .id = "area")
+  
+  # combine
+  cmip_all <- bind_rows(list(cmip_mean, cmip_5, cmip_95)) %>% 
+    mutate(data_source = factor(data_source, levels = c("CMIP 5th Perc.", "CMIP Mean", "CMIP 95th Perc.")),
+           area = str_replace_all(area, "_", " "),
+           area = str_to_title(area))
+  
+  
+  
+  # format variable for display on axis
+  var_label <- str_replace(var_option, "_", " ")
+  var_label <- str_to_title(var_label)
+  
+  # Build plot
+  regional_comparison_plot <- ggplot() +
+    geom_line(data = cmip_all, aes_string("date", var_option, color = "area")) +
+    scale_color_gmri() +
+    facet_grid(area~data_source) +
+    labs(x = "", y = var_label, color = "") +
+    theme(legend.position = "bottom")
+  
+  
+  return(regional_comparison_plot)
+    
+  
+  
+}
+
+```
+
+## Bottom Temperature
+
+```{r}
+clim_futures(var_option = "bot_temp")
+```
+
+
+
+## Surface Temperature
+
+```{r}
+clim_futures(var_option = "surf_temp")
+```
+
+
+## Bottom Salinity
+
+```{r}
+clim_futures(var_option = "bot_sal")
+```
+
+
+
+## Surface Salinity
+
+```{r}
+clim_futures(var_option = "surf_sal")
 ```
