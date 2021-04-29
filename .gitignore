@@ -1,18 +1,23 @@
+# R project and user data files
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 .rds
-model_dat.rds
 
+# R files that tend to be large
+.gri
 .grd
 .tiff
 
-# Ignore _targets files
-_targets*/
-_targetsdm*/
-_targets_flow/*
+# For targets
+_targets/
+/scratch/aja/TargetsSDM/data/
+/scratch/aja/TargetsSDM/results/
 
-# Ignore pachyderm file system files
-_pfs/*
+# For pachyderm
+pachy/pfs/*
+
+# AJA data folder
+/scratch/aja/data
 
