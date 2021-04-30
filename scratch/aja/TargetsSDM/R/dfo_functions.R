@@ -51,9 +51,9 @@ dfo_get_tows<-function(dfo_GSINF, dfo_GSMISSIONS, out_dir){
   
   # For debugging
   if(FALSE){
-    dfo_GSINF = dfo_GSINF_load(here::here("scratch/aja/targets_flow/data/dfo/raw"))
-    dfo_GSMISSIONS = dfo_GSMISSIONS_load(here::here("scratch/aja/targets_flow/data/dfo/raw"))
-    out_dir = here::here("scratch/aja/targets_flow/data/dfo/clean")
+    dfo_GSINF = dfo_GSINF_load(here::here("scratch/aja/TargetsSDM/data/dfo/raw"))
+    dfo_GSMISSIONS = dfo_GSMISSIONS_load(here::here("scratch/aja/TargetsSDM/data/dfo/raw"))
+    out_dir = here::here("scratch/aja/TargetsSDM/data/dfo/clean")
   }
   
   # Join GSING with GSMISSIONS, create a unique ID and get DATE info
@@ -108,10 +108,10 @@ dfo_make_tidy_occu<-function(dfo_GSCAT, dfo_tows, species_table, out_dir){
   
   # For debugging
   if(FALSE){
-    dfo_GSCAT = dfo_GSCAT_load(here::here("scratch/aja/targets_flow/data/dfo/raw"))
-    dfo_tows = dfo_GSCAT_load(here::here("scratch/aja/targets_flow/data/dfo/raw"))
-    species_table = species_read_csv(here::here("scratch/aja/targets_flow/data/supporting"))
-    out_dir = here::here("scratch/aja/targets_flow/data/dfo/clean")
+    dfo_GSCAT = dfo_GSCAT_load(here::here("scratch/aja/TargetsSDM/data/dfo/raw"))
+    dfo_tows = readRDS(here::here("scratch/aja/TargetsSDM/data/dfo/clean/dfo_tows.rds"))
+    species_table = species_read_csv(here::here("scratch/aja/TargetsSDM/data/supporting"))
+    out_dir = here::here("scratch/aja/TargetsSDM/data/dfo/clean")
   }
   
   # Create a long dataframe containing biomass and abundance data for all ID/species from GSCAT; this should be a presence only dataset

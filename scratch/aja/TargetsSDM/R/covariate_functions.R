@@ -57,10 +57,10 @@ dynamic_covariates_read<- function(dynamic_covariates_dir){
 static_extract<- function(rast, cov_name, sf_points, date_col_name, df_sf){
   # For debugging
   if(FALSE){
-    rast = raster(paste(shared.path(os.use = os_use, group = "root", folder = "RES Data/Shapefiles/"), "NEShelf_Etopo1_bathy.tiff", sep = ""))
-    cov_name = "DEPTH"
-    sf_points = trawl_sf
-    out_path = here::here("/scratch/aja/data/")
+    rast = rast_use
+    cov_name = names(static_covariates_list)[[i]]
+    sf_points = sf_points_run
+    date_col_name = date_col_name
     df_sf = "sf"
   }
   
@@ -82,7 +82,7 @@ static_extract<- function(rast, cov_name, sf_points, date_col_name, df_sf){
   names(sf_extract)<- cov_name
   
   # Bind to sf_unique 
-  sf_points<- bind_cols(sf_points, sf_extract)
+  sf_points<- cbind(sf_points, sf_extract)
   
   # Return processed file -----------------------------------------------------------
   if(df_sf == "sf"){
@@ -111,10 +111,12 @@ static_extract<- function(rast, cov_name, sf_points, date_col_name, df_sf){
 static_extract_wrapper<- function(static_covariates_list, sf_points, date_col_name, df_sf, out_dir){
   # For debugging
   if(FALSE){
-    static_covariates_list
-    sf_points
-    date_col_name
-    df_sf
+    tar_load(static_covariates_stack)
+    tar_load("all_tows_sf")
+    static_covariates_list = static_covariates_stack
+    sf_points = all_tows_sf
+    date_col_name = "EST_DATE"
+    df_sf = "sf"
     out_dir
   }
   
@@ -138,12 +140,16 @@ static_extract_wrapper<- function(static_covariates_list, sf_points, date_col_na
   if(df_sf == "sf"){
     # Keep it as sf object
     out<- tows_with_covs_out
-    saveRDS(out, file = paste(out_dir, "all_tows_with_static_covs_sf.rds", sep = "/"))
+    if(!is.null(out_dir)){
+      saveRDS(out, file = paste(out_dir, "all_tows_with_static_covs_sf.rds", sep = "/"))
+    }
     return(out)
   } else {
     # Drop the geometry and save the data frame
     out<- st_drop_geometry(tows_with_covs_out)
-    saveRDS(out, file = paste(out_dir, "all_tows_with_static_covs.rds", sep = "/"))
+    if(!is.null(out_dir)){
+      saveRDS(out, file = paste(out_dir, "all_tows_with_static_covs.rds", sep = "/"))
+    }
     return(out)
   }
 }
@@ -168,40 +174,34 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
  
   # Custom rowMeans like function
   rowMeans_cust<- function(row_id, start_col, end_col, full_data){
-    out<- rowMeans(full_data[row_id,start_col:end_col])
-    return(out)
+    
+    # If daily, then start_col and end_col are equal, so just use one of them
+    if(start_col == end_col){
+      out<- full_data[row_id, start_col]
+      return(out)
+    } else {
+      out<- rowMeans(full_data[row_id,start_col:end_col])
+      return(out)
+    }
   }
   
   # For debugging
   if(FALSE){
-    rast_ts_stack = raster::stack(paste(shared.path(os.use = "unix", group = "root", folder = "RES_Data/OISST/"), "ThroughFeb2020.grd", sep = ""))
-    # Annoyingly, dates not preserved...
-    rast_ts_dates<- seq(from = ymd('1981-09-01'), to = ymd('1981-09-01') + nlayers(rast_ts_stack)-1, by = 'day')
-    names(rast_ts_stack)<- rast_ts_dates
-    writeRaster(projectRaster(rast_ts_stack, crs = 4326), filename = here::here("scratch/aja/targets_flow/data/covariates/dynamic/SST.grd"), overwrite = TRUE, format = "raster")
-    t<- raster::stack(here::here("scratch/aja/targets_flow/data/covariates/dynamic/SST.grd"))
-    stack_name = "SST"
-    t_summ = "seasonal"
-    t_position = NULL
-    sf_points = trawl_covs
-    out_path = here::here("/scratch/aja/data/")
-    new_file_name = NULL
-    
-    rast_ts_stack = oisst_stack
-    stack_name = "sst"
-    t_summ = "seasonal"
-    t_position = NULL
-    sf_points = cov_sf
-    df_sf = df
-    out_path = here::here("scratch/aja/data")
+    rast_ts_stack = stack_use
+    stack_name = names(dynamic_covariates_list)[[i]]
+    t_summ = t_summ
+    t_position = t_position
+    sf_points = sf_points_run
+    date_col_name = date_col_name
+    df_sf = "sf"
   }
   
   # A few checks...
   # If t_summ is a character, does it match one of "daily", monthly", "seasonal", or "annual" AND is t_position set to NULL?
   if(is.character(t_summ)){
-    t_summ_check<- t_summ %in% c("monthly", "seasonal", "annual") & is.null(t_position)
+    t_summ_check<- t_summ %in% c("daily", "monthly", "seasonal", "annual") & is.null(t_position)
     if(!t_summ_check){
-      print("Check 't_summ' argument and 't_position'. 't_summ' must be one of 'daily' monthly', 'seasonal' or 'annual' and 't_position' = NULL")
+      print("Check 't_summ' argument and 't_position'. 't_summ' must be one of 'daily', monthly', 'seasonal' or 'annual' and 't_position' = NULL")
       stop()
     }
   }
@@ -228,9 +228,9 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
   # To do the matching for seasons, need some type of look up table.
   month_season_table<- data.frame("Month" = str_pad(seq(from = 1, to = 12, by = 1), 2, "left", 0), "Season" = c("Winter", "Winter", "Spring", "Spring", "Spring", "Summer", "Summer", "Summer", "Fall", "Fall", "Fall", "Winter"))
   
-  # Rename the date column to be "EST_DATE" to match the function set up
-  sf_points<- sf_points %>%
-    rename(., "EST_DATE" := {{date_col_name}})
+  # Rename the date column to be "EST_DATE" to match the function set up, This gets a bit tricky if we are running things in sequence. In other words, maybe we ran things through for SST and then want to do Chl. When we pass in the dataframe, "EST_DATE" may already exist. Going to try something else for now and pass in {{date_col_name}} below whenever EST_DATE is used
+  # sf_points<- sf_points %>%
+  #   rename(., "EST_DATE" := {{date_col_name}})
 
   # Full extraction, all points and layers -----------------------------------------------------------
   sf_extract<- data.frame(raster::extract(rast_ts_stack, sf_points))
@@ -255,27 +255,31 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
       summ_df<- data.frame("Point" = 1:nrow(sf_extract), "Date_Match" = rep(NA, nrow(sf_extract)), "Start_Summ" = rep(NA, nrow(sf_extract)), "End_Summ" = rep(NA, nrow(sf_extract)))
       
       # Get the exact date match
-      summ_df$Date_Match<- match(sf_points$EST_DATE, as.Date(colnames(sf_extract)))
+      sf_points_date_col<- as.character(st_drop_geometry(sf_points[,{{date_col_name}}])[,1])
+      sf_points_date_col<- ymd(sf_points_date_col)
+      
+      # May need to revisit this at some point, but for now, shouldn't influence the results..
+      summ_df$Date_Match<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
       
       # Column index start based on t_summ_use. Seasonal needs more finagling.
       if(t_summ_use != "seasonal"){
         summ_df$Start_Summ<- switch(t_summ_use,
                                     "daily" = summ_df$Date_Match,
-                                    "monthly" = match(format(sf_points$EST_DATE, "%Y-%m"), format(rast_ts_match, "%Y-%m")),
-                                    "annual" = match(format(sf_points$EST_DATE, "%Y"), format(rast_ts_match, "%Y")))
+                                    "monthly" = match(format(sf_points_date_col, "%Y-%m"), format(rast_ts_match, "%Y-%m")),
+                                    "annual" = match(format(sf_points_date_col, "%Y"), format(rast_ts_match, "%Y")))
         
         # Now index end
         summ_df$End_Summ<- switch(t_summ_use,
                                   "daily" = summ_df$Date_Match,
-                                  "monthly" = sapply(format(sf_points$EST_DATE, "%Y-%m"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y-%m")))),
-                                  "annual" = sapply(format(sf_points$EST_DATE, "%Y"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y")))))
+                                  "monthly" = sapply(format(sf_points_date_col, "%Y-%m"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y-%m")))),
+                                  "annual" = sapply(format(sf_points_date_col, "%Y"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y")))))
       } else {
         # Season bits, need a year - season combo for both the points AND columns of sf_extract.
-        colnames_orig<- as.Date(colnames(sf_extract))
+        colnames_orig<- as.Date(gsub("X", "", gsub("[.]", "-", colnames(sf_extract))))
         colnames_season<- month_season_table$Season[match(format(colnames_orig, "%m"), month_season_table$Month)]
         colnames_season_match<- paste(format(colnames_orig, "%Y"), colnames_season, sep = "-")
         
-        sf_points$Season_Match<- paste(format(sf_points$EST_DATE, "%Y"), month_season_table$Season[match(format(sf_points$EST_DATE, "%m"), month_season_table$Month)], sep = "-")
+        sf_points$Season_Match<- paste(format(sf_points_date_col, "%Y"), month_season_table$Season[match(format(sf_points_date_col, "%m"), month_season_table$Month)], sep = "-")
         
         # Start index
         summ_df$Start_Summ<- match(sf_points$Season_Match, colnames_season_match)
@@ -302,7 +306,7 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
       summ_df<- data.frame("Point" = 1:nrow(sf_extract), "Date_Match" = rep(NA, nrow(sf_extract)), "Start_Summ" = rep(NA, nrow(sf_extract)), "End_Summ" = rep(NA, nrow(sf_extract)))
       
       # Get the exact date match
-      summ_df$Date_Match<- match(sf_points$EST_DATE, as.Date(colnames(sf_extract)))
+      summ_df$Date_Match<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
       
       # Get summary window time range
       t_summ_use<- t_summ[i]
@@ -332,7 +336,7 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
   for(j in seq_along(summ_df_list)){
     
     summ_df_comp<- summ_df_list[[j]] %>%
-      drop_na() %>%
+      drop_na(., Start_Summ, End_Summ) %>%
       dplyr::filter(., Start_Summ > 0)
     
     # Calculate mean given start and end column index of extraction file and row based on observation point ID
@@ -383,21 +387,23 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
 dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_position, sf_points, date_col_name, df_sf, out_dir){
   # For debugging
   if(FALSE){
-    dynamic_covariates_dir
-    stack_names
-    t_summ
-    t_position
-    sf_points
-    date_col_name
-    df_sf
-    out_dir
+    tar_load(dynamic_covariates_stack)
+    dynamic_covariates_list = dynamic_covariates_stack
+    t_summ = "seasonal"
+    t_position = NULL
+    tar_load(all_tows_with_static_covs)
+    sf_points = all_tows_with_static_covs
+    date_col_name = "DATE"
+    df_sf ="df"
+    out_dir = here::here("data/combined")
   }
   
   # For each of the covariate layers in `dynamic_covariates_list` we are going to run our `dynamic_2d_extract` function. I think this might require some creative manipulating of the `sf_points` so we don't lose covariates as we move through them...
   sf_points_run<- sf_points
+  
   for(i in seq_along(dynamic_covariates_list)){
     stack_use<- dynamic_covariates_list[[i]]
-    temp_tows_with_covs<- dynamic_2d_extract(rast_ts_stack = stack_use, stack_name = names(dynamic_covariates_list)[[i]], t_summ = "seasonal", t_position = NULL, sf_points = sf_points_run, date_col_name = date_col_name, df_sf = "sf")
+    temp_tows_with_covs<- dynamic_2d_extract(rast_ts_stack = stack_use, stack_name = names(dynamic_covariates_list)[[i]], t_summ = t_summ, t_position = t_position, sf_points = sf_points_run, date_col_name = date_col_name, df_sf = "sf")
 
     # If there are more files to go, update sf_points_run
     if(i < length(dynamic_covariates_list)){
@@ -420,5 +426,89 @@ dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_positio
     out<- st_drop_geometry(tows_with_covs_out)
     saveRDS(out, file = paste(out_dir, "all_tows_all_covs.rds", sep = "/"))
     return(out)
+  }
+}
+
+#' @title Aggregate covariate raster stack list
+#' 
+#' @description This function aggregates a covariate raster stack to a new time scale. For example, with year-month raster stack of SST, we may instead need the covariates summarized at year-season time scale.
+#'
+#' @param predict_covariates_dir = predict_covariates_dir
+#' @param ensemble_stat = Either the climate model ensemble statistic to use when working with climate model projections, or NULL. This is only used in naming the output file
+#' @param resample_template = Raster layer template with target resolution
+#' @param summarize = Currently, either "annual" or "seasonal" to indicate whether the each dynamic raster stack should be summarized to an annual or seasonal time scale
+#' @param out_dir = Directory to save the aggregated raster stack
+#' 
+#' @return  NULL. This function aggregates and then saves the new raster stack for each covariate
+#' 
+#' @export
+predict_covariates_stack_agg<- function(predict_covariates_dir, ensemble_stat, resample_template, summarize, out_dir){
+  if(FALSE){
+    predict_covariates_dir = "~/Box/RES_Data/CMIP6/BiasCorrected"
+    ensemble_stat = "mean"
+    resample_template = here::here("scratch/aja/TargetsSDM/data/supporting/", "Rast0.25grid.grd")
+    summarize = "seasonal"
+    out_dir = here::here("scratch/aja/TargetsSDM/data/predict")
+  }
+  
+  # Quick check, ensemble stat needs to be one of mean, 5th or 95th
+  if(!ensemble_stat %in% c("mean", "5th", "95th")){
+    stop("Check `ensemble stat`. Must be one of `mean`, `5thpercentile` or `95thpercentile`.")
+  }
+  
+  # To do the matching for seasons, need some type of look up table.
+  month_season_table<- data.frame("Month" = str_pad(seq(from = 1, to = 12, by = 1), 2, "left", 0), "Season" = c("Winter", "Winter", "Spring", "Spring", "Spring", "Summer", "Summer", "Summer", "Fall", "Fall", "Fall", "Winter"))
+  
+  # First, get the files that match our ensemble statistic
+  rast_files_load<- list.files(predict_covariates_dir, pattern = paste0(ensemble_stat, ".grd"), full.names = TRUE)
+  
+  for(i in seq_along(rast_files_load)){
+    
+    # Bring in the stack
+    rast_stack_temp<- raster::stack(rast_files_load[i])
+    
+    covariate_name<- case_when(
+      grepl("bot_sal", rast_files_load[i]) ~ "BS",
+      grepl("bot_temp", rast_files_load[i]) ~ "BT",
+      grepl("surf_sal", rast_files_load[i]) ~ "SS",
+      grepl("surf_temp", rast_files_load[i]) ~ "SST"
+    )
+    
+    # Check layers
+    layers<- nlayers(rast_stack_temp)
+    
+    if(layers > 1){
+      # Check resolution, resample if necessary
+      if(any(res(rast_stack_temp) != c(0.25, 0.25))){
+        rast_template<- raster::stack(resample_template)
+        rast_stack_temp<- resample(rast_stack_temp, rast_template, method = "bilinear")
+      }
+      # Need to summarize
+      # Get indices
+      if(summarize == "annual"){
+        stack_dates<- as.Date(gsub("X", "", gsub("[.]", "-", paste(names(rast_stack_temp), ".16", sep = ""))))
+        stack_years<- format(stack_dates, format = "%Y")
+        indices<- as.numeric(factor(stack_years, levels = unique(stack_years)))
+        stack_names<- unique(stack_years)
+      } else if(summarize == "seasonal"){
+        stack_dates<- as.Date(gsub("X", "", gsub("[.]", "-", paste(names(rast_stack_temp), ".16", sep = ""))))
+        stack_season<- month_season_table$Season[match(format(stack_dates, "%m"), month_season_table$Month)]
+        stack_season_years<- paste(format(stack_dates, format = "%Y"), stack_season, sep = "-")
+        indices<- as.numeric(factor(stack_season_years, levels = unique(stack_season_years)))
+        stack_names<- unique(stack_season_years)
+      }
+      # Calculate summary and store it
+      rast_agg_temp<- stackApply(rast_stack_temp, indices = indices, fun = mean, na.rm = TRUE)
+      names(rast_agg_temp)<- stack_names
+      writeRaster(rast_agg_temp, filename = paste(out_dir, "predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
+    } else {
+      # No summary needed, just check resolution and then save it
+      if(any(res(rast_stack_temp) != c(0.25, 0.25))){
+        rast_template<- raster::stack(resample_template)
+        rast_stack_temp<- resample(rast_stack_temp, rast_template, method = "bilinear")
+      }
+      rast_agg_temp<- rast_stack_temp
+      writeRaster(rast_agg_temp, filename = paste(out_dir, "predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
+    }
   }
 }
