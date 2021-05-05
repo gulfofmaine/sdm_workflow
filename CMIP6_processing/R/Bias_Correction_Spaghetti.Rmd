@@ -644,38 +644,79 @@ comparison_plot(var_option = var_option, mask_option = mask_option)
 
 
 ```{r}
+
 # Function to Plot Single Variable Trajectories for the Different Regions
 clim_futures <- function(var_option){
   
   # Subset the variables
+  obs_data  <- masked_vars[[var_option]]
   cmip_mean <- masked_cmip[[var_option]]
   cmip_5    <- masked_cmip_5[[var_option]]
   cmip_95   <- masked_cmip_95[[var_option]]
   
   # Label the sources for the CMIP Data, process areas
+  
+  obs_data  <- map_dfr(obs_data, ~ mutate(.x, data_source = "Reference Data"), .id = "area")
   cmip_mean <- map_dfr(cmip_mean, ~ mutate(.x, data_source = "CMIP Mean"), .id = "area")
   cmip_5    <- map_dfr(cmip_5, ~ mutate(.x, data_source = "CMIP 5th Perc."), .id = "area")
-  cmip_95 <- map_dfr(cmip_95, ~ mutate(.x, data_source = "CMIP 95th Perc."), .id = "area")
+  cmip_95   <- map_dfr(cmip_95, ~ mutate(.x, data_source = "CMIP 95th Perc."), .id = "area")
   
-  # combine
-  cmip_all <- bind_rows(list(cmip_mean, cmip_5, cmip_95)) %>% 
-    mutate(data_source = factor(data_source, levels = c("CMIP 5th Perc.", "CMIP Mean", "CMIP 95th Perc.")),
+  # combine the different quantiles
+  cmip_all <- bind_rows(list(obs_data, cmip_mean, cmip_5, cmip_95)) %>% 
+    mutate(data_source = factor(data_source, 
+                                levels = c("Reference Data", "CMIP 5th Perc.", 
+                                           "CMIP Mean", "CMIP 95th Perc.")),
            area = str_replace_all(area, "_", " "),
-           area = str_to_title(area))
+           area = str_to_title(area),
+           area = str_replace(area, "Dfo", "DFO"),
+           area = str_replace(area, "Nefsc", "NEFSC"),
+           area = factor(area, levels = c("DFO Full", "NEFSC Gom", "NEFSC Full")),
+           yr = lubridate::year(date),
+           month = lubridate::month(date)) 
   
+  
+  #group on year and get annual averayges
+  var_sym <- sym(var_option)
+  cmip_all <- cmip_all %>% 
+    group_by(yr, area, data_source) %>% 
+    summarise({{ var_sym }} := mean({{ var_sym }}, na.rm = T),
+              .groups = "keep") %>% 
+    ungroup() %>% 
+    mutate(yr = as.numeric(as.character(yr))) %>% 
+    filter(yr >= 1982)
   
   
   # format variable for display on axis
-  var_label <- str_replace(var_option, "_", " ")
-  var_label <- str_to_title(var_label)
+  var_titles <- c(
+    "bot_temp" = expression("Bottom Temperature"~degree~"C"),
+    "surf_temp" = expression("Surface Temperature"~degree~"C"),
+    "bot_sal" = "Bottom Salinity",
+    "surf_sal" = "Surface Salinity")
+  var_label <- var_titles[var_option]
+  
+  
+  
+  #pivot the sources wider so we can single them out asier
+  data_wide <- cmip_all %>% 
+    pivot_wider(names_from = data_source, values_from = {{var_option}})
+  
   
   # Build plot
-  regional_comparison_plot <- ggplot() +
-    geom_line(data = cmip_all, aes_string("date", var_option, color = "area")) +
-    scale_color_gmri() +
-    facet_grid(area~data_source) +
-    labs(x = "", y = var_label, color = "") +
-    theme(legend.position = "bottom")
+  regional_comparison_plot <-  ggplot(data_wide, aes(x = yr)) +
+      geom_ribbon(aes(ymin = `CMIP 5th Perc.`, 
+                      ymax = `CMIP 95th Perc.`),
+                  fill = "gray80") +
+      geom_line(aes(y = `CMIP Mean`, 
+                    color = "CMIP Mean")) +
+      geom_line(aes(y = `Reference Data`, color = "Reference Data")) +
+      geom_point(aes(y = `Reference Data`, color = "Reference Data"),
+                 size = 0.25) +
+      scale_color_manual(values = c(
+        "Reference Data" = "gray10", 
+        "CMIP Mean"          = "gray50")) +
+      facet_wrap(~area, nrow = 3) +
+      labs(x = "", y = var_label, color = "") +
+      theme(legend.position = "bottom")
   
   
   return(regional_comparison_plot)
@@ -691,7 +732,6 @@ clim_futures <- function(var_option){
 ```{r}
 clim_futures(var_option = "bot_temp")
 ```
-
 
 
 ## Surface Temperature
