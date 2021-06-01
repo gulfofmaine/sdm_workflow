@@ -7,7 +7,7 @@
 static_covariates_read<- function(static_covariates_dir){
   
   # Get the files...
-  rast_read_layers<- list.files(static_covariates_dir)
+  rast_read_layers<- list.files(static_covariates_dir, pattern = ".grd")
   
   # Output storage
   static_covariate_rasters_out<- vector(mode = "list", length = length(rast_read_layers))
@@ -439,7 +439,7 @@ dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_positio
 #' @param summarize = Currently, either "annual" or "seasonal" to indicate whether the each dynamic raster stack should be summarized to an annual or seasonal time scale
 #' @param out_dir = Directory to save the aggregated raster stack
 #' 
-#' @return  NULL. This function aggregates and then saves the new raster stack for each covariate
+#' @return  The output directory path. This allows the function to integrate easily within the Targets workflow. Along with returning the output directory, the function also saves the new aggregated raster stack for each covariate.
 #' 
 #' @export
 predict_covariates_stack_agg<- function(predict_covariates_dir, ensemble_stat, resample_template, summarize, out_dir){
@@ -511,4 +511,6 @@ predict_covariates_stack_agg<- function(predict_covariates_dir, ensemble_stat, r
       writeRaster(rast_agg_temp, filename = paste(out_dir, "predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
     }
   }
+  # Return the file path
+  return(out_dir)
 }

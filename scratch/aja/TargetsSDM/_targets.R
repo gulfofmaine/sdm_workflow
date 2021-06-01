@@ -22,11 +22,21 @@ library(parallel)
 library(doFuture)
 
 # Functions
-source(here::here("R/dfo_functions.R"))
-source(here::here("R/nmfs_functions.R"))
-source(here::here("R/combo_functions.R"))
-source(here::here("R/covariate_functions.R"))
-source(here::here("R/vast_functions.R"))
+manual<- FALSE
+if(manual){
+  source(here::here("scratch/aja/TargetsSDM/R/dfo_functions.R"))
+  source(here::here("scratch/aja/TargetsSDM/R/nmfs_functions.R"))
+  source(here::here("scratch/aja/TargetsSDM/R/combo_functions.R"))
+  source(here::here("scratch/aja/TargetsSDM/R/covariate_functions.R"))
+  source(here::here("scratch/aja/TargetsSDM/R/vast_functions.R"))
+} else {
+  source(here::here("R/dfo_functions.R"))
+  source(here::here("R/nmfs_functions.R"))
+  source(here::here("R/combo_functions.R"))
+  source(here::here("R/covariate_functions.R"))
+  source(here::here("R/vast_functions.R"))
+}
+
 
 # Targets set up
 options(tidyverse.quiet = TRUE)
@@ -36,9 +46,9 @@ tar_option_set(packages = c("Matrix", "TMB", "FishStatsUtils", "VAST", "tidyvers
 nmfs_species_code<- 105
 fit_year_min<- 1985
 fit_year_max<- 2017
-fit_seasons<- c("DFO", "SPRING", "FALL")
-pred_years <- 2025
-mod_formula<- ~ Season + Year_Cov + bs(SST_seasonal, degree = 2, intercept = FALSE)
+fit_seasons<- c("DFO", "SPRING", "SUMMER", "FALL")
+pred_years <- 2100
+mod_formula<- ~ Season + Year_Cov + bs(SST_seasonal, degree = 2, intercept = FALSE) + bs(BT_seasonal, degree = 2, intercept = FALSE)
 
 # Dynamic files
 nmfs_raw_dir <- function() {
@@ -65,9 +75,9 @@ predict_covariates_raw_dir <- function() {
   "~/Box/RES_Data/CMIP6/BiasCorrected"
 }
 
-predict_covariates_processed_dir <- function() {
-  here::here("data/predict")
-}
+# predict_covariates_processed_dir <- function() {
+#   here::here("data/predict")
+# }
 
 predict_template_dir <- function() {
   here::here("data/supporting")
@@ -101,13 +111,13 @@ list(
     name = land_sf_dir,
     command =  land_sf_dir(),
   ),
-  
+
   # Land sf file
   tar_target(
     name = land_sf,
     command =  land_read_sf(land_sf_dir),
   ),
-  
+
   # Get DFO directory
   tar_target(
     name = dfo_raw,
@@ -242,15 +252,16 @@ list(
   # Read in raw covariates and summarize them
   tar_target(
     name = predict_covariates_stack_agg,
-    command =  predict_covariates_stack_agg(predict_covariates_raw_dir, ensemble_stat = "mean", summarize = "seasonal", resample_template = here::here("data/supporting", "Rast0.25grid.grd"), out_dir = here::here("data/predict/")),
-  ),
-  
-  # Processed covariate directory
-  tar_target(
-    name = predict_covariates_processed_dir,
-    command = predict_covariates_processed_dir(),
+    command =  predict_covariates_stack_agg(predict_covariates_raw_dir, ensemble_stat = "mean", summarize = "seasonal", resample_template = here::here("data/supporting", "Rast0.25grid.grd"), out_dir = here::here("data/predict")),
     format = "file",
   ),
+  
+  # # Processed covariate directory
+  # tar_target(
+  #   name = predict_covariates_processed_dir,
+  #   command = predict_covariates_processed_dir(),
+  #   format = "file",
+  # ),
 
   # Process prediction covariates into a dataframe that can be eventually joined up to vast_seasonal_data, masked to focal region of interest
   # Read in shapefile
@@ -261,7 +272,7 @@ list(
   
   tar_target(
     name = vast_predict_df,
-    command =  make_vast_predict_df(predict_covariates_processed_dir, extra_covariates_stack = static_covariates_stack, mask = shapefile, summarize = "seasonal", ensemble_stat = "mean", fit_year_min = fit_year_min, fit_year_max = fit_year_max, fit_seasons = fit_seasons, pred_years = pred_years, out_dir = here::here("data/predict")),
+    command =  make_vast_predict_df(predict_covariates_stack_agg, extra_covariates_stack = static_covariates_stack, mask = shapefile, summarize = "seasonal", ensemble_stat = "mean", fit_year_min = fit_year_min, fit_year_max = fit_year_max, fit_seasons = fit_seasons, pred_years = pred_years, out_dir = here::here("data/predict")),
   ),
 
   # Make VAST seasonal data
@@ -297,7 +308,7 @@ list(
   # Make covariate effect vectors
   tar_target(
     name = vast_coveff,
-    command = vast_make_coveff(X1_coveff_vec = c(2, 3, 3, 2, rep(3, nlevels(vast_covariate_data$Year_Cov)-1), rep(1, 2)), X2_coveff_vec = c(2, 3, 3, 2, rep(3, nlevels(vast_covariate_data$Year_Cov)-1), rep(1, 2)))
+    command = vast_make_coveff(X1_coveff_vec = c(2, 3, 3, 3, 2, rep(3, nlevels(vast_covariate_data$Year_Cov)-1), rep(1, 2), rep(1, 2)), X2_coveff_vec = c(2, 3, 3, 3, 2, rep(3, nlevels(vast_covariate_data$Year_Cov)-1), rep(1, 2), rep(1, 2)))
   ),
 
   # Build base model
@@ -309,27 +320,39 @@ list(
   # Make adjustments
   tar_target(
     name = vast_adjust,
-    command = vast_make_adjustments(vast_build = vast_build0, adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, 3), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2))), "log_sigmaXi2_cp" = factor(c(rep(1, 3), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2)))))
+    command = vast_make_adjustments(vast_build = vast_build0, adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, 4), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 4))), "log_sigmaXi2_cp" = factor(c(rep(1, 4), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 4)))))
   ),
 
   # Fit model, either the base model OR by making some adjustments
   tar_target(
     name = vast_fit,
-    command = vast_fit_sdm(vast_build_adjust = vast_adjust)
+    command = vast_fit_sdm(vast_build_adjust = vast_adjust, nmfs_species_code = nmfs_species_code, out_dir = here::here("results/mod_fits"))
   ),
-
-  # # High res template, needed for "pretty" plotting
-  # tar_target(
-  #   name = high_res_dir,
-  #   command = high_res_dir(),
-  #   format = "file",
-  # ),
-
-  # Create gif from predictions
+  
+  # Predict with fitted model
+  tar_target(
+    name = vast_predictions,
+    command = predict_vast(vast_fitted_sdm = vast_fit, nmfs_species_code = nmfs_species_code, predict_variable = "D_i", predict_category = 0, predict_vessel = 0, predict_covariates_df_all = vast_predict_df, out_dir = here::here("results/prediction_df"))
+  ),
+  
+  # Plot predictions
   tar_target(
     name = plot_preds,
-    command = vast_plot_density(vast_fit = vast_fit, mask = shapefile, all_times = as.character(levels(vast_seasonal_data$VAST_YEAR_SEASON)), plot_times = NULL, land_sf = land_sf, xlim = c(-80, -55), ylim = c(35, 50), panel_or_gif = "gif", out_dir = here::here("results/"))
+    command = df_plot_density(pred_df = vast_predictions, nmfs_species_code = nmfs_species_code, mask = shapefile, plot_times = NULL, land_sf = land_sf, xlim = c(-80, -55), ylim = c(35, 50), panel_or_gif = "gif", out_dir = here::here("results/plots_maps/"))
   )
+
+  # # # High res template, needed for "pretty" plotting
+  # # tar_target(
+  # #   name = high_res_dir,
+  # #   command = high_res_dir(),
+  # #   format = "file",
+  # # ),
+  # 
+  # # Create gif from predictions
+  # tar_target(
+  #   name = plot_preds,
+  #   command = vast_plot_density(vast_fit = vast_fit, mask = shapefile, all_times = as.character(levels(vast_seasonal_data$VAST_YEAR_SEASON)), plot_times = NULL, land_sf = land_sf, xlim = c(-80, -55), ylim = c(35, 50), panel_or_gif = "gif", out_dir = here::here("results/"))
+  # )
   # # Make predictions from fitted VAST model
   # # Prediction dataset directory
   # tar_target(

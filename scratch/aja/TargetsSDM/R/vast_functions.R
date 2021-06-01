@@ -50,6 +50,8 @@ make_vast_predict_df<- function(predict_covariates_processed_dir, extra_covariat
     tar_load(predict_covariates_processed_dir)
     tar_load(static_covariates_stack)
     extra_covariates_stack = static_covariates_stack
+    tar_load(shapefile)
+    mask = shapefile
     summarize<- "seasonal"
     ensemble_stat<- "mean"
     fit_year_min = fit_year_min
@@ -162,7 +164,10 @@ make_vast_predict_df<- function(predict_covariates_processed_dir, extra_covariat
   
   # Drop any NAs, save and return it
   pred_covs_out_final<- pred_covs_out_final %>%
-    drop_na(., {{cov_names}})
+    drop_na(., {{cov_names}}) %>%
+    mutate(., "Summarized" = summarize,
+           "Ensemble_Stat" = ensemble_stat)
+  
   saveRDS(pred_covs_out_final, file = paste(out_dir, "/VAST_pred_df_", summarize, "_", ensemble_stat, ".rds", sep = "" ))
   return(pred_covs_out_final)
 }
@@ -261,14 +266,20 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
   
   # If we have additional years that we want to predict to and NOT Fit too, we aren't quite done just yet...
   if(!is.null(pred_df)){
+    # Name work...
+    pred_df<- pred_df %>%
+      dplyr::select(., -Summarized, -Ensemble_Stat)
+    
     # Add those -- check names first
     check_names<- all(colnames(pred_df) %in% colnames(vast_data_out)) & all(colnames(vast_data_out) %in% colnames(pred_df))
     if(!check_names){
       print("Check data and prediction column names, they don't match")
       stop()
     } else {
+      # We only need one observation for each of the times...
       pred_df_bind<- pred_df %>%
-        dplyr::select(., colnames(vast_data_out))
+        dplyr::select(., colnames(vast_data_out)) %>%
+        distinct(., ID, .keep_all = TRUE)
       vast_data_out<- rbind(vast_data_out, pred_df_bind)
     }
   }
@@ -337,6 +348,7 @@ make_vast_covariate_data<- function(vast_seasonal_data, out_dir){
     "Year_Cov" = vast_seasonal_data$VAST_YEAR_COV,
     "Season" = vast_seasonal_data$VAST_SEASON,
     "SST_seasonal" = vast_seasonal_data$SST_seasonal,
+    "BT_seasonal" = vast_seasonal_data$BT_seasonal,
     "Lat" = vast_seasonal_data$DECDEG_BEGLAT,
     "Lon" = vast_seasonal_data$DECDEG_BEGLON
   )
@@ -640,7 +652,6 @@ vast_make_adjustments <- function(vast_build, adjustments = NULL){
       vast_build_adjust_out<- fit_model("settings" = vast_build$settings, input_grid = vast_build$input_args$data_args_input$input_grid, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, X_contrasts = vast_build$input_args$data_args_input$X_contrasts, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
     }
   }
-  
   # Return it
   return(vast_build_adjust_out)
 }
@@ -655,7 +666,7 @@ vast_make_adjustments <- function(vast_build, adjustments = NULL){
 #'
 #' @export
 
-vast_fit_sdm <- function(vast_build_adjust){
+vast_fit_sdm <- function(vast_build_adjust, nmfs_species_code, out_dir){
   
   # For debugging
   if(FALSE){
@@ -666,7 +677,8 @@ vast_fit_sdm <- function(vast_build_adjust){
   # Build and fit model
   vast_fit_out<- fit_model("settings" = vast_build_adjust$settings, input_grid = vast_build_adjust$input_args$data_args_input$input_grid, "Lat_i" = vast_build_adjust$data_frame[, 'Lat_i'], "Lon_i" = vast_build_adjust$data_frame[, 'Lon_i'], "t_i" = vast_build_adjust$data_frame[, 't_i'], "c_iz" = vast_build_adjust$data_frame[, 'c_iz'], "b_i" = vast_build_adjust$data_frame[, 'b_i'], "a_i" = vast_build_adjust$data_frame[, 'a_i'], "PredTF_i" = vast_build_adjust$data_list[['PredTF_i']], "X1config_cp" = vast_build_adjust$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build_adjust$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build_adjust$input_args$data_args_input$covariate_data, "X1_formula" = vast_build_adjust$input_args$data_args_input$X1_formula, "X2_formula" = vast_build_adjust$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build_adjust$input_args$data_args_input$X_contrasts, "Map" = vast_build_adjust$tmb_list$Map, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = TRUE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE)
   
-  # Return it
+  # Save and return it
+  saveRDS(vast_fit_out, file = paste(out_dir, "/", nmfs_species_code, "_", "fitted_vast.rds", sep = "" ))
   return(vast_fit_out)
 }
 
@@ -686,7 +698,7 @@ vast_fit_sdm <- function(vast_build_adjust){
 #' @return A VAST fit_model object, with the inputs and and outputs, including parameter estimates, extrapolation gid info, spatial list info, data info, and TMB info.
 #'
 #' @export
-vast_plot_density<- function(vast_fit, mask, all_times = all_times, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
+vast_fit_plot_density<- function(vast_fit, nmfs_species_code, mask, all_times = all_times, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
   if(FALSE){
     tar_load(vast_fit)
     template = raster("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/HighResTemplate.grd")
@@ -789,43 +801,174 @@ vast_plot_density<- function(vast_fit, mask, all_times = all_times, plot_times =
           print(plot_use)
         }
       }
-      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, "LogDensity.gif"), delay = 0.75, progress = FALSE))
+      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, nmfs_species_code, "_LogDensity.gif"), delay = 0.75, progress = FALSE))
     }
   }
 }
 
 #' @title Predict fitted VAST model
 #'
-#' @description This function makes predictions from a fitted VAST SDM to new locations/times based on new covariate data.
+#' @description This function makes predictions from a fitted VAST SDM to new locations using VAST::predict.fit_model. Importantly, to use this feature for new times, at least one location for each time of interest needs to be included during the model fitting process. This dummy observation should have a PredTF value of 1 so that the observation is only used in the predicted probability and NOT eastimating the likelihood.
 #'
-#' @param predict_covariates_df = A stack of the prediction covariates
-#' @param Xcontrasts_pred = 
-#' @param X1config_cp_pred = 
-#' @param X2config_cp_pred = 
 #' @param vast_fitted_sdm = A fitted VAST SDM object, as returned with `vast_fit_sdm`
-#' @param predict_variable = A character string indicating which variable we want to predict from the TMB report of the fitted object
-
+#' @param predict_variable = Which variable should be predicted, default is density (D_i)
+#' @param predict_category = Which category (species/age/size) should be predicted, default is 0
+#' @param predict_vessel = Which sampling category should be predicted, default is 0
+#' @param predict_covariates_df = A stack of the prediction covariates
+#' @param out_dir = Output directory to save...
+#' 
 #' @return
 #'
 #' @export
-
-predict_vast<- function(predict_covariates_df, vast_fitted_sdm, out_dir){
+predict_vast<- function(vast_fitted_sdm, nmfs_species_code, predict_variable = "D_i", predict_category = 0, predict_vessel = 0, predict_covariates_df_all, out_dir){
 
   # For debugging
   if(FALSE){
-   predict_covariates_df = readRDS(here::here("scratch/aja/TargetsSDM/data/predict", "VAST_pred_df_seasonal_mean.rds"))
-   Xcontrasts_pred = list(Season = contrasts(predict_covariates_df$Season, contrasts = FALSE), Year_Cov = contrasts(predict_covariates_df$Year_Cov, contrasts = FALSE))
-   X1config_cp_pred = matrix(c(2, rep(3, nlevels(predict_covariates_df$Season)-1), 2, rep(3, nlevels(predict_covariates_df$Year_Cov)-1)), nrow = 1)
-   X2config_cp_pred = matrix(c(2, rep(3,nlevels(predict_covariates_df$Season)-1), 2, rep(3, nlevels(predict_covariates_df$Year_Cov)-1)), nrow = 1)
-   tar_load(vast_fit)
-   vast_fitted_sdm = vast_fit
+    tar_load(vast_fit)
+    predict_variable = "D_i"
+    predict_covariates_df_all = pred_covs_out_final
+    predict_category = 0
+    predict_vessel = 0
   }
   
-
+  # Collecting necessary bits from the prediction covariates -- lat, lon, time
+  pred_lats<- predict_covariates_df_all$DECDEG_BEGLAT
+  pred_lons<- predict_covariates_df_all$DECDEG_BEGLON
+  pred_times<- as.numeric(predict_covariates_df_all$VAST_YEAR_SEASON)-1
+  
+  # Catch stuff...
+  pred_sampled_areas<- rep(1, length(pred_lats))
+  pred_category<- rep(predict_category, length(pred_lats))
+  pred_vessel<- rep(predict_vessel, length(pred_lats))
+  
+  # Renaming predict_covariates_df_all to match vast_fit_covariate_data
+  pred_cov_dat_use<- data.frame(
+    "Year" = as.numeric(predict_covariates_df_all$VAST_YEAR_SEASON)-1,
+    "Year_Cov" = predict_covariates_df_all$VAST_YEAR_COV,
+    "Season" = predict_covariates_df_all$VAST_SEASON,
+    "SST_seasonal" = predict_covariates_df_all$SST_seasonal,
+    "BT_seasonal" = predict_covariates_df_all$BT_seasonal,
+    "Lat" = predict_covariates_df_all$DECDEG_BEGLAT,
+    "Lon" = predict_covariates_df_all$DECDEG_BEGLON
+  )
+  
+  # Make the predictions
+  preds_out<- predict(x = vast_fitted_sdm, what = predict_variable, Lat_i = pred_lats, Lon_i = pred_lons, t_i = pred_times, a_i = pred_sampled_areas, c_iz = pred_category, v_i = pred_vessel, new_covariate_data = pred_cov_dat_use, do_checks = FALSE)
+  
+  # Get everything as a dataframe to make plotting easier...
+  pred_df_out<- data.frame("Lat" = pred_lats, "Lon" = pred_lons, "Time" = predict_covariates_df_all$VAST_YEAR_SEASON, "Pred" = preds_out)
+  
   # Save and return it
-  saveRDS(predict_covariates_agg, file = paste(out_dir, "/predict_stack_list", summarize, "_", ensemble_stat, ".rds", sep = "" ))
-  return(predict_covariates_agg)
+  saveRDS(pred_df_out, file = paste(out_dir, "/pred_Di_", nmfs_species_code, "_", unique(predict_covariates_df_all$Summarized), "_", unique(predict_covariates_df_all$Ensemble_Stat), ".rds", sep = "" ))
+  return(pred_df_out)
 }
+
+
+#' @title Plot predicted density surfaces from data frame
+#' 
+#' @description Creates either a panel plot or a gif of predicted density surfaces from a data frame that has location and time information
+#'
+#' @param pred_df = A dataframe with Lat, Lon, Time and Pred columns
+#' @param mask = Land mask
+#' @param plot_times = Either NULL to make a plot for each time in `pred_df$Time` or a vector of all of the times to plot, which must be a subset of `pred_df$Time`
+#' @param land_sf = Land sf object
+#' @param xlim = A two element vector with the min and max longitudes 
+#' @param ylim = A two element vector with the min and max latitudes 
+#' @param panel_or_gif = A character string of either "panel" or "gif" indicating how the multiple plots across time steps should be displayed
+#' @param out_dir = Output directory to save the panel plot or gif
+#' 
+#' @return NULL. Panel or gif plot is saved in out_dir.
+#'
+#' @export
+df_plot_density<- function(pred_df, nmfs_species_code, mask, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
+  if(FALSE){
+    tar_load(vast_predictions)
+    pred_df = vast_predictions
+    plot_times = NULL
+    tar_load(land_sf)
+    tar_load(shapefile)
+    mask = shapefile
+    land_color = "#d9d9d9"
+    res_data_path = "~/Box/RES_Data/"
+    xlim = c(-80, -55)
+    ylim = c(35, 50)
+    panel_or_gif = "gif"
+    panel_cols = NULL
+    panel_rows = NULL
+  }
+  
+  # Time ID column for filtering
+  pred_df<- pred_df %>%
+    mutate(., "Time_Filter" = as.numeric(Time))
+  
+  # Log transform pred_df$Pred 
+  pred_df$Pred<- log(pred_df$Pred+1)
+  
+  # Getting all unique times
+  all_times<- unique(pred_df$Time)
+  
+  # Getting time info
+  if(!is.null(plot_times)){
+    plot_times<- all_times[which(all_times) %in% plot_times]
+  } else {
+    plot_times<- all_times
+  }
+  
+  # Getting spatial information
+  land_sf<- st_crop(land_sf, xmin = xlim[1], ymin = ylim[1], xmax = xlim[2], ymax = ylim[2])
+  
+  # Looping through...
+  rasts_out<- vector("list", length(plot_times))
+  rasts_range<- pred_df$Pred
+  rast_lims<- c(round(min(rasts_range)-0.000001, 2), round(max(rasts_range) + 0.0000001, 2))
+  
+  for (tI in 1:length(plot_times)) {
+    pred_df_temp<- pred_df %>%
+      dplyr::filter(., Time_Filter == tI)
+    
+    # Interpolation
+    pred_df_temp<- na.omit(data.frame("x" = pred_df_temp$Lon, "y" = pred_df_temp$Lat, "layer" = pred_df_temp$Pred))
+    pred_df_interp<- interp(pred_df_temp[,1], pred_df_temp[,2], pred_df_temp[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred_df_interp_final<- data.frame(expand.grid(x = pred_df_interp$x, y = pred_df_interp$y), z = c(round(pred_df_interp$z, 2)))
+    pred_sp<- st_as_sf(pred_df_interp_final, coords = c("x", "y"), crs = 4326)
+    
+    pred_df_temp2<- pred_sp[which(st_intersects(pred_sp, mask, sparse = FALSE) == TRUE),]
+    coords_keep<- as.data.frame(st_coordinates(pred_df_temp2))
+    row.names(coords_keep)<- NULL
+    pred_df_use<- data.frame(cbind(coords_keep, "z" = as.numeric(pred_df_temp2$z)))
+    names(pred_df_use)<- c("x", "y", "z")
+    
+    # raster_proj<- raster::rasterize(as_Spatial(points_ll), template, field = "z", fun = mean)
+    # raster_proj<- as.data.frame(raster_proj, xy = TRUE)
+    # 
+    time_plot_use<- plot_times[tI]
+    
+    rasts_out[[tI]]<- ggplot() +
+      geom_tile(data = pred_df_use, aes(x = x, y = y, fill = z)) +
+      scale_fill_viridis_c(name = "Log (density+1)", option = "viridis", na.value = "transparent", limits = rast_lims) +
+      annotate("text", x = -65, y = 37.5, label = time_plot_use) +
+      geom_sf(data = land_sf, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+      coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
+      theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt"))
+  }
+  
+  if(panel_or_gif == "panel"){
+    # Panel plot
+    all_plot<- wrap_plots(rasts_out, ncol = panel_cols, nrow = panel_rows, guides = "collect", theme(plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt")))
+    ggsave(filename = paste(working_dir, file_name, ".png", sep = ""), all.plot, width = 11, height = 8, units = "in")
+    } else {
+      # Make a gif
+      plot_loop_func<- function(plot_list){
+        for (i in seq_along(plot_list)) {
+          plot_use<- plot_list[[i]]
+          print(plot_use)
+        }
+      }
+      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, nmfs_species_code, "_LogDensity.gif"), delay = 0.75, progress = FALSE))
+    }
+  }
 
 #' Predict density for new samples (\emph{Beta version; may change without notice})
 #'
@@ -885,104 +1028,86 @@ predict_vast<- function(predict_covariates_df, vast_fitted_sdm, out_dir){
 predict.fit_model_aja<- function(x, what = "D_i", Lat_i, Lon_i, t_i, a_i, c_iz = rep(0,length(t_i)), v_i = rep(0,length(t_i)), new_covariate_data = NULL, Xcontrasts_pred, X1config_cp_pred, X2config_cp_pred, new_catchability_data = NULL, do_checks = TRUE, working_dir = paste0(getwd(),"/")){
   
   if(FALSE){
-    predict_covariates_df = readRDS(here::here("scratch/aja/TargetsSDM/data/predict", "VAST_pred_df_seasonal_mean.rds"))
-    tar_load(vast_fit)
     x = vast_fit
     what = predict_variable
-    Lat_i = predict_covariates_df$Lat
-    Lon_i = predict_covariates_df$Lon
-    t_i = predict_covariates_df$Year
-    a_i = rep(0.5, nrow(predict_covariates_df))
-    c_iz = rep(0, length(t_i))
-    v_i = rep(0, length(t_i))
-    new_covariate_data = predict_covariates_df
-    Xcontrasts_pred = list(Season = contrasts(predict_covariates_df$Season, contrasts = FALSE), Year_Cov = contrasts(predict_covariates_df$Year_Cov, contrasts = FALSE))
-    X1config_cp_pred = matrix(c(2, rep(3, nlevels(predict_covariates_df$Season)-1), 2, rep(3, nlevels(predict_covariates_df$Year_Cov)-1)), nrow = 1)
-    X2config_cp_pred = matrix(c(2, rep(3,nlevels(predict_covariates_df$Season)-1), 2, rep(3, nlevels(predict_covariates_df$Year_Cov)-1) ), nrow = 1)
+    Lat_i = pred_lats
+    Lon_i = pred_lons
+    t_i = pred_times
+    a_i = pred_sampled_areas
+    c_iz = pred_category
+    v_i = pred_vessel
+    new_covariate_data = pred_cov_dat_use
     new_catchability_data = NULL
-    do_checks = TRUE
-    working_dir = here::here("scratch/aja/TargetsSDM/results/")
-    
-    
-    x = fit
-    what = "D_i"
-    Lat_i = pred_dat$Lat
-    Lon_i = pred_dat$Lon
-    t_i = pred_dat$Year
-    a_i = rep(0.03, nrow(pred_dat))
-    c_iz = rep(0, length(t_i))
-    v_i = rep(0, length(t_i))
-    new_covariate_data = pred_dat
-    Xcontrasts_pred = list(Season = contrasts(pred_dat$Season, contrasts = FALSE), Year_Cov = contrasts(pred_dat$Year_Cov, contrasts = FALSE))
-    X1config_cp_pred = matrix(c(2, rep(3, nlevels(pred_dat$Season)-1), 2, rep(3, nlevels(pred_dat$Year_Cov)-1)), nrow = 1)
-    X2config_cp_pred = matrix(c(2, rep(3,nlevels(pred_dat$Season)-1), 2, rep(3, nlevels(pred_dat$Year_Cov)-1) ), nrow = 1)
-    new_catchability_data = NULL
-    working_dir = here::here("")
-    
+    working_dir = here::here("scratch/aja/TargetsSDM")
   }
   
   message("`predict.fit_model(.)` is in beta-testing, and please explore results carefully prior to using")
   
   # Check issues
-  if(!(what%in%names(x$Report)) || (length(x$Report[[what]]) != x$data_list$n_i)){
+  if( !(what%in%names(x$Report)) || (length(x$Report[[what]])!=x$data_list$n_i) ){
     stop("`what` can only take a few options")
   }
-  if(!is.null(new_covariate_data)){
+  if( !is.null(new_covariate_data) ){
     # Confirm all columns are available
-    if(!all(colnames(x$covariate_data) %in% colnames(new_covariate_data))){
+    if( !all(colnames(x$covariate_data) %in% colnames(new_covariate_data)) ){
       stop("Please ensure that all columns of `x$covariate_data` are present in `new_covariate_data`")
     }
     # Eliminate unnecessary columns
-    new_covariate_data = new_covariate_data[, match(colnames(x$covariate_data), colnames(new_covariate_data))]
+    new_covariate_data = new_covariate_data[,match(colnames(x$covariate_data),colnames(new_covariate_data))]
     # Eliminate old-covariates that are also present in new_covariate_data
-    NN = RANN::nn2(query = x$covariate_data[, c('Lat', 'Lon', 'Year')], data = new_covariate_data[, c('Lat', 'Lon', 'Year')], k=1)
-    if(any(NN$nn.dist==0)){
-      x$covariate_data = x$covariate_data[-which(NN$nn.dist == 0), , drop = FALSE]
+    NN = RANN::nn2( query=x$covariate_data[,c('Lat','Lon','Year')], data=new_covariate_data[,c('Lat','Lon','Year')], k=1 )
+    if( any(NN$nn.dist==0) ){
+      x$covariate_data = x$covariate_data[-which(NN$nn.dist==0),,drop=FALSE]
     }
   }
-  if(!is.null(new_catchability_data)){
+  if( !is.null(new_catchability_data) ){
     stop("Option not implemented")
   }
   
   # Process covariates
-  catchability_data = rbind(x$catchability_data, new_catchability_data)
-  covariate_data = rbind(x$covariate_data, new_covariate_data)
+  catchability_data = rbind( x$catchability_data, new_catchability_data )
+  covariate_data = rbind( x$covariate_data, new_covariate_data )
   
   # Process inputs
-  PredTF_i = c(x$data_list$PredTF_i, rep(1, length(t_i)))
-  b_i = c(x$data_frame[, "b_i"], rep(1, length(t_i)))
-  c_iz = rbind(matrix(x$data_frame[, grep("c_iz", names(x$data_frame))]), matrix(c_iz))
-  Lat_i = c(x$data_frame[, "Lat_i"], Lat_i)
-  Lon_i = c(x$data_frame[, "Lon_i"], Lon_i)
-  a_i = c(x$data_frame[, "a_i"], a_i)
-  v_i = c(x$data_frame[, "v_i"], v_i)
-  t_i = c(x$data_frame[, "t_i"], t_i)
+  PredTF_i = c( x$data_list$PredTF_i, rep(1,length(t_i)) )
+  b_i = c( x$data_frame[,"b_i"], rep(1,length(t_i)) )
+  c_iz = rbind( matrix(x$data_frame[,grep("c_iz",names(x$data_frame))]), matrix(c_iz) )
+  Lat_i = c( x$data_frame[,"Lat_i"], Lat_i )
+  Lon_i = c( x$data_frame[,"Lon_i"], Lon_i )
+  a_i = c( x$data_frame[,"a_i"], a_i )
+  v_i = c( x$data_frame[,"v_i"], v_i )
+  t_i = c( x$data_frame[,"t_i"], t_i )
   #assign("b_i", b_i, envir=.GlobalEnv)
   
   # Build information regarding spatial location and correlation
   message("\n### Re-making spatial information")
-  spatial_args_new = list("anisotropic_mesh" = x$spatial_list$MeshList$anisotropic_mesh, "Kmeans" = x$spatial_list$Kmeans, "Lon_i" = Lon_i, "Lat_i" = Lat_i)
-  spatial_args_input = combine_lists(input = spatial_args_new, default = x$input_args$spatial_args_input)
-  spatial_list = do.call(what = make_spatial_info, args = spatial_args_input)
+  spatial_args_new = list("anisotropic_mesh"=x$spatial_list$MeshList$anisotropic_mesh, "Kmeans"=x$spatial_list$Kmeans,
+                          "Lon_i"=Lon_i, "Lat_i"=Lat_i )
+  spatial_args_input = combine_lists( input=spatial_args_new, default=x$input_args$spatial_args_input )
+  spatial_list = do.call( what=make_spatial_info, args=spatial_args_input )
   
   # Check spatial_list
-  if(!all.equal(spatial_list$MeshList, x$spatial_list$MeshList)){
+  if( !all.equal(spatial_list$MeshList,x$spatial_list$MeshList) ){
     stop("`MeshList` generated during `predict.fit_model` doesn't match that of original fit; please email package author to report issue")
   }
   
   # Build data
   # Do *not* restrict inputs to formalArgs(make_data) because other potential inputs are still parsed by make_data for backwards compatibility
   message("\n### Re-making data object")
-  data_args_new = list("c_iz" = c_iz, "b_i" = b_i, "a_i" = a_i, "v_i" = v_i, "PredTF_i" = PredTF_i, "t_i" = t_i, "spatial_list" = spatial_list, "covariate_data" = covariate_data, "catchability_data" = catchability_data, "X_contrasts" = Xcontrasts_pred, "X1config_cp" = X1config_cp_pred, "X2config_cp" = X2config_cp_pred)
-  data_args_input = combine_lists(input = data_args_new, default = x$input_args$data_args_input)  # Do *not* use args_to_use
-  data_list = do.call(what = make_data, args = data_args_input)
+  data_args_new = list( "c_iz"=c_iz, "b_i"=b_i, "a_i"=a_i, "v_i"=v_i, "PredTF_i"=PredTF_i,
+                        "t_i"=t_i, "spatial_list"=spatial_list,
+                        "covariate_data"=covariate_data, "catchability_data"=catchability_data )
+  data_args_input = combine_lists( input=data_args_new, default=x$input_args$data_args_input )  # Do *not* use args_to_use
+  data_list = do.call( what=make_data, args=data_args_input )
   data_list$n_g = 0
   
   # Build object
   message("\n### Re-making TMB object")
-  model_args_default = list("TmbData" = data_list, "RunDir" = working_dir, "Version" = x$settings$Version, "RhoConfig" = x$settings$RhoConfig, "loc_x" = spatial_list$loc_x, "Method" = spatial_list$Method)
-  model_args_input = combine_lists(input = list("Parameters" = x$ParHat), default = model_args_default, args_to_use = formalArgs(make_model))
-  tmb_list = do.call(what = make_model, args = model_args_input)
+  model_args_default = list("TmbData"=data_list, "RunDir"=working_dir, "Version"=x$settings$Version,
+                            "RhoConfig"=x$settings$RhoConfig, "loc_x"=spatial_list$loc_x, "Method"=spatial_list$Method)
+  model_args_input = combine_lists( input=list("Parameters"=x$ParHat),
+                                    default=model_args_default, args_to_use=formalArgs(make_model) )
+  tmb_list = do.call( what=make_model, args=model_args_input )
   
   # Extract output
   Report = tmb_list$Obj$report()
