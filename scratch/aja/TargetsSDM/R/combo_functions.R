@@ -12,7 +12,19 @@ species_read_csv<- function(species_table_dir){
   return(species_table)
 }
 
+land_read_sf<- function(land_sf_dir){
+  land_sf<- st_read(land_sf_dir)
+  return(land_sf)
+}
+
 ## Cleaning and processing functions
+
+# Function to convert points to sf object
+points_to_sf<- function(points){
+  sf_out<- st_as_sf(points, coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"), crs = 4326, remove = FALSE)
+  return(sf_out)
+}
+
 #' @title Bind NMFS and DFO tow data 
 #' 
 #' @description A short function that will row bind a NMFS tows dataframe and DFO tows dataframe to create one dataframe that has all tows combined, with one row per unique tow.
@@ -29,14 +41,15 @@ bind_nmfs_dfo_tows<- function(nmfs_tows, dfo_tows, out_dir){
   
   # For debugging
   if(FALSE){
-    nmfs_tows = nmfs_tows_out
-    dfo_tows = dfo_tows_out
-    out_dir = here::here("scratch/aja/targets_flow/data/combined")
+    nmfs_tows = readRDS(here::here("scratch/aja/TargetsSDM/data/nmfs/clean/nmfs_tows.rds"))
+    dfo_tows = readRDS(here::here("scratch/aja/TargetsSDM/data/dfo/clean/dfo_tows.rds"))
+    out_dir = here::here("scratch/aja/TargetsSDM/data/combined")
   }
   
   # Load in both datasets, add survey column
   nmfs_tows<- nmfs_tows %>%
-    mutate(., "SURVEY" = rep("NMFS", nrow(.)))
+    mutate(., "SURVEY" = rep("NMFS", nrow(.))) 
+  nmfs_tows$SEASON<- toupper(nmfs_tows$SEASON)
   dfo_tows<- dfo_tows %>%
     mutate(., "SURVEY" = rep("DFO", nrow(.)))
   
@@ -65,9 +78,9 @@ bind_nmfs_dfo_tidy_occu<- function(nmfs_tidy_occu, dfo_tidy_occu, out_dir){
   
   # For debugging
   if(FALSE){
-    nmfs_tidy_occu = nmfs_tidy_occu
-    dfo_tidy_occu = dfo_tidy_occu
-    out_dir = here::here("scratch/aja/targets_flow/data/combined")
+    nmfs_tidy_occu = readRDS(here::here("scratch/aja/TargetsSDM/data/nmfs/clean/nmfs_tidy_occu.rds"))
+    dfo_tidy_occu = readRDS(here::here("scratch/aja/TargetsSDM/data/dfo/clean/dfo_tidy_occu.rds"))
+    out_dir = here::here("scratch/aja/TargetsSDM/data/combined")
   }
   
   # Load in both datasets, add survey column
@@ -99,9 +112,12 @@ make_tidy_mod_data<- function(all_tows, all_tidy_occu, out_dir){
   
   # For debugging
   if(FALSE){
-    all_tows = all_tows
-    all_tidy_occu = all_tidy_occu 
-    out_dir = here::here("scratch/aja/targets_flow/data/combined")
+    tar_load(all_tows_with_all_covs)
+    all_tows = all_tows_with_all_covs
+    tar_load(all_tidy_occu)
+    all_tows = readRDS(here::here("scratch/aja/TargetsSDM/data/combined/all_tows.rds"))
+    all_tidy_occu = readRDS(here::here("scratch/aja/TargetsSDM/data/combined/all_tidy_occu.rds"))
+    out_dir = here::here("scratch/aja/TargetsSDM/data/combined")
   }
   
   # Need to join up the tow info with the tidy occu
@@ -109,16 +125,14 @@ make_tidy_mod_data<- function(all_tows, all_tidy_occu, out_dir){
     left_join(., all_tows, by = c("ID", "SURVEY"))
   
   # Keep only what we need..
+  cov_names<- names(all_tows)[-which(names(all_tows) %in% c("ID", "DATE", "EST_YEAR", "SEASON", "SURVEY", "SVVESSEL", "DECDEG_BEGLAT", "DECDEG_BEGLON", "NMFS_SVSPP", "DFO_SPEC", "PRESENCE", "BIOMASS", "ABUNDANCE"))]
   tidy_mod_data_out<- tidy_mod_data %>%
-    dplyr::select(., ID, EST_DATE, EST_YEAR, SEASON, SURVEY, SVVESSEL, DECDEG_BEGLAT, DECDEG_BEGLON, NMFS_SVSPP, DFO_SPEC, PRESENCE, BIOMASS, ABUNDANCE) 
+    dplyr::select(., ID, DATE, EST_YEAR, SEASON, SURVEY, SVVESSEL, DECDEG_BEGLAT, DECDEG_BEGLON, NMFS_SVSPP, DFO_SPEC, PRESENCE, BIOMASS, ABUNDANCE, {{cov_names}}) 
   
-  # Return and save
+  # Drop NAs, return and save
+  tidy_mod_data_out<- tidy_mod_data_out %>%
+    drop_na(., {{cov_names}})
   saveRDS(tidy_mod_data_out, file = paste(out_dir, "tidy_mod_data.rds", sep = "/"))
   return(tidy_mod_data_out)
 }
 
-# Function to convert points to sf object
-points_to_sf<- function(points){
-  sf_out<- st_as_sf(points, coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"), crs = 4326, remove = FALSE)
-  return(sf_out)
-}

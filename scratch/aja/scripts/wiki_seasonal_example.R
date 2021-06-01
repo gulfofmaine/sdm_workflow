@@ -1,3 +1,13 @@
+#####
+## VAST seasonal example and predictions
+#####
+
+### Libraries
+library(VAST)
+library(sf)
+
+
+### Data loading and processing
 example = load_example( data_set="NWA_yellowtail_seasons" )
 
 # Load data and quick exploration of structure
@@ -58,7 +68,8 @@ table("year_season"=cov_dat$Year, "Actual_season"=cov_dat$Season)
 #####
 ## Model settings
 #####
-
+VAST_Testing
+setwd("~/Desktop/VAST_Testing")
 # Make settings
 settings = make_settings(n_x = 100,
                          Region = example$Region,
@@ -82,45 +93,87 @@ X2config_cp_use = matrix( c(2, rep(3,nlevels(cov_dat$Season)-1), 2, rep(3,nlevel
 #####
 ## Model fit -- make sure to use new functions
 #####
+# This will prevent refitting the model and just load it if its been fit already
+first = FALSE 
+if(first){
+  fit_orig = fit_model("settings" = settings,
+                       "Lat_i" = samp_dat[, 'Lat'],
+                       "Lon_i" = samp_dat[, 'Lon'],
+                       "t_i" = samp_dat[, 'year_season'],
+                       "b_i" = samp_dat[, 'weight'],
+                       "a_i" = samp_dat[, 'Swept'],
+                       "X1config_cp" = X1config_cp_use,
+                       "X2config_cp" = X2config_cp_use,
+                       "covariate_data" = cov_dat,
+                       "X1_formula" = formula_use,
+                       "X2_formula" = formula_use,
+                       "X_contrasts" = list(Season = contrasts(cov_dat$Season, contrasts = FALSE), Year_Cov = contrasts(cov_dat$Year_Cov, contrasts = FALSE)),
+                       "run_model" = FALSE,
+                       "PredTF_i" = samp_dat[, 'Dummy'] )
+  
+  # Adjust mapping for log_sigmaXi and fitting final model -- pool variance for all seasons and then set year's to NA
+  Map_adjust = fit_orig$tmb_list$Map
+  
+  # Pool variances for each term to a single value
+  Map_adjust$log_sigmaXi1_cp = factor(c(rep(as.numeric(Map_adjust$log_sigmaXi1_cp[1]), nlevels(cov_dat$Season)),
+                                        rep(as.numeric(Map_adjust$log_sigmaXi1_cp[nlevels(cov_dat$Season)+1]), nlevels(cov_dat$Year_Cov))))
+  Map_adjust$log_sigmaXi2_cp = factor(c(rep(as.numeric(Map_adjust$log_sigmaXi2_cp[1]), nlevels(cov_dat$Season)),
+                                        rep(as.numeric(Map_adjust$log_sigmaXi2_cp[nlevels(cov_dat$Season)+1]), nlevels(cov_dat$Year_Cov))))
+  
+  # Fit final model with new mapping
+  fit  = fit_model("settings" = settings,
+                   "Lat_i" = samp_dat[, 'Lat'],
+                   "Lon_i" = samp_dat[, 'Lon'],
+                   "t_i" = samp_dat[, 'year_season'],
+                   "b_i" = samp_dat[, 'weight'],
+                   "a_i" = samp_dat[, 'Swept'],
+                   "X1config_cp" = X1config_cp_use,
+                   "X2config_cp" = X2config_cp_use,
+                   "covariate_data" = cov_dat,
+                   "X1_formula" = formula_use,
+                   "X2_formula" = formula_use,
+                   "X_contrasts" = list(Season = contrasts(cov_dat$Season, contrasts = FALSE), Year_Cov = contrasts(cov_dat$Year_Cov, contrasts = FALSE)),
+                   "newtonsteps" = 1,
+                   "PredTF_i" = samp_dat[, 'Dummy'],
+                   "Map" = Map_adjust,
+                   "run_model" = TRUE)
+  saveRDS(fit, here::here("", "VASTseasonalexample_fit.rds"))
+} else {
+  fit = readRDS("~/GitHub/sdm_workflow/VASTseasonalexample_fit.rds")
+}
 
-fit_orig = fit_model("settings" = settings,
-                     "Lat_i" = samp_dat[, 'Lat'],
-                     "Lon_i" = samp_dat[, 'Lon'],
-                     "t_i" = samp_dat[, 'year_season'],
-                     "b_i" = samp_dat[, 'weight'],
-                     "a_i" = samp_dat[, 'Swept'],
-                     "X1config_cp" = X1config_cp_use,
-                     "X2config_cp" = X2config_cp_use,
-                     "covariate_data" = cov_dat,
-                     "X1_formula" = formula_use,
-                     "X2_formula" = formula_use,
-                     "X_contrasts" = list(Season = contrasts(cov_dat$Season, contrasts = FALSE), Year_Cov = contrasts(cov_dat$Year_Cov, contrasts = FALSE)),
-                     "run_model" = FALSE,
-                     "PredTF_i" = samp_dat[, 'Dummy'] )
+#####
+## Model predictions using predict.fit_model
+#####
+# Make predictions -- pretend like the last year of obs is the "next" year we want to predict...
+pred_dat = cov_dat
+pred_dat = pred_dat[pred_dat$Year_Cov == "2017",]
 
-# Adjust mapping for log_sigmaXi and fitting final model -- pool variance for all seasons and then set year's to NA
-Map_adjust = fit_orig$tmb_list$Map
+# Adjusting "Year" and "Year_Cov"
+pred_dat$Year = pred_dat$Year + 1
+pred_dat$Year_Cov = "2018"
+pred_dat$Year_Cov = factor(pred_dat$Year_Cov, levels = c(levels(cov_dat$Year_Cov), "2018"))
 
-# Pool variances for each term to a single value
-Map_adjust$log_sigmaXi1_cp = factor(c(rep(as.numeric(Map_adjust$log_sigmaXi1_cp[1]), nlevels(cov_dat$Season)),
-                                      rep(as.numeric(Map_adjust$log_sigmaXi1_cp[nlevels(cov_dat$Season)+1]), nlevels(cov_dat$Year_Cov))))
-Map_adjust$log_sigmaXi2_cp = factor(c(rep(as.numeric(Map_adjust$log_sigmaXi2_cp[1]), nlevels(cov_dat$Season)),
-                                      rep(as.numeric(Map_adjust$log_sigmaXi2_cp[nlevels(cov_dat$Season)+1]), nlevels(cov_dat$Year_Cov))))
+# Check it out
+summary(pred_dat)
 
-# Fit final model with new mapping
-fit  = fit_model("settings" = settings,
-                 "Lat_i" = samp_dat[, 'Lat'],
-                 "Lon_i" = samp_dat[, 'Lon'],
-                 "t_i" = samp_dat[, 'year_season'],
-                 "b_i" = samp_dat[, 'weight'],
-                 "a_i" = samp_dat[, 'Swept'],
-                 "X1config_cp" = X1config_cp_use,
-                 "X2config_cp" = X2config_cp_use,
-                 "covariate_data" = cov_dat,
-                 "X1_formula" = formula_use,
-                 "X2_formula" = formula_use,
-                 "X_contrasts" = list(Season = contrasts(cov_dat$Season, contrasts = FALSE), Year_Cov = contrasts(cov_dat$Year_Cov, contrasts = FALSE)),
-                 "newtonsteps" = 1,
-                 "PredTF_i" = samp_dat[, 'Dummy'],
-                 "Map" = Map_adjust,
-                 "run_model" = FALSE)
+# Projected coordinates...
+pred_dat_sf<- st_as_sf(pred_dat, coords = c("Lon", "Lat"), remove = FALSE, crs = 4326)
+
+# Test to see if predict crashes?
+test_crash = FALSE
+# Prediction....
+if(test_crash){
+  vast_pred = predict(x = fit, what = "D_i", Lat_i = pred_dat$Lat, Lon_i = pred_dat$Lon, t_i = pred_dat$Year, a_i = rep(0.03, nrow(pred_dat)), new_covariate_data = pred_dat, new_catchability_data = NULL, do_checks = TRUE, working_dir = paste0(getwd(),"/"))
+  
+  # Contrast error. Can `predict` accept this as an additional argument?
+  vast_pred = predict(x = fit, what = "D_i", Lat_i = pred_dat$Lat, Lon_i = pred_dat$Lon, t_i = pred_dat$Year, a_i = rep(0.03, nrow(pred_dat)), new_covariate_data = pred_dat, X_contrasts = list(Season = contrasts(pred_dat$Season, contrasts = FALSE), Year_Cov = contrasts(pred_dat$Year_Cov, contrasts = FALSE)), new_catchability_data = NULL, do_checks = TRUE, working_dir = paste0(getwd(),"/"))
+  
+  # Not as it stands now. Edited function to accept this as well as our "CP" matrix bits that can then pass through to `make_data`
+  source("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/R/vast_functions.R")
+  vast_pred = predict.fit_model_aja(x = fit, what = "D_i", Lat_i = pred_dat$Lat, Lon_i = pred_dat$Lon, t_i = pred_dat$Year, a_i = rep(0.03, nrow(pred_dat)), new_covariate_data = pred_dat, Xcontrasts_pred = list(Season = contrasts(pred_dat$Season, contrasts = FALSE), Year_Cov = contrasts(pred_dat$Year_Cov, contrasts = FALSE)), X1config_cp_pred = matrix(c(2, rep(3, nlevels(pred_dat$Season)-1), 2, rep(3, nlevels(pred_dat$Year_Cov)-1)), nrow = 1), X2config_cp_pred = matrix(c(2, rep(3,nlevels(pred_dat$Season)-1), 2, rep(3, nlevels(pred_dat$Year_Cov)-1) ), nrow = 1))
+  
+  # Crash. A little detective work and this crash occurs at the `dyn.load` line in `make_model`. I have not really found a great way around this yet...
+}
+
+
