@@ -1,0 +1,72 @@
+$Version
+[1] "VAST_v13_0_0"
+
+$n_x
+[1] 250
+
+$Region
+[1] "northwest_atlantic"
+
+$strata.limits
+$strata.limits$Georges_Bank_A
+[1] 1130 1140 1150 1160 1170
+
+$strata.limits$Georges_Bank_B
+ [1] 1180 1190 1200 1210 1220 1230 1240 1250 1290 1300
+
+$strata.limits$All
+ [1] 1130 1140 1150 1160 1170 1180 1190 1200 1210 1220 1230 1240 1250 1290 1300
+
+
+$zone
+[1] NA
+
+$FieldConfig
+        Component_1 Component_2
+Omega   "IID"       "IID"      
+Epsilon "IID"       "IID"      
+Beta    "IID"       "IID"      
+
+$RhoConfig
+   Beta1    Beta2 Epsilon1 Epsilon2 
+       0        0        0        0 
+
+$VamConfig
+Method   Rank Timing 
+     0      0      0 
+
+$OverdispersionConfig
+Eta1 Eta2 
+   0    0 
+
+$ObsModel
+[1] 2 1
+
+$vars_to_correct
+[1] "Index_cyl" "Index_ctl"
+
+$Options
+        SD_site_logdensity            Calculate_Range   Calculate_effective_area treat_nonencounter_as_zero 
+                     FALSE                       TRUE                       TRUE                       TRUE 
+
+$grid_size_km
+[1] 25
+
+$max_cells
+[1] 2500
+
+$knot_method
+[1] "grid"
+
+$Method
+[1] "Mesh"
+
+$use_anisotropy
+[1] TRUE
+
+$fine_scale
+[1] TRUE
+
+$bias.correct
+[1] FALSE
+

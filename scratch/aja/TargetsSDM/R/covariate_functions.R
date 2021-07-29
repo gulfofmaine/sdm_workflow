@@ -40,6 +40,17 @@ dynamic_covariates_read<- function(dynamic_covariates_dir){
   return(dynamic_covariate_rasters_out)
 }
 
+# Rescaling covariates
+covariate_rescale_func<- function(x, type, center = NULL, scale = NULL){
+  if(type == "JT"){
+    x.out<- x/100
+    return(x.out)
+  } else {
+    x.out<- as.numeric(scale(abs(x), center = center, scale = scale))
+    return(x.out)
+  }
+}
+
 ## Processing functions
 #' @title Extract static covariates at point locations
 #' 
@@ -429,6 +440,42 @@ dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_positio
   }
 }
 
+# New rescale function
+rescale_all_covs<- function(all_tows_with_all_covs, covs_rescale = c("Depth", "BS_seasonal", "BT_seasonal", "SS_seasonal", "SST_seasonal"), type = "AJA", scale = TRUE, center = TRUE, out_dir){
+  
+  if(FALSE){
+    tar_load(all_tows_with_all_covs)
+    type = "AJA"
+    scale = TRUE
+    center = TRUE
+    out_dir
+  }
+  
+  all_tows_with_all_covs_rescale<- all_tows_with_all_covs %>%
+    mutate_at(., .vars = {{covs_rescale}}, .funs = covariate_rescale_func, type = type, scale = scale, center = center)
+  
+  saveRDS(all_tows_with_all_covs_rescale, file = paste(out_dir, "all_tows_all_covs_rescale.rds", sep = "/"))
+  return(all_tows_with_all_covs_rescale)
+}
+
+get_rescale_params<- function(all_tows_with_all_covs, out_dir){
+  
+  if(FALSE){
+    tar_load(all_tows_with_all_covs)
+    type = "AJA"
+    scale = TRUE
+    center = TRUE
+  }
+  
+  cov_names<- c("Depth", "BS_seasonal", "BT_seasonal", "SS_seasonal", "SST_seasonal")
+  
+  rescale_params<- all_tows_with_all_covs %>%
+    summarize_at(., .vars = {{cov_names}}, .funs = c("Mean" = mean, "SD" = sd), na.rm = TRUE)
+  
+  saveRDS(rescale_params, file = paste(out_dir, "rescale_cov_params.rds", sep = "/"))
+  return(rescale_params)
+}
+
 #' @title Aggregate covariate raster stack list
 #' 
 #' @description This function aggregates a covariate raster stack to a new time scale. For example, with year-month raster stack of SST, we may instead need the covariates summarized at year-season time scale.
@@ -500,7 +547,7 @@ predict_covariates_stack_agg<- function(predict_covariates_dir, ensemble_stat, r
       # Calculate summary and store it
       rast_agg_temp<- stackApply(rast_stack_temp, indices = indices, fun = mean, na.rm = TRUE)
       names(rast_agg_temp)<- stack_names
-      writeRaster(rast_agg_temp, filename = paste(out_dir, "predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
+      writeRaster(rast_agg_temp, filename = paste(out_dir, "/predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
     } else {
       # No summary needed, just check resolution and then save it
       if(any(res(rast_stack_temp) != c(0.25, 0.25))){
@@ -508,7 +555,7 @@ predict_covariates_stack_agg<- function(predict_covariates_dir, ensemble_stat, r
         rast_stack_temp<- resample(rast_stack_temp, rast_template, method = "bilinear")
       }
       rast_agg_temp<- rast_stack_temp
-      writeRaster(rast_agg_temp, filename = paste(out_dir, "predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
+      writeRaster(rast_agg_temp, filename = paste(out_dir, "/predict_stack_", covariate_name, "_", summarize, "_", ensemble_stat, ".grd", sep = ""), format = "raster", overwrite = TRUE)
     }
   }
   # Return the file path
