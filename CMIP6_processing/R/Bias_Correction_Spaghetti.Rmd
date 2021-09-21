@@ -35,11 +35,11 @@ library(ggforce)
 
 
 # Load the build code and stratification function
-box_paths  <- research_access_paths(os.use = "unix")
+box_paths  <- research_access_paths()
 res_path   <- box_paths$res
 oisst_path <- box_paths$oisst_mainstays
-cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
-soda_path  <- shared.path("unix", "RES_Data", "SODA")
+cmip_path  <- box_path("RES_Data", "CMIP6")
+soda_path  <- box_path("RES_Data", "SODA")
 
 # Set theme  
 theme_set(theme_bw())
@@ -49,9 +49,9 @@ temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
 
 # Coastlines
 world       <- ne_countries(scale = "medium", returnclass = "sf")
-new_england <- ne_states("united states of america", returnclass = "sf")# %>% st_as_sf(crs = 4326) 
-canada      <- ne_states("canada", returnclass = "sf")# %>% st_as_sf(crs = 4326)
-greenland   <- ne_states(country = "greenland", returnclass = "sf")# %>% st_as_sfc(crs = 4326)
+new_england <- ne_states("united states of america", returnclass = "sf")
+canada      <- ne_states("canada", returnclass = "sf")
+greenland   <- ne_states(country = "greenland", returnclass = "sf")
 
 ####  Functions  ####
 source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
@@ -64,13 +64,19 @@ source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
 
 # Validating Bias-Correction of CMIP6 Data
 
-Bias corrected timelines for the different bias corrected variables will be compared against the reference observations (OISSTv2, SODA) to check how accurately they represent observed conditions, and how that changes across areas of interest. 
+This report exists to visually compare the bias-corrected CMIP6 data against the real-world observation data sources used to bias-correct them.
+
+Bias corrected timelines for the sea surface temperature, sea surface salinity, bottom temperature, and bottom salinity will be compared against the reference observations (OISSTv2, SODA) to check how accurately they represent observed conditions, and whether that changes between our areas of interest. 
 
 
 ## Load Data {.tabset .tabset-pills}
 
+Both the bias-corrections and the observational datasets (OISSTv2, SODA) have been prepared separately and are loaded below.
+
+
 ###  Target Areas {.tabset }
 
+For clarity on what data is included/attributed to each region, the areas we focused on have been plotted below.
 
 ```{r get polygons}
 
@@ -130,7 +136,6 @@ base_map <- ggplot() +
 ```{r}
 # Build off of base map
 base_map +
-  # geom_sf(data = trawl_full, aes(fill = "Trawl Survey Area")) +
   geom_sf(data = st_union(trawl_full), aes(fill = "Trawl Survey Area"), alpha = 0.2) +
   geom_sf(data = st_union(trawl_gom), aes(fill = "Gulf of Maine Survey Area"), alpha = 0.2) +
   coord_sf(xlim = xlimz, ylim = ylimz) +
@@ -185,8 +190,7 @@ data_window <- data.frame(lon = c(-72, -61),
                           time = as.Date(c("1981-09-01", "2020-12-31")))
 
 # Load Data
-oisst <- oisst_window_load(oisst_path = oisst_path, 
-                           data_window = data_window, 
+oisst <- oisst_window_load(data_window = data_window, 
                            anomalies = FALSE)
 
 
@@ -198,7 +202,7 @@ month_key <- seq.Date(min(data_window$time), max(data_window$time), by = "month"
 month_key <- str_c("X", month_key) %>% str_replace_all("-", ".")
 month_key <- str_sub(month_key, 1, -4)
 
-# 
+# Crop them
 oisst_monthly <- map(month_key, function(wut_month){
   
   # Identify corresponding days in month
@@ -217,7 +221,8 @@ oisst_monthly <- map(month_key, function(wut_month){
   
 }) 
 
-# Crop them
+
+# Stack
 oisst_monthly <- stack(oisst_monthly)
 
 # clean up
@@ -320,11 +325,10 @@ oisst_index <- which(str_sub(names(cmip_stemp), 2, 5) %in% oisst_years)
 
 # Put them in a list
 cmip_vars <- list(
-  bot_temp  = cmip_btemp,#[[soda_index]],
-  bot_sal   = cmip_bsal,#[[soda_index]],
-  surf_sal  = cmip_ssal,#[[soda_index]],
-  surf_temp = cmip_stemp#[[oisst_index]]
-  )
+  bot_temp  = cmip_btemp,
+  bot_sal   = cmip_bsal,
+  surf_sal  = cmip_ssal,
+  surf_temp = cmip_stemp)
 
 # Rotate them:
 cmip_vars <- map(cmip_vars, raster::rotate)
@@ -346,8 +350,7 @@ masked_cmip <- imap(cmip_vars, function(masking_var, var_name){
   list(
     nefsc_gom  = masked_gom,
     nefsc_full = masked_trawl,
-    dfo_full   = masked_dfo
-  )
+    dfo_full   = masked_dfo)
   
 })
 ```
@@ -436,10 +439,18 @@ masked_cmip_95 <- imap(cmip_vars_95, function(masking_var, var_name){
   )
   
 })
+
+
 ```
 
 
 # Validating Seasonality {.tabset .tabset-pills}
+
+The goal of the bias correction methods is to (as the name implies) remove bias from the CMIP6 model runs, through comparison to real-world observations or reanalysis data sets that better reflect real-world data. 
+
+The bias-corrected data should mirror the intra-annual variations seen in the datasets used to bias-correct them, and the values should be close, and without an obvious bias.
+
+The following plots showcase how the observational datasets fall in-line with the bias corrected means, 5th percentile, and 95th percentile data. With emphasis on intra-annual variations.
 
 ```{r}
 comparison_plot <- function(var_option, mask_option){
@@ -454,20 +465,6 @@ comparison_plot <- function(var_option, mask_option){
   cmip_5$data_source    <- "CMIP 5th Perc."
   cmip_95$data_source   <- "CMIP 95th Perc."
   
-  # # Format dates  
-  # cmip_mean$date <- as.Date(str_c(cmip_mean$date, "-15"))
-  # cmip_5$date    <- as.Date(str_c(cmip_5$date, "-15"))
-  # cmip_95$date   <- as.Date(str_c(cmip_95$date, "-15"))
-  # 
-  # # Separate action for oisst/soda
-  # if(var_option == "surf_temp"){
-  #   obs_data$date <- as.Date(str_c(obs_data$date, "-15"))
-  #   obs_data$data_source <- "OISSTv2"
-  # 
-  #   } else{
-  #   obs_data$date <- as.Date(obs_data$date)
-  #   obs_data$data_source <- "SODA"
-  #   }
   
     # Separate action for labeling oisst/soda
   if(var_option == "surf_temp"){
@@ -495,7 +492,7 @@ comparison_plot <- function(var_option, mask_option){
      geom_line(data = cmip_95, aes_string("date", var_option, color = "data_source")) +
      scale_color_gmri() +
      labs(x = "", y = var_label, color = "") +
-     facet_zoom(xlim =c(as.Date("2000-01-01"), as.Date("2002-12-31")), zoom.size = .5) +
+     facet_zoom(xlim =c(as.Date("2000-01-01"), as.Date("2001-12-31")), zoom.size = .5) +
     theme(legend.position = "bottom")
   
 }
@@ -642,6 +639,7 @@ comparison_plot(var_option = var_option, mask_option = mask_option)
 
 # Regional Trajectories {.tabset .tabset-pills}
 
+The following plots showcase how the observational datasets fall in-line with the bias corrected means, 5th percentile, and 95th percentile data sets.
 
 ```{r}
 

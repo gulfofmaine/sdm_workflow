@@ -1,0 +1,17 @@
+github-pages-navigation
+intro
+cmip6-data
+support-function-sources
+processing-order
+accessing-data
+preparing-date-keys-for-cmip6-models
+oisstv2-data
+accessing-data-1
+data-preparation
+soda-reanalysis-data
+accessing-data-2
+data-preparation-1
+preparing-climatologies
+climatology-preparation
+bias-corrections
+performing-bias-corrections
