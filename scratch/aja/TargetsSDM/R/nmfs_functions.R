@@ -25,8 +25,8 @@ nmfs_get_tows<-function(nmfs_raw, out_dir){
   
   # For debugging
   if(FALSE){
-    nmfs_raw = nmfs_load(here::here("scratch/aja/targets_flow/data/nmfs/raw"))
-    out_dir = here::here("scratch/aja/targets_flow/data/nmfs/clean")
+    nmfs_raw = nmfs_load("~/Box/RES_Data/NMFS_trawl/processed_data")
+    out_dir = here::here("scratch/aja/TargetsSDM/data/nmfs/clean")
   }
   
   # Get unique tows

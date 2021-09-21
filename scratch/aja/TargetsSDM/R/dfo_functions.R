@@ -83,7 +83,7 @@ dfo_get_tows<-function(dfo_GSINF, dfo_GSMISSIONS, out_dir){
   # select function = selects variables to keep and puts them in a US-equivalent order
   dfo_tows_out<- temp_tows %>% 
     dplyr::rename("DECDEG_BEGLAT" = "LATITUDE", "DECDEG_BEGLON" = "LONGITUDE") %>% 
-    dplyr::select(ID, DATE, EST_YEAR, SEASON, SVVESSEL, DECDEG_BEGLAT, DECDEG_BEGLON)
+    dplyr::select(ID, DATE, EST_YEAR, SEASON, SVVESSEL, DECDEG_BEGLAT, DECDEG_BEGLON, DIST)
   
   # Return and save it
   saveRDS(dfo_tows_out, file = paste(out_dir, "dfo_tows.rds", sep = "/"))
@@ -119,10 +119,16 @@ dfo_make_tidy_occu<-function(dfo_GSCAT, dfo_tows, species_table, out_dir){
     mutate(ID = paste(MISSION, SETNO, sep="")) %>% # create a unique ID
     rename(., DFO_SPEC = SPEC) %>% # renaming to keep DFO/NMFS codes clear
     dplyr::filter(DFO_SPEC %in% c(species_table$DFO_SPEC)) %>%  # keep only species in species_table
-    mutate(BIOMASS = ifelse(TOTWGT == 0 & TOTNO > 0, 0.001, TOTWGT)) %>%  # if TOTNO/ABUNDANCE > 0 but TOTWGT is 0, make TOTWGT non-zero (set equal to 0.001)
+    mutate(BIOMASS = ifelse(TOTWGT == 0 & TOTNO > 0, 0.001, TOTWGT)) %>%  # if TOTNO/ABUNDANCE > 0 but TOTWGT is 0, make TOTWGT non-zero (set equal to 0.001) %>%
     rename("ABUNDANCE" = "TOTNO") %>%   # rename TOTNO to ABUNDANCE
     mutate(PRESENCE = ifelse(ABUNDANCE > 0, 1, 0)) %>%  # PRESENCE = 1 if ABUNDANCE >=1, PRESENCE = 0 if ABUNDANCE = 0   
-    dplyr::select(ID, DFO_SPEC, PRESENCE, BIOMASS, ABUNDANCE) # keep only cols of interest                           
+    dplyr::select(ID, DFO_SPEC, PRESENCE, BIOMASS, ABUNDANCE) # keep only cols of interest
+  
+  # Need to rescale tows...
+  presence_data<- presence_data %>%
+    left_join(., dfo_tows) %>%
+    mutate(., BIOMASS = (1.75*BIOMASS)/DIST) %>%
+    dplyr::select(ID, DFO_SPEC, PRESENCE, BIOMASS, ABUNDANCE) # keep only cols of interest
   
   # Create a dataframe of all possible survey ID/species combinations
   all_ID_SPEC_possibilities<- tibble::tibble(ID = rep(dfo_tows$ID, length(unique(species_table$DFO_SPEC)))) %>% 

@@ -7,7 +7,7 @@ library(doFuture)
 
 cores_avail<- detectCores()
 registerDoFuture()
-plan(multisession, workers = cores_aval-2)
+plan(multisession, workers = cores_avail-2)
 
 # Clean everything?
 clean_start<- TRUE
@@ -28,4 +28,12 @@ tar_visnetwork(label = "time", reporter = "forecast", targets_only = TRUE)
 
 # Run it
 tar_make()
+
+# Check on warnings
+warning_ind<- which(!is.na(tar_meta(fields = warnings)$warnings))
+tar_meta(fields = warnings)[warning_ind, ]
+
+tar_load(vast_fit)
+TMBhelper::check_estimability(vast_fit$tmb_list$Obj)
+
 
