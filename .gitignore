@@ -24,3 +24,7 @@ scratch/aja/TargetsSDM/parameter_estimates.RData
 scratch/aja/TargetsSDM/parameter_estimates.txt
 scratch/aja/TargetsSDM/settings.txt
 scratch/aja/TargetsSDM/results
+
+
+# For bookdown
+docs/.nojekyll

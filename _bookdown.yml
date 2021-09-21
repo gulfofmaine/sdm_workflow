@@ -1,0 +1,5 @@
+book_filename: "sdm_workflow"
+language:
+  ui:
+    chapter_name: "Chapter "
+output_dir: "docs"
