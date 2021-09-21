@@ -1,0 +1,32 @@
+# CMIP6 Data
+
+**About:**
+
+This section of the repository contains code detailing how the CMIP6 data was processed to 
+prepare any bias-corrections. This readme exists to orient users through what files are connected 
+and need to be run to maintain upstream-downstream connections.
+
+## Support Function Sources:
+
+For both python and R Workflows the data processing steps were broken down into discrete steps
+and written as individual functions. 
+
+R functions for processing bias correction steps can be found [here](https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/R/sdm_workflow_funs.R)
+
+Python functions used to download and process cmip data can be found [here](https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/fcts.py)
+
+## Accessing Data
+
+CMIP6 data was downloaded using climate data operator (CDO) command line tools using the following 
+specifications:
+
+## Preparing Date Keys for CMIP6 Models
+
+For some reason the R packages that support NetCDF file handling do not like the calendar structure
+used by climate models. To still use R as a processing tool the dates for each individual CMIP6 model were extracted and placed into a lookup table that could be referenced to lookup the date values when needed. 
+
+These lookup tables include the source model, the variable of interest, and the proper dates that 
+go with them. To prepare the lookup table we used a python3 script [CMIP6 Variable Date Keys](https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/date_key.py). This file 
+was stepped for each of the four variables to create lookup tables for dates and also to flag 
+models that had inconsistent structures/dates/variables.
+
