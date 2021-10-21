@@ -1,0 +1,3 @@
+# About the Project {#intro}
+
+The aim of this project is to use the projected future climate states, as forecast by an ensemble of CMIP6 models, to predict shifts in the distribution and abundances of marine species along the Northeastern United States.

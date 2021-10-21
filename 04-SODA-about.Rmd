@@ -1,0 +1,11 @@
+# SODA Reanalysis Data
+
+**About:**
+
+The Simple Ocean Data Assimilation ocean/sea ice reanalysis (SODA) dataset was used as our reference dataset for three environmental variables: 1.) Sea Surface Salinity, 2.) Seafloor Temperature, & 3.) Seafloor Salinity.
+
+## Accessing Data
+
+SODA monthly data were downloaded as annual NetCDF files from the [University of Maryland](https://www2.atmos.umd.edu/~ocean/index_files/soda3.4.2_mn_download_b.htm) server, using their linux wget commands.
+
+## Data Preparation

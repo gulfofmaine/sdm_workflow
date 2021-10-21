@@ -1,0 +1,15 @@
+# Bias-Corrections
+
+**About:**
+
+Bias-corrections are an important step in the preparation of CMIP6 data for use in forecasting. This step aims to remove any inherent hot/cold biases from the CMIP6 data that are observed during the range of dates that we have available reference data with which to compare the models to.
+
+## Performing Bias Corrections
+
+Bias-corrections were performed by stepping through one of two Rmarkdowns. One for SODA bias-corrections
+and the other for OISSTv2 bias-corrections. The SODA rmarkdown has a parameter option that lets you 
+select which variable to process, outputting everything according to the selection.
+
+Details on individual steps can be found in the Rmarkdown report links:
+
+[OISSTv2 Bias Corrections](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_OISST_bias_corrections.html) & [SODA Bias Corrections](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_SODA_bias_corrections.html)

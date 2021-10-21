@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>2 CMIP6 Data | Navigating the SDM Workflow Repository</title>
+  <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="2 CMIP6 Data | Navigating the SDM Workflow Repository" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="2 CMIP6 Data | Navigating the SDM Workflow Repository" />
+  
+  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2021-09-21" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="intro.html"/>
+
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> About the Project</a></li>
+<li class="chapter" data-level="2" data-path="cmip6-data.html"><a href="cmip6-data.html"><i class="fa fa-check"></i><b>2</b> CMIP6 Data</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="cmip6-data.html"><a href="cmip6-data.html#support-function-sources"><i class="fa fa-check"></i><b>2.1</b> Support Function Sources:</a></li>
+<li class="chapter" data-level="2.2" data-path="cmip6-data.html"><a href="cmip6-data.html#processing-order"><i class="fa fa-check"></i><b>2.2</b> Processing Order:</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Navigating the SDM Workflow Repository</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="cmip6-data" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> CMIP6 Data</h1>
+<p><strong>About:</strong></p>
+<p>This section of the repository contains code detailing how the CMIP6 data was processed to
+prepare any bias-corrections. This readme exists to orient users through what files are connected
+and need to be run to maintain upstream-downstream connections.</p>
+<div id="support-function-sources" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Support Function Sources:</h2>
+<p>For both python and R Workflows the data processing steps were broken down into discrete steps
+and written as individual functions.</p>
+<p>R functions for processing bias correction steps can be found <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/R/sdm_workflow_funs.R">here</a></p>
+<p>Python functions used to download and process cmip data can be found <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/fcts.py">here</a></p>
+</div>
+<div id="processing-order" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Processing Order:</h2>
+<p><strong>Downloading CMIP6 Data</strong></p>
+<p>CMIP6 data was downloaded using climate data operator (CDO) command line tools using the following
+specifications:</p>
+<p><strong>Downloading Reference Data for Bias Corrections</strong></p>
+<ol style="list-style-type: decimal">
+<li>OISSTv2</li>
+</ol>
+<p>OISSTv2 Data was downloaded as annual NetCDF files from the <a href="https://psl.noaa.gov/data/gridded/data.noaa.oisst.v2.highres.html">Physical Science Laboratory</a>.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>SODA</li>
+</ol>
+<p>SODA monthly data were downloaded as annual NetCDF files from the <a href="https://www2.atmos.umd.edu/~ocean/index_files/soda3.4.2_mn_download_b.htm">University of Maryland</a> server, using their linux wget commands.</p>
+<p><strong>Preparing Date Keys for CMIP6 Models</strong></p>
+<p>For some reason the R packages that support NetCDF file handling do not like the calendar structure
+used by climate models. To still use R as a processing tool the dates for individual. To prepare
+lookup tables that include the source model, the variable of interest, and the proper dates that
+go with them we used a python3 script <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/date_key.py">CMIP6 Variable Date Keys</a>. This file
+was stepped for each of the four variables to create lookup tables for dates and also to flag
+models that had inconsistent structures/dates/variables.</p>
+<p><strong>Preparing Climatologies</strong></p>
+<p>For all data sources the reference period for the climatologies was 1985-2014. This
+period was chosen because it is the last 30-year period available in the CMIP6 historical
+period of 1950-2014.</p>
+<p>The Daily Climatology for OISSTv2 data was performed separately as part of the <a href="https://github.com/adamkemberling/oisst_mainstays">OISST Mainstays Workflow</a> using the 1985-2014 reference period.
+This was then converted to a monthly climatology as part of the processing for bias-correction.</p>
+<p>SODA monthly climatologies were done for bottom temperature, bottom salinity, surface temperature,
+and surface salinity in the python3 script: <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/soda_climatology.py">soda climatologies</a>.</p>
+<p>All CMIP6 climatologies were done using historical model runs, using the same reference period of
+1985-2014. These were done for each variable as part of the two rmarkdown workflows:
+<a href="https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_OISST_bias_corrections.html">OISSTv2 Bias Corrections</a> &amp; <a href="https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_SODA_bias_corrections.html">SODA Bias Corrections</a></p>
+<p><strong>Performing Bias Corrections</strong></p>
+<p>Bias-corrections were performed by stepping through one of two rmarkdowns. One for SODA bias-corrections
+and the other for OISSTv2 bias-corrections. The SODA rmarkdown has a parameter option that lets you
+select which variable to process, outputting everything according to the selection.</p>
+<p>Details on individual steps can be found in the Rmarkdown report links:</p>
+<p><a href="https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_OISST_bias_corrections.html">OISSTv2 Bias Corrections</a> &amp; <a href="https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_SODA_bias_corrections.html">SODA Bias Corrections</a></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="intro.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
