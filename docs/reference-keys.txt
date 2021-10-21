@@ -1,8 +1,6 @@
-github-pages-navigation
 intro
 cmip6-data
 support-function-sources
-processing-order
 accessing-data
 preparing-date-keys-for-cmip6-models
 oisstv2-data
