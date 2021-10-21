@@ -1103,20 +1103,34 @@ vast_fit_plot_density<- function(vast_fit, nice_category_names, mask, all_times 
   rast_lims<- c(0, round(max(rasts_range) + 0.0000001, 2))
   
   if(dim(pred_array)[3] == 1){
-    df<- data.frame(loc_g, z = pred_array[,1,])
-    points_ll = st_as_sf(data_df, coords = c("Lon", "Lat"), crs = CRS_orig)
-    points_proj = points_ll %>%
-      st_transform(., crs = CRS_proj)
-    points_bbox<- st_bbox(points_proj)
-    raster_proj<- st_rasterize(points_proj)
-    raster_proj<- resample(raster_proj, raster(template))
+    data_df<- data.frame(loc_g, z = pred_array[,1,])
+    
+    # Interpolation
+    pred_df<- na.omit(data.frame("x" = data_df$Lon, "y" = data_df$Lat, "layer" = data_df$z))
+    pred_df_interp<- interp(pred_df[,1], pred_df[,2], pred_df[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred_df_interp_final<- data.frame(expand.grid(x = pred_df_interp$x, y = pred_df_interp$y), z = c(round(pred_df_interp$z, 2)))
+    pred_sp<- st_as_sf(pred_df_interp_final, coords = c("x", "y"), crs = CRS_orig)
+    
+    pred_df_temp<- pred_sp[which(st_intersects(pred_sp, mask, sparse = FALSE) == TRUE),]
+    coords_keep<- as.data.frame(st_coordinates(pred_df_temp))
+    row.names(coords_keep)<- NULL
+    pred_df_use<- data.frame(cbind(coords_keep, "z" = as.numeric(pred_df_temp$z)))
+    names(pred_df_use)<- c("x", "y", "z")
+    
+    # raster_proj<- raster::rasterize(as_Spatial(points_ll), template, field = "z", fun = mean)
+    # raster_proj<- as.data.frame(raster_proj, xy = TRUE)
+    # 
+    time_plot_use<- plot_times
     
     plot_out<- ggplot() +
-      geom_stars(data = raster_proj, aes(x = x, y = y, fill = z)) +
-      scale_fill_viridis_c(name = "Density", option = "viridis", na.value = "transparent", limits = rast_lims) +
-      geom_sf(data = land_sf_proj, fill = land_color, lwd = 0.2) +
-      coord_sf(xlim = points_bbox[c(1,3)], ylim = points_bbox[c(2,4)], expand = FALSE, datum = sf::st_crs(CRS_proj)) 
-    theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05))
+      geom_tile(data = pred_df_use, aes(x = x, y = y, fill = z)) +
+      scale_fill_viridis_c(name = "Log (density+1)", option = "viridis", na.value = "transparent", limits = rast_lims) +
+      annotate("text", x = -65, y = 37.5, label = time_plot_use) +
+      geom_sf(data = land_sf, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+      coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
+      theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt"))
     
     ggsave(filename = paste(out_dir, file_name, ".png", sep = "/"), plot_out, width = 11, height = 8, units = "in")
   } else {
@@ -1154,7 +1168,8 @@ vast_fit_plot_density<- function(vast_fit, nice_category_names, mask, all_times 
     if(panel_or_gif == "panel"){
       # Panel plot
       all_plot<- wrap_plots(rasts_out, ncol = panel_cols, nrow = panel_rows, guides = "collect", theme(plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt")))
-      ggsave(filename = paste(working_dir, file_name, ".png", sep = "/"), all.plot, width = 11, height = 8, units = "in")
+      ggsave(filename = paste0(out_dir, "/", nice_category_names, "_LogDensity.png"), all_plot, width = 11, height = 8, units = "in")
+      return(all_plot)
     } else {
       # Make a gif
       plot_loop_func<- function(plot_list){
@@ -1782,9 +1797,9 @@ get_vast_index_timeseries<- function(vast_fit, nice_category_names, index_scale 
     
     if(dim(index_array_temp)[2] == 3){
       index_res_temp_est<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,1]) %>%
-        gather(., "Index_Region", "Index_Estimate", -Time, -Category)
+        pivot_longer(cols = -c(Time, Category), names_to = "Index_Region", values_to = "Index_Estimate")
       index_res_temp_sd<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,2]) %>%
-        gather(., "Index_Region", "Index_SD", -Time, -Category)
+        pivot_longer(cols = -c(Time, Category), names_to = "Index_Region", values_to = "Index_SD")
       index_res_temp_out<- index_res_temp_est %>%
         left_join(., index_res_temp_sd)
       
@@ -1795,10 +1810,10 @@ get_vast_index_timeseries<- function(vast_fit, nice_category_names, index_scale 
       }
     } else if(dim(index_array_temp)[2] == 2){
       index_res_temp_est<- data.frame("Time" = as.numeric(names(index_array_temp[,1])), "Category" = categories_ind[i], index_array_temp[,1]) %>%
-        gather(., "Index_Region", "Index_Estimate", -Time, -Category)
+        pivot_longer(cols = -c(Time, Category), names_to = "Index_Region", values_to = "Index_Estimate")
       index_res_temp_est$Index_Region<- attributes(index_res_array)$dimnames[[3]]
       index_res_temp_sd<- data.frame("Time" = as.numeric(names(index_array_temp[,1])), "Category" = categories_ind[i], index_array_temp[,2]) %>%
-        gather(., "Index_Region", "Index_SD", -Time, -Category)
+        pivot_longer(cols = -c(Time, Category), names_to = "Index_Region", values_to = "Index_SD")
       index_res_temp_sd$Index_Region<- attributes(index_res_array)$dimnames[[3]]
       index_res_temp_out<- index_res_temp_est %>%
         left_join(., index_res_temp_sd)
@@ -1813,18 +1828,25 @@ get_vast_index_timeseries<- function(vast_fit, nice_category_names, index_scale 
   }
   
   # Get date info instead of time..
-  year_start<- min(as.numeric(as.character(vast_fit$covariate_data$Year_Cov)))
-  
-  if(any(grepl("Season", vast_fit$X1_formula))){
-    seasons<- nlevels(unique(vast_fit$covariate_data$Season))
-    if(seasons == 3 & max(time_labels) == 347){
-      time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 3), rep(c("SPRING", "SUMMER", "FALL")), sep = "-")
+  if(!is.null(vast_fit$covariate_date)){
+    year_start<- min(as.numeric(as.character(vast_fit$covariate_data$Year_Cov)))
+    
+    if(any(grepl("Season", vast_fit$X1_formula))){
+      seasons<- nlevels(unique(vast_fit$covariate_data$Season))
+      if(seasons == 3 & max(time_labels) == 347){
+        time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 3), rep(c("SPRING", "SUMMER", "FALL")), sep = "-")
+      }
+    } else {
+      time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 1), rep(c("FALL")), sep = "-")
     }
+    
+    index_res_out$Date<- factor(rep(time_labels_use, length(index_regions)), levels = time_labels_use)
+    
   } else {
-    time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 1), rep(c("FALL")), sep = "-")
+    # Just basic years...
+    time_labels_use<- paste(rep(seq(from = min(vast_fit$year_labels), to = max(vast_fit$year_labels), each = 1)))
+    index_res_out$Date<- factor(rep(time_labels_use, length(index_regions)), levels = time_labels_use)
   }
-  
-  index_res_out$Date<- factor(rep(time_labels_use, length(index_regions)), levels = time_labels_use)
   
   
   # Save and return it
@@ -1868,7 +1890,7 @@ plot_vast_index_timeseries<- function(index_res_df, index_scale, nice_category_n
       geom_errorbar(data = index_res_df, aes(x = Date, ymin = (Index_Estimate - Index_SD), ymax = (Index_Estimate + Index_SD), color = Index_Region, group = Index_Region)) + 
       geom_point(data = index_res_df, aes(x = Date, y = Index_Estimate, color = Index_Region)) +
       scale_color_manual(values = colors_use) +
-      scale_x_date(date_breaks = "5 year", date_labels =  "%Y", limits = c(min(index_res_df$Date), max(index_res_df$Date)), expand = c(0, 0)) +
+      scale_x_date(date_breaks = "5 year", date_labels =  "%Y", limits = c(min(index_res_df$Date), max(index_res_df$Date))) +
       xlab({{nice_xlab}}) +
       ylab({{nice_ylab}}) +
       ggtitle({{nice_category_names}}) + 
@@ -1878,6 +1900,7 @@ plot_vast_index_timeseries<- function(index_res_df, index_scale, nice_category_n
   
   # Save and return the plot
   ggsave(plot_out, file = paste(out_dir, "/Biomass_Index_", index_scale, "_", nice_category_names, ".jpg", sep = ""))
+  return(plot_out)
 }
 
 
