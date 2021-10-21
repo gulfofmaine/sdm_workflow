@@ -95,6 +95,7 @@ settings = make_settings( n_x = 250,
 
 # Run model
 fit_g = fit_model_aja( settings = settings, 
+                       Method = "Mesh",
                        input_grid = extrap_grid,
                        Lat_i = dat_use2[,'LATITUDE'], 
                        Lon_i = dat_use2[,'LONGITUDE'], 

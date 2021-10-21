@@ -43,7 +43,7 @@ high_res_load <- function(high_res_dir) {
 #'
 #' @export
 
-make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_stack, covs_rescale = c("Depth", "BS_seasonal", "BT_seasonal", "SS_seasonal", "SST_seasonal"), rescale_params, mask, summarize, ensemble_stat, fit_seasons, fit_year_min, fit_year_max, pred_years, out_dir){
+make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_stack, covs_rescale = c("Depth", "BS_seasonal", "BT_seasonal", "SS_seasonal", "SST_seasonal"), rescale_params, depth_cut, mask, summarize, ensemble_stat, fit_seasons, fit_year_min, fit_year_max, pred_years, out_dir){
   
   # For debugging
   if(FALSE){
@@ -112,8 +112,7 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
              BIOMASS = 1,
              ABUNDANCE = 1,
              ID = paste("DUMMY", DATE, sep = ""),
-             PredTF = TRUE
-      )
+             PredTF = TRUE)
     
     if(i == 1){
       pred_covs_out<- pred_covs_df_out_temp
@@ -128,7 +127,8 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
   
   # New implementation...
   pred_covs_out_final<- pred_covs_out_final %>%
-    mutate(., VAST_YEAR_COV = ifelse(EST_YEAR > fit_year_max, fit_year_max, EST_YEAR),
+    mutate(., #VAST_YEAR_COV = EST_YEAR,
+           VAST_YEAR_COV = ifelse(EST_YEAR > fit_year_max, fit_year_max, EST_YEAR),
            VAST_SEASON = case_when(
              SEASON == "Spring" ~ "SPRING",
              SEASON == "Summer" ~ "SUMMER",
@@ -163,11 +163,12 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
     pred_covs_out_final<- static_extract_wrapper(static_covariates_list = extra_covariates_stack, sf_points = pred_covs_sf, date_col_name = "DATE", df_sf = "df", out_dir = NULL)
   }
   
-  # Drop any NAs
+  # Apply depth cut and drop NAs
   pred_covs_out_final<- pred_covs_out_final %>%
-    drop_na(., {{cov_names}}) %>%
-    mutate(., "Summarized" = summarize,
-           "Ensemble_Stat" = ensemble_stat)
+    mutate(., "Depth" = ifelse(Depth > depth_cut, NA, Depth),
+           "Summarized" = summarize,
+           "Ensemble_Stat" = ensemble_stat) %>%
+    drop_na()
   
   # Rescale
   if(!is.null(rescale_params)){
@@ -198,7 +199,7 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
 #' 
 #' @export
 
-make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code, fit_year_min, fit_year_max, pred_df, out_dir){
+make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code, fit_year_min, fit_year_max, pred_years, pred_df, out_dir){
   
   # For debugging
   if(FALSE){
@@ -211,6 +212,9 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
     tar_load(vast_predict_df)
     pred_df = vast_predict_df
     out_dir = here::here("scratch/aja/targets_flow/data/combined/")
+    
+    tar_load(tidy_mod_data)
+    fit_seasons
   }
   
   # Some work on the time span and seasons 
@@ -234,7 +238,7 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
       SURVEY == "NMFS" & SEASON == "SPRING" ~ "SPRING",
       SURVEY == "DFO" & SEASON == "SUMMER" ~ "SUMMER",
       SURVEY == "NMFS" & SEASON == "FALL" ~ "FALL",
-      SURVEY == "DFO" & SEASON == "FALL" ~ "FALL")) %>%
+      SURVEY == "DFO" & SEASON == "FALL" ~ as.character("NA"))) %>%
     drop_na(VAST_SEASON)
   
   data_temp<- data_temp %>%
@@ -242,6 +246,7 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
 
   # Set of years and seasons. The DFO spring survey usually occurs before the NOAA NEFSC spring survey, so ordering accordingly. Pred year max or fit year max??
   all_years<- seq(from = fit_year_min, to = fit_year_max, by = 1)
+  #all_years<- seq(from = fit_year_min, to = pred_years, by = 1)
   all_seasons<- fit_seasons
   yearseason_set<- expand.grid("SEASON" = all_seasons, "EST_YEAR" = all_years)
   all_yearseason_levels<- apply(yearseason_set[,2:1], MARGIN = 1, FUN = paste, collapse = "_")
@@ -264,6 +269,7 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
   
   # VAST year
   data_temp$VAST_YEAR_COV<- ifelse(data_temp$EST_YEAR > fit_year_max, fit_year_max, data_temp$EST_YEAR)
+  #data_temp$VAST_YEAR_COV<- data_temp$EST_YEAR
   data_temp$PredTF<- FALSE
   
   # Ordering...
@@ -283,11 +289,12 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
     dummy_data[,col_ind]<- mean(cov_vec, na.rm = TRUE)
     names(dummy_data)[col_ind]<- {{cov_names}}[i]
   }
-  
+
   # Combine with original dataset
   vast_data_out<- rbind(data_temp, dummy_data)
   vast_data_out$VAST_YEAR_COV<- factor(vast_data_out$VAST_YEAR_COV, levels = seq(from = fit_year_min, to = fit_year_max, by = 1))
- 
+  #vast_data_out$VAST_YEAR_COV<- factor(vast_data_out$VAST_YEAR_COV, levels = seq(from = fit_year_min, to = pred_years, by = 1))
+  
   # If we have additional years that we want to predict to and NOT Fit too, we aren't quite done just yet...
   if(!is.null(pred_df)){
     # Name work...
@@ -300,10 +307,12 @@ make_vast_seasonal_data<- function(tidy_mod_data, fit_seasons, nmfs_species_code
       print("Check data and prediction column names, they don't match")
       stop()
     } else {
-      # We only need one observation for each of the times...
       pred_df_bind<- pred_df %>%
-        dplyr::select(., colnames(vast_data_out)) %>%
-        distinct(., ID, .keep_all = TRUE)
+        dplyr::select(., colnames(vast_data_out))
+      # # We only need one observation for each of the times...
+      # pred_df_bind<- pred_df %>%
+      #   dplyr::select(., colnames(vast_data_out)) %>%
+      #   distinct(., ID, .keep_all = TRUE)
       vast_data_out<- rbind(vast_data_out, pred_df_bind)
     }
   }
@@ -368,16 +377,23 @@ make_vast_covariate_data<- function(vast_seasonal_data, out_dir){
     out_dir = here::here("scratch/aja/targets_flow/data/dfo/combined")
   }
   
+  # Some work to make sure that we don't allow covariates for the "DUMMY" observations to be used at the knots...
+  vast_seasonal_data_temp<- vast_seasonal_data
+  
+  vast_seasonal_data_temp<- vast_seasonal_data_temp %>%
+    mutate(., "DECDEC_BEGLON" = ifelse(vast_seasonal_data_temp$EST_YEAR <= 2020 & vast_seasonal_data_temp$SURVEY == "DUMMY", 0, vast_seasonal_data_temp$DECDEG_BEGLON),
+           "DECDEC_BEGLAT" = ifelse(vast_seasonal_data_temp$EST_YEAR <= 2020 & vast_seasonal_data_temp$SURVEY == "DUMMY", 0, vast_seasonal_data_temp$DECDEG_BEGLAT))
+  
   # Select columns we want from the "full" vast_seasonal_data dataset
   vast_cov_dat<- data.frame(
-    "Year" = as.numeric(vast_seasonal_data$VAST_YEAR_SEASON)-1,
-    "Year_Cov" = vast_seasonal_data$VAST_YEAR_COV,
-    "Season" = vast_seasonal_data$VAST_SEASON,
-    "Depth" = vast_seasonal_data$Depth,
-    "SST_seasonal" = vast_seasonal_data$SST_seasonal,
-    "BT_seasonal" = vast_seasonal_data$BT_seasonal,
-    "Lat" = vast_seasonal_data$DECDEG_BEGLAT,
-    "Lon" = vast_seasonal_data$DECDEG_BEGLON
+    "Year" = as.numeric(vast_seasonal_data_temp$VAST_YEAR_SEASON)-1,
+    "Year_Cov" = vast_seasonal_data_temp$VAST_YEAR_COV,
+    "Season" = vast_seasonal_data_temp$VAST_SEASON,
+    "Depth" = vast_seasonal_data_temp$Depth,
+    "SST_seasonal" = vast_seasonal_data_temp$SST_seasonal,
+    "BT_seasonal" = vast_seasonal_data_temp$BT_seasonal,
+    "Lat" = vast_seasonal_data_temp$DECDEG_BEGLAT,
+    "Lon" = vast_seasonal_data_temp$DECDEG_BEGLON
   )
   
   # Save and return 
@@ -449,7 +465,8 @@ read_polyshape<- function(polyshape_path){
 #' 
 #' @description Create a list of with information defining the extrapolation grid and used by subsequent VAST functions, leveraging code here: https://github.com/James-Thorson-NOAA/VAST/wiki/Creating-an-extrapolation-grid. 
 #'
-#' @param shapefile = A geospatial vector sf polygon file, specifying the location and shape of the area of interest.
+#' @param region_shapefile = A geospatial vector sf polygon file, specifying the location and shape of the area of of spatial domain
+#' @param index_shapes = A multipolygon geospatial vector sf polygon file, specifying sub regions of interest. Grid locations are assigned to their subregion within the total spatial domain. 
 #' @param cell_size = The size of grid in meters (since working in UTM). This will control the resolution of the extrapolation grid.
 #'
 #' @return Tagged list containing extrapolation grid settings needed to fit a VAST model of species occurrence.
@@ -460,7 +477,6 @@ vast_make_extrap_grid<- function(region_shapefile, index_shapes, strata.limits, 
   
   # For debugging
   if(FALSE){
-    tar_load(region_shapefile)
     tar_load(index_shapefiles)
     index_shapes = index_shapefiles
     strata.limits = strata_use
@@ -475,7 +491,7 @@ vast_make_extrap_grid<- function(region_shapefile, index_shapes, strata.limits, 
   utm_zone<- floor((lon + 180)/6)+1
   
   # Transform to the UTM zone
-  crs_utm<- st_crs(paste0("+proj=utm +zone=",utm_zone," +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
+  crs_utm<- st_crs(paste0("+proj=utm +zone=", utm_zone, " +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
   region_utm<- st_transform(region_wgs84, crs = crs_utm)
   
   # Make extrapolation grid with sf
@@ -491,13 +507,13 @@ vast_make_extrap_grid<- function(region_shapefile, index_shapes, strata.limits, 
   extrap_grid<- region_grid %>%
     st_transform(., crs = "+proj=longlat +lat_0=90 +lon_0=180 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ") %>%
     st_join(., index_shapes, join = st_within) %>%
-    mutate(., "Lon" = st_coordinates(.)[,1],
-           "Lat" = st_coordinates(.)[,2]) %>%
+    mutate(., "Lon" = as.numeric(st_coordinates(.)[,1]),
+           "Lat" = as.numeric(st_coordinates(.)[,2])) %>%
     st_drop_geometry() %>%
     dplyr::select(., Lon, Lat, Region) %>%
     mutate(., Area_km2=((cell_size/1000)^2),
            STRATA = factor(Region, levels = index_shapes$Region, labels = index_shapes$Region))
-    
+  
   # Return it
   return(extrap_grid)
 }
@@ -518,7 +534,7 @@ vast_make_extrap_grid<- function(region_shapefile, index_shapes, strata.limits, 
 #' 
 #' @export
 
-vast_make_settings <- function(extrap_grid, FieldConfig, RhoConfig, OverdispersionConfig, bias.correct, Options, strata.limits){
+vast_make_settings <- function(extrap_grid, n_knots, FieldConfig, RhoConfig, OverdispersionConfig, bias.correct, knot_method, Options, strata.limits){
   
   # For debugging
   if(FALSE){
@@ -528,24 +544,23 @@ vast_make_settings <- function(extrap_grid, FieldConfig, RhoConfig, Overdispersi
     RhoConfig = c("Beta1" = 3, "Beta2" = 3, "Epsilon1" = 2, "Epsilon2" = 2)
     OverdispersionConfig = c(0, 0)
     bias.correct = FALSE
-    Options = NULL
+    Options = c("Calculate_Range"=TRUE)
     strata.limits = strata_use
+    n_knots = 400
+    knot_method = "samples"
   }
   
-  # Get number of vertices in the mesh, which is based on our input_grid
-  n_x_use<- nrow(extrap_grid)
-  
   # Run FishStatsUtils::make_settings
-  settings_out<- make_settings(n_x = n_x_use, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(1, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = "grid", treat_nonencounter_as_zero = FALSE, strata.limits = strata.limits)
+  settings_out<- make_settings(n_x = n_knots, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(2, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = knot_method, treat_nonencounter_as_zero = FALSE, strata.limits = strata.limits)
   
   # Adjust options?
   options_new<- settings_out$Options
   if(!is.null(Options)){
     for(i in seq_along(Options)){
-      options_adjust_i<- Options[[i]]
-      options_new[[{{options_adjust_i}}]]<- Options[[{{options_adjust_i}}]]
+      options_adjust_i<- Options[i]
+      options_new[[which(names(options_new) == names(options_adjust_i))]]<- options_adjust_i
     }
-    settings_out<- make_settings(n_x = n_x_use, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(1, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = "grid", treat_nonencounter_as_zero = FALSE, Options = options_new)
+    settings_out<- make_settings(n_x = n_knots, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(1, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = knot_method, treat_nonencounter_as_zero = FALSE, strata.limits = strata.limits, Options = options_new)
   }
   
   # Return it
@@ -595,6 +610,7 @@ vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec, Q1_coveff_vec, Q2_cove
 #'
 #' @param settings = A tagged list with the settings for the model, created with `vast_make_settings`.
 #' @param extrap_grid = An extrapolation grid, created with `vast_make_extrap_grid`.
+#' @param Method = A character string specifying which Method to use when making the mesh.
 #' @param sample_dat = A data frame with the biomass sample data for each species at each tow.
 #' @param covariate_dat = A data frame with the habitat covariate data for each tow.
 #' @param X1_formula = A formula for the habitat covariates and first linear predictor.
@@ -610,7 +626,7 @@ vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec, Q1_coveff_vec, Q2_cove
 #'
 #' @export
 
-vast_build_sdm <- function(settings, extrap_grid, sample_data, covariate_data, X1_formula, X2_formula, X_contrasts, Xconfig_list, catchability_data, Q1_formula, Q2_formula, index_shapes){
+vast_build_sdm <- function(settings, extrap_grid, Method, sample_data, covariate_data, X1_formula, X2_formula, X_contrasts, Xconfig_list, catchability_data, Q1_formula, Q2_formula, index_shapes){
   
   # For debugging
   if(FALSE){
@@ -655,12 +671,14 @@ vast_build_sdm <- function(settings, extrap_grid, sample_data, covariate_data, X
     hab_env_coeffs_n = hab_env_coeffs_n
     tar_load(vast_catchability_data)
     catchability_data = vast_catchability_data
-    catch_formula<- ~ Survey
+    catch_formula<- ~ 0
     Q1_formula = catch_formula
     Q2_formula = catch_formula
     X_contrasts = list(Year_Cov = contrasts(vast_covariate_data$Year_Cov, contrasts = FALSE))
     tar_load(vast_coveff)
     Xconfig_list = vast_coveff
+    tar_load(index_shapefiles)
+    index_shapes<- index_shapefiles
   }
   
   # Check names
@@ -672,7 +690,7 @@ vast_build_sdm <- function(settings, extrap_grid, sample_data, covariate_data, X
   cov_dat_names1<- unlist(str_extract_all(X1_formula, boundary("word"))[[2]])
   
   # Remove some stuff associated with the splines...
-  spline_words<- c("bs", "degree", "TRUE", "intercept", "2", "FALSE")
+  spline_words<- c("bs", "degree", "TRUE", "intercept", unique(as.numeric(unlist(str_extract_all(X1_formula, pattern = "[0-9]+", simplify = TRUE)))), "FALSE")
   cov_dat_names1<- cov_dat_names1[-which(cov_dat_names1 %in% spline_words)]
   cov_dat_names2<- unlist(str_extract_all(X2_formula, boundary("word"))[[2]])
   cov_dat_names2<- cov_dat_names2[-which(cov_dat_names2 %in% spline_words)]
@@ -686,7 +704,7 @@ vast_build_sdm <- function(settings, extrap_grid, sample_data, covariate_data, X
   }
   
   # Run VAST::fit_model with correct info and settings
-  vast_build_out<- fit_model_aja("settings" = settings, "input_grid" = extrap_grid, "Lat_i" = sample_data[, 'Lat'], "Lon_i" = sample_data[, 'Lon'], "t_i" = sample_data[, 'Year'], "c_i" = rep(0, nrow(sample_data)), "b_i" = sample_data[, 'Biomass'], "a_i" = sample_data[, 'Swept'], "PredTF_i" = sample_data[, 'Pred_TF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = covariate_data, "X1_formula" = X1_formula, "X2_formula" = X2_formula, "X_contrasts" = X_contrasts, "catchability_data" = catchability_data, "Q1_formula" = Q1_formula, "Q2_formula" = Q2_formula, "Q1config_k" = Xconfig_list[['Q1config_k']], "Q2config_k" = Xconfig_list[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+  vast_build_out<- fit_model_aja("settings" = settings, "input_grid" = extrap_grid, "Method" = Method, "Lat_i" = sample_data[, 'Lat'], "Lon_i" = sample_data[, 'Lon'], "t_i" = sample_data[, 'Year'], "c_i" = rep(0, nrow(sample_data)), "b_i" = sample_data[, 'Biomass'], "a_i" = sample_data[, 'Swept'], "PredTF_i" = sample_data[, 'Pred_TF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = covariate_data, "X1_formula" = X1_formula, "X2_formula" = X2_formula, "X_contrasts" = X_contrasts, "catchability_data" = catchability_data, "Q1_formula" = Q1_formula, "Q2_formula" = Q2_formula, "Q1config_k" = Xconfig_list[['Q1config_k']], "Q2config_k" = Xconfig_list[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
   
   # Return it
   return(vast_build_out)
@@ -711,14 +729,15 @@ vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
   if(FALSE){
     tar_load(vast_build0)
     vast_build = vast_build0
-    tar_load(vast_covariate_data)
-    adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, 3), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2))), "log_sigmaXi2_cp" = factor(c(rep(1, 3), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2))))
-    adjustments = list("log_sigmaXi1_cp" = factor(c(rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2*hab_env_coeffs_n))), "log_sigmaXi2_cp" = factor(c(rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, 2*hab_env_coeffs_n))), "lambda1_k" = factor(c(NA, 1)), "lambda2_k" = factor(c(NA, 1)), "RhoConfig" = c("Beta1" = 3, "Beta2" = 3, "Epsilon1" = 3, "Epsilon2" = 3))
+    tar_load(vast_covariate_data) 
+    adjustments = list("log_sigmaXi1_cp" = factor(c(rep(1, length(unique(fit_seasons))), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, gam_degree*hab_env_coeffs_n))), "log_sigmaXi2_cp" = factor(c(rep(1, length(unique(fit_seasons))), rep(4, nlevels(vast_covariate_data$Year_Cov)), rep(NA, gam_degree*hab_env_coeffs_n))), "lambda1_k" = factor(c(1, NA)), "lambda2_k" = factor(c(1, NA)))
+    tar_load(index_shapefiles)
+    index_shapes<- index_shapefiles
   }
   
   # If no adjustments are needed, just need to pull information from vast_build and then set "run_model" to TRUE
   if(is.null(adjustments)){
-    vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+    vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
   }
   
   # If there are adjustments, need to make those and then re run model. 
@@ -771,10 +790,10 @@ vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
     # Now, re-build and fit model. This is slightly different if we have changed map or not...
     if(any(names(adjustments) %in% c("log_sigmaXi1_cp", "log_sigmaXi2_cp", "lambda1_k", "lambda2_k"))){
       # Adding Map argument
-      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_k']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "Map" = map_adjust_out, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_k']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "Map" = map_adjust_out, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
     } else {
       # No need for Map argument, just build and fit
-      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build$input_args$data_args_input[['Q2config_cp']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build$input_args$data_args_input[['Q2config_cp']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
     }
   }
   # Return it
@@ -803,7 +822,7 @@ vast_fit_sdm <- function(vast_build_adjust, nmfs_species_code, index_shapes, out
   }
   
   # Build and fit model
-  vast_fit_out<- fit_model_aja("settings" = vast_build_adjust$settings, "input_grid" = vast_build_adjust$input_args$data_args_input$input_grid, "Lat_i" = vast_build_adjust$data_frame[, 'Lat_i'], "Lon_i" = vast_build_adjust$data_frame[, 'Lon_i'], "t_i" = vast_build_adjust$data_frame[, 't_i'], "c_iz" = vast_build_adjust$data_frame[, 'c_iz'], "b_i" = vast_build_adjust$data_frame[, 'b_i'], "a_i" = vast_build_adjust$data_frame[, 'a_i'], "PredTF_i" = vast_build_adjust$data_list[['PredTF_i']], "X1config_cp" = vast_build_adjust$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build_adjust$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build_adjust$input_args$data_args_input$covariate_data, "X1_formula" = vast_build_adjust$input_args$data_args_input$X1_formula, "X2_formula" = vast_build_adjust$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build_adjust$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build_adjust$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build_adjust$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build_adjust$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build_adjust$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build_adjust$input_args$data_args_input[['Q2config_cp']], "Map" = vast_build_adjust$tmb_list$Map, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = TRUE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+  vast_fit_out<- fit_model_aja("settings" = vast_build_adjust$settings, "input_grid" = vast_build_adjust$input_args$data_args_input$input_grid, "Method" = vast_build_adjust$settings$Method, "Lat_i" = vast_build_adjust$data_frame[, 'Lat_i'], "Lon_i" = vast_build_adjust$data_frame[, 'Lon_i'], "t_i" = vast_build_adjust$data_frame[, 't_i'], "c_iz" = vast_build_adjust$data_frame[, 'c_iz'], "b_i" = vast_build_adjust$data_frame[, 'b_i'], "a_i" = vast_build_adjust$data_frame[, 'a_i'], "PredTF_i" = vast_build_adjust$data_list[['PredTF_i']], "X1config_cp" = vast_build_adjust$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build_adjust$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build_adjust$input_args$data_args_input$covariate_data, "X1_formula" = vast_build_adjust$input_args$data_args_input$X1_formula, "X2_formula" = vast_build_adjust$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build_adjust$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build_adjust$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build_adjust$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build_adjust$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build_adjust$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build_adjust$input_args$data_args_input[['Q2config_cp']], "Map" = vast_build_adjust$tmb_list$Map, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = TRUE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
   
   # Save and return it
   saveRDS(vast_fit_out, file = paste(out_dir, "/", nmfs_species_code, "_", "fitted_vast.rds", sep = "" ))
@@ -1046,11 +1065,11 @@ vast_fit_plot_density<- function(vast_fit, nice_category_names, mask, all_times 
     tar_load(vast_fit)
     template = raster("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/HighResTemplate.grd")
     tar_load(vast_seasonal_data)
-    all_times = as.character(levels(vast_seasonal_data$YEAR_SEASON))
+    all_times = as.character(levels(vast_seasonal_data$VAST_YEAR_SEASON))
     plot_times = NULL
     tar_load(land_sf)
-    tar_load(shapefile)
-    mask = shapefile
+    tar_load(region_shapefile)
+    mask = region_shapefile
     land_color = "#d9d9d9"
     res_data_path = "~/Box/RES_Data/"
     xlim = c(-85, -55)
@@ -1081,7 +1100,7 @@ vast_fit_plot_density<- function(vast_fit, nice_category_names, mask, all_times 
   # Looping through...
   rasts_out<- vector("list", dim(pred_array)[3])
   rasts_range<- pred_array
-  rast_lims<- c(round(min(rasts_range)-0.000001, 2), round(max(rasts_range) + 0.0000001, 2))
+  rast_lims<- c(0, round(max(rasts_range) + 0.0000001, 2))
   
   if(dim(pred_array)[3] == 1){
     df<- data.frame(loc_g, z = pred_array[,1,])
@@ -1166,14 +1185,14 @@ vast_fit_plot_density<- function(vast_fit, nice_category_names, mask, all_times 
 #'
 #' @export
 
-df_plot_density<- function(pred_df, nmfs_species_code, mask, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
+vast_df_plot_density<- function(pred_df, nice_category_names, mask, all_times = all_times, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
   if(FALSE){
     tar_load(vast_predictions)
     pred_df = vast_predictions
     plot_times = NULL
     tar_load(land_sf)
-    tar_load(shapefile)
-    mask = shapefile
+    tar_load(region_shapefile)
+    mask = region_shapefile
     land_color = "#d9d9d9"
     res_data_path = "~/Box/RES_Data/"
     xlim = c(-80, -55)
@@ -1206,7 +1225,7 @@ df_plot_density<- function(pred_df, nmfs_species_code, mask, plot_times = NULL, 
   # Looping through...
   rasts_out<- vector("list", length(plot_times))
   rasts_range<- pred_df$Pred
-  rast_lims<- c(round(min(rasts_range)-0.000001, 2), round(max(rasts_range) + 0.0000001, 2))
+  rast_lims<- c(0, round(max(rasts_range) + 0.0000001, 2))
   
   for (tI in 1:length(plot_times)) {
     pred_df_temp<- pred_df %>%
@@ -1252,64 +1271,9 @@ df_plot_density<- function(pred_df, nmfs_species_code, mask, plot_times = NULL, 
           print(plot_use)
         }
       }
-      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, nmfs_species_code, "_LogDensity.gif"), delay = 0.75, progress = FALSE))
+      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, "/", nice_category_names, "_LogDensity.gif"), delay = 0.75, progress = FALSE))
     }
   }
-
-#' Predict density for new samples (\emph{Beta version; may change without notice})
-#'
-#' \code{predict.fit_model} calculates predictions given new data
-#'
-#' \code{predict.fit_model} is designed with two purposes in mind:
-#' \enumerate{
-#' \item If \code{new_covariate_data=NULL} as by default, then the model uses the covariate values supplied during original model fits,
-#'       and interpolates as needed from those supplied values to new predicted locations.  This then uses *exactly* the same information
-#'       as was available during model fitting.
-#' \item If \code{new_covariate_data} is supplied with new values (e.g., at locations for predictions), then these values are used in
-#'       combination with original covariate values when interpolating to new values.  However, supplying \code{new_oovariate_data}
-#'       at the same Lat-Lon-Year combination as any original covariate value will delete those matches in the latter, such that originally fitted data
-#'       can be predicted using alternative values for covariates (e.g., when calculating partial dependence plots)
-#' }
-#'
-#' @inheritParams make_covariates
-#' @inheritParams VAST::make_data
-#' @param x Output from \code{\link{fit_model}}
-#' @param what Which output from \code{fit$Report} should be extracted; default is predicted density
-#' @param keep_old_covariates Whether to add new_covariate_data to existing data.
-#'        This is useful when predicting values at new locations, but does not work
-#'        when predicting data are locations with existing data (because the interpolation of
-#'        covariate values will conflict for existing and new covariate values), e.g.,
-#'        when calculating partial dependence plots for existing data.
-#'
-#' @return NULL
-#'
-#' @examples
-#' \dontrun{
-#'
-#' # Showing use of package pdp for partial dependence plots
-#' pred.fun = function( object, newdata ){
-#'   predict( x=object,
-#'     Lat_i = object$data_frame$Lat_i,
-#'     Lon_i = object$data_frame$Lon_i,
-#'     t_i = object$data_frame$t_i,
-#'     a_i = object$data_frame$a_i,
-#'     what = "P1_iz",
-#'     new_covariate_data = newdata,
-#'     do_checks = FALSE )
-#' }
-#'
-#' library(ggplot2)
-#' library(pdp)
-#' Partial = partial( object = fit,
-#'                    pred.var = "BOT_DEPTH",
-#'                    pred.fun = pred.fun,
-#'                    train = fit$covariate_data )
-#' autoplot(Partial)
-#'
-#' }
-#'
-#' @method predict fit_model
-#' @export
 
 predict.fit_model_aja<- function(x, what = "D_i", Lat_i, Lon_i, t_i, a_i, c_iz = rep(0,length(t_i)), v_i = rep(0,length(t_i)), new_covariate_data = NULL, new_catchability_data = NULL, do_checks = TRUE, working_dir = paste0(getwd(),"/")){
   
@@ -1346,19 +1310,20 @@ predict.fit_model_aja<- function(x, what = "D_i", Lat_i, Lon_i, t_i, a_i, c_iz =
     new_covariate_data = pred_cov_dat_use
     new_catchability_data = pred_catch_dat_use
     do_checks = FALSE
+    working_dir = paste0(getwd(),"/")
     
-    object = vast_fit
-    x = object
-    Lat_i = object$data_frame$Lat_i
-    Lon_i = object$data_frame$Lon_i
-    t_i = object$data_frame$t_i
-    a_i = object$data_frame$a_i
-    c_iz = rep(0,length(t_i))
-    v_i = rep(0,length(t_i))
-    what = "P1_iz"
-    new_covariate_data = object$covariate_data
-    new_catchability_data = object$catchability_data
-    do_checks = FALSE
+    # object = vast_fit
+    # x = object
+    # Lat_i = object$data_frame$Lat_i
+    # Lon_i = object$data_frame$Lon_i
+    # t_i = object$data_frame$t_i
+    # a_i = object$data_frame$a_i
+    # c_iz = rep(0,length(t_i))
+    # v_i = rep(0,length(t_i))
+    # what = "P1_iz"
+    # new_covariate_data = object$covariate_data
+    # new_catchability_data = object$catchability_data
+    # do_checks = FALSE
   }
   
   message("`predict.fit_model(.)` is in beta-testing, and please explore results carefully prior to using")
@@ -1456,6 +1421,7 @@ predict.fit_model_aja<- function(x, what = "D_i", Lat_i, Lon_i, t_i, a_i, c_iz =
 match_strata_fn_aja <- function(points, strata_dataframe, index_shapes) {
   if(FALSE){
     points = Tmp
+    l = 1
     strata_dataframe = strata.limits[l, , drop = FALSE]
     index_shapes = index_shapes
   }
@@ -1491,6 +1457,15 @@ match_strata_fn_aja <- function(points, strata_dataframe, index_shapes) {
 }
 
 Prepare_User_Extrapolation_Data_Fn_aja<- function (input_grid, strata.limits = NULL, projargs = NA, zone = NA, flip_around_dateline = TRUE, index_shapes, ...) {
+  if(FALSE){
+    # Run make_extrapolation_info_aja first...
+    strata.limits = strata.limits
+    input_grid = input_grid
+    projargs = projargs
+    zone = zone
+    flip_around_dateline = flip_around_dateline
+    index_shapes = index_shapes
+  }
   if (is.null(strata.limits)) {
     strata.limits = data.frame(STRATA = "All_areas")
   }
@@ -1503,7 +1478,7 @@ Prepare_User_Extrapolation_Data_Fn_aja<- function (input_grid, strata.limits = N
   }
   a_el = as.data.frame(matrix(NA, nrow = nrow(Data_Extrap), ncol = nrow(strata.limits), dimnames = list(NULL, strata.limits[, "STRATA"])))
   for (l in 1:ncol(a_el)) {
-    a_el[, l] = match_strata_fn_aja(points = Tmp, strata_dataframe = strata.limits[l, , drop = FALSE], index_shapes = index_shapes[l,])
+    a_el[, l] = match_strata_fn_aja(points = Tmp, strata_dataframe = strata.limits[l, , drop = FALSE], index_shapes = index_shapes[index_shapes$Region == as.character(strata.limits[l, , drop = FALSE]),])
     a_el[, l] = ifelse(is.na(a_el[, l]), 0, Area_km2_x)
   }
   tmpUTM = project_coordinates(X = Data_Extrap[, "Lon"], Y = Data_Extrap[, "Lat"], projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline)
@@ -1518,117 +1493,24 @@ Prepare_User_Extrapolation_Data_Fn_aja<- function (input_grid, strata.limits = N
 }
 
 make_extrapolation_info_aja<- function (Region, projargs = NA, zone = NA, strata.limits = data.frame(STRATA = "All_areas"), create_strata_per_region = FALSE, max_cells = NULL, input_grid = NULL, observations_LL = NULL, grid_dim_km = c(2, 2), maximum_distance_from_sample = NULL, grid_in_UTM = TRUE, grid_dim_LL = c(0.1, 0.1), region = c("south_coast", "west_coast"), strata_to_use = c("SOG", "WCVI", "QCS", "HS", "WCHG"), epu_to_use = c("All", "Georges_Bank", "Mid_Atlantic_Bight", "Scotian_Shelf", "Gulf_of_Maine", "Other")[1], survey = "Chatham_rise", surveyname = "propInWCGBTS", flip_around_dateline, nstart = 100, area_tolerance = 0.05, backwards_compatible_kmeans = FALSE, DirPath = paste0(getwd(), "/"), index_shapes, ...) {
+  if(FALSE){
+    # First run fit_model_aja...
+    Region = settings$Region
+    projargs = NA
+    zone = settings$zone
+    strata.limits = settings$strata.limits
+    create_strata_per_region = FALSE
+    max_cells = settings$max_cells
+    input_grid = input_grid
+    observations_LL = NULL
+    grid_dim_km = settings$grid_size_km
+    maximum_distance_from_sample = NULL
+    index_shapes = index_shapes
+  }
   if (is.null(max_cells)) 
     max_cells = Inf
   for (rI in seq_along(Region)) {
     Extrapolation_List = NULL
-    if (tolower(Region[rI]) == "california_current") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_WCGBTS_Extrapolation_Data_Fn(strata.limits = strata.limits, surveyname = surveyname, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) %in% c("wcghl", "wcghl_domain", "west_coast_hook_and_line")) {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_WCGHL_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "british_columbia") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_BC_Coast_Extrapolation_Data_Fn(strata.limits = strata.limits, strata_to_use = strata_to_use, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "eastern_bering_sea") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = TRUE
-      Extrapolation_List = Prepare_EBS_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "northern_bering_sea") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_NBS_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "bering_sea_slope") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_BSslope_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) %in% c("st_matthews_island", "smi")) {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = TRUE
-      Extrapolation_List = Prepare_SMI_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "aleutian_islands") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = TRUE
-      Extrapolation_List = Prepare_AI_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "gulf_of_alaska") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_GOA_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == tolower("BFISH_MHI")) {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_BFISH_MHI_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "northwest_atlantic") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_NWA_Extrapolation_Data_Fn(strata.limits = strata.limits, epu_to_use = epu_to_use, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "south_africa") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_SA_Extrapolation_Data_Fn(strata.limits = strata.limits, region = region, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "gulf_of_st_lawrence") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_GSL_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "new_zealand") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_NZ_Extrapolation_Data_Fn(strata.limits = strata.limits, survey = survey, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "habcam") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_HabCam_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    if (tolower(Region[rI]) == "gulf_of_mexico") {
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_GOM_Extrapolation_Data_Fn(strata.limits = strata.limits, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
-    Shapefile_set = c("ATL-IBTS-Q1", "ATL-IBTS-Q4", "BITS", 
-                      "BTS", "BTS-VIIA", "EVHOE", "IE-IGFS", "NIGFS", "NS_IBTS", 
-                      "PT-IBTS", "SP-ARSA", "SP-NORTH", "SP-PORC", "CalCOFI_Winter-Spring", 
-                      "CalCOFI-IMECOCAL_Winter-Spring", "IMECOCAL_Winter-Spring", 
-                      "CalCOFI-IMECOCAL_Summer", "rockfish_recruitment_coastwide", 
-                      "rockfish_recruitment_core")
-    if (toupper(Region[rI]) %in% toupper(Shapefile_set)) {
-      if (Region[rI] == "SP-ARSA") 
-        stop("There's some problem with `SP-ARSA` which precludes it's use")
-      Conversion = convert_shapefile(file_path = paste0(system.file("region_shapefiles", package = "FishStatsUtils"), "/", toupper(Region[rI]), "/Shapefile.shp"), projargs_for_shapefile = "+proj=longlat +ellps=WGS84 +no_defs", projargs = projargs, grid_dim_km = grid_dim_km, area_tolerance = area_tolerance, ...)
-      Extrapolation_List = list(a_el = matrix(Conversion$extrapolation_grid[, "Area_km2"], ncol = 1), Data_Extrap = Conversion$extrapolation_grid, zone = NA, projargs = Conversion$projargs, flip_around_dateline = FALSE, Area_km2_x = Conversion$extrapolation_grid[, "Area_km2"])
-    }
-    if (file.exists(Region[rI])) {
-      Conversion = convert_shapefile(file_path = Region[rI], projargs = projargs, grid_dim_km = grid_dim_km, area_tolerance = area_tolerance, ...)
-      Extrapolation_List = list(a_el = matrix(Conversion$extrapolation_grid[, "Area_km2"], ncol = 1), Data_Extrap = Conversion$extrapolation_grid, zone = NA, projargs = Conversion$projargs, flip_around_dateline = FALSE, Area_km2_x = Conversion$extrapolation_grid[, "Area_km2"])
-    }
-    if (tolower(Region[rI]) == "stream_network") {
-      if (is.null(input_grid)) {
-        stop("Because you're using a stream network, please provide 'input_grid' input")
-      }
-      if (!(all(c("Lat", "Lon", "Area_km2", "child_i") %in% colnames(input_grid)))) {
-        stop("'input_grid' must contain columns named 'Lat', 'Lon', 'Area_km2', and 'child_i'")
-      }
-      if (missing(flip_around_dateline)) 
-        flip_around_dateline = FALSE
-      Extrapolation_List = Prepare_User_Extrapolation_Data_Fn(strata.limits = strata.limits, input_grid = input_grid, projargs = projargs, zone = zone, flip_around_dateline = flip_around_dateline, ...)
-    }
     if (tolower(Region[rI]) == "user") {
       if (is.null(input_grid)) {
         stop("Because you're using a user-supplied region, please provide 'input_grid' input")
@@ -1682,29 +1564,17 @@ make_extrapolation_info_aja<- function (Region, projargs = NA, zone = NA, strata
   return(Return)
 }
 
-fit_model_aja<- function (settings, Lat_i, Lon_i, t_i, b_i, a_i, c_iz = rep(0, length(b_i)), v_i = rep(0, length(b_i)), working_dir = paste0(getwd(), "/"), X1config_cp = NULL, X2config_cp = NULL, covariate_data, X1_formula = ~0, X2_formula = ~0, Q1config_k = NULL, Q2config_k = NULL, catchability_data, Q1_formula = ~0, Q2_formula = ~0, newtonsteps = 1, silent = TRUE, build_model = TRUE, run_model = TRUE, test_fit = TRUE, ...) {
+fit_model_aja<- function (settings, Method, Lat_i, Lon_i, t_i, b_i, a_i, c_iz = rep(0, length(b_i)), v_i = rep(0, length(b_i)), working_dir = paste0(getwd(), "/"), X1config_cp = NULL, X2config_cp = NULL, covariate_data, X1_formula = ~0, X2_formula = ~0, Q1config_k = NULL, Q2config_k = NULL, catchability_data, Q1_formula = ~0, Q2_formula = ~0, newtonsteps = 1, silent = TRUE, build_model = TRUE, run_model = TRUE, test_fit = TRUE, ...) {
   if(FALSE){
-    vast_build_adjust = vast_adjust
-    nmfs_species_code = nmfs_species_code
-    out_dir = here::here("results/mod_fits")
-    index_shapes = index_shapefiles
+    #Run vast_fit_sdm first...
     
-    tar_load(vast_settings)
-    settings = vast_settings
-    tar_load(vast_extrap_grid)
-    extrap_grid = input_grid
-    tar_load(vast_sample_data)
-    sample_data = vast_sample_data
-    
-    
-    "settings" = vast_settings
+    "settings" = settings
     "input_grid" = extrap_grid
     "Lat_i" = sample_data[, 'Lat']
     "Lon_i" = sample_data[, 'Lon']
     "t_i" = sample_data[, 'Year']
     "c_i" = rep(0, nrow(sample_data))
     "b_i" = sample_data[, 'Biomass']
-    "c_iz" = rep(0, length(b_i))
     "v_i" = rep(0, length(b_i))
     "a_i" = sample_data[, 'Swept']
     "PredTF_i" = sample_data[, 'Pred_TF']
@@ -1726,7 +1596,9 @@ fit_model_aja<- function (settings, Lat_i, Lon_i, t_i, b_i, a_i, c_iz = rep(0, l
     "test_fit" = FALSE
     "Use_REML" = FALSE
     "getJointPrecision" = FALSE
-    "index_shapes" = index_shapefiles
+    "index_shapes" = index_shapes
+    
+    # Now, go into make_extrapolation_info_aja
   }
   extra_args = list(...)
   extra_args = c(extra_args, extra_args$extrapolation_args, extra_args$spatial_args, extra_args$optimize_args, extra_args$model_args)
@@ -1741,7 +1613,7 @@ fit_model_aja<- function (settings, Lat_i, Lon_i, t_i, b_i, a_i, c_iz = rep(0, l
   extrapolation_args_input = combine_lists(input = extra_args, default = extrapolation_args_default, args_to_use = formalArgs(make_extrapolation_info_aja))
   extrapolation_list = do.call(what = make_extrapolation_info_aja, args = extrapolation_args_input)
   message("\n### Making spatial information")
-  spatial_args_default = list(grid_size_km = settings$grid_size_km, n_x = settings$n_x, Method = settings$Method, Lon_i = Lon_i, Lat_i = Lat_i, Extrapolation_List = extrapolation_list, DirPath = working_dir, Save_Results = TRUE, fine_scale = settings$fine_scale, knot_method = settings$knot_method)
+  spatial_args_default = list(grid_size_km = settings$grid_size_km, n_x = settings$n_x, Method = Method, Lon_i = Lon_i, Lat_i = Lat_i, Extrapolation_List = extrapolation_list, DirPath = working_dir, Save_Results = TRUE, fine_scale = settings$fine_scale, knot_method = settings$knot_method)
   spatial_args_input = combine_lists(input = extra_args, default = spatial_args_default, args_to_use = c(formalArgs(make_spatial_info), formalArgs(INLA::inla.mesh.create)))
   spatial_list = do.call(what = make_spatial_info, args = spatial_args_input)
   message("\n### Making data object")
@@ -1854,8 +1726,12 @@ get_vast_index_timeseries<- function(vast_fit, nice_category_names, index_scale 
   
   if(FALSE){
     tar_load(vast_fit)
+    tar_load(vast_predict_df)
+    predict_covariates_df_all = vast_predict_df
+    
+    tar_load(vast_fit)
     nice_category_names = "American lobster"
-    index_scale = "log"
+    index_scale = "raw"
     out_dir = here::here("scratch/aja/TargetsSDM/results/tables")
   }
   
@@ -1903,29 +1779,52 @@ get_vast_index_timeseries<- function(vast_fit, nice_category_names, index_scale 
   # Data manipulation to get out out the array and to something more "plottable"
   for(i in seq_along(categories_ind)){
     index_array_temp<- index_res_array[i, , , ]
-    index_res_temp_est<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,1]) %>%
-      gather(., "Index_Region", "Index_Estimate", -Time, -Category)
-    index_res_temp_sd<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,2]) %>%
-      gather(., "Index_Region", "Index_SD", -Time, -Category)
-    index_res_temp_out<- index_res_temp_est %>%
-      left_join(., index_res_temp_sd)
     
-    if(i == 1){
-      index_res_out<- index_res_temp_out
-    } else {
-      index_res_out<- bind_rows(index_res_out, index_res_temp_out)
+    if(dim(index_array_temp)[2] == 3){
+      index_res_temp_est<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,1]) %>%
+        gather(., "Index_Region", "Index_Estimate", -Time, -Category)
+      index_res_temp_sd<- data.frame("Time" = as.numeric(rownames(index_array_temp[,,1])), "Category" = categories_ind[i], index_array_temp[,,2]) %>%
+        gather(., "Index_Region", "Index_SD", -Time, -Category)
+      index_res_temp_out<- index_res_temp_est %>%
+        left_join(., index_res_temp_sd)
+      
+      if(i == 1){
+        index_res_out<- index_res_temp_out
+      } else {
+        index_res_out<- bind_rows(index_res_out, index_res_temp_out)
+      }
+    } else if(dim(index_array_temp)[2] == 2){
+      index_res_temp_est<- data.frame("Time" = as.numeric(names(index_array_temp[,1])), "Category" = categories_ind[i], index_array_temp[,1]) %>%
+        gather(., "Index_Region", "Index_Estimate", -Time, -Category)
+      index_res_temp_est$Index_Region<- attributes(index_res_array)$dimnames[[3]]
+      index_res_temp_sd<- data.frame("Time" = as.numeric(names(index_array_temp[,1])), "Category" = categories_ind[i], index_array_temp[,2]) %>%
+        gather(., "Index_Region", "Index_SD", -Time, -Category)
+      index_res_temp_sd$Index_Region<- attributes(index_res_array)$dimnames[[3]]
+      index_res_temp_out<- index_res_temp_est %>%
+        left_join(., index_res_temp_sd)
+      
+      if(i == 1){
+        index_res_out<- index_res_temp_out
+      } else {
+        index_res_out<- bind_rows(index_res_out, index_res_temp_out)
+      }
     }
+   
   }
   
   # Get date info instead of time..
   year_start<- min(as.numeric(as.character(vast_fit$covariate_data$Year_Cov)))
-  seasons<- nlevels(unique(vast_fit$covariate_data$Season))
   
-  if(seasons == 3 & max(time_labels) == 347){
-    time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 3), rep(c("SPRING", "SUMMER", "FALL")), sep = "-")
+  if(any(grepl("Season", vast_fit$X1_formula))){
+    seasons<- nlevels(unique(vast_fit$covariate_data$Season))
+    if(seasons == 3 & max(time_labels) == 347){
+      time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 3), rep(c("SPRING", "SUMMER", "FALL")), sep = "-")
+    }
+  } else {
+    time_labels_use<- paste(rep(seq(from = year_start, to = 2100), each = 1), rep(c("FALL")), sep = "-")
   }
   
-  index_res_out$Date<- factor(c(time_labels_use, time_labels_use), levels = time_labels_use)
+  index_res_out$Date<- factor(rep(time_labels_use, length(index_regions)), levels = time_labels_use)
   
   
   # Save and return it
@@ -1985,472 +1884,477 @@ plot_vast_index_timeseries<- function(index_res_df, index_scale, nice_category_n
 ######
 ## Plot parameter effects...
 ######
-plot_vast_parameter_curves<- function(vast_fit, nice_category_names){
+#' @title Adapts package \code{effects}
+#'
+#' @inheritParams effects::Effect
+#' @param which_formula which formula to use e.g., \code{"X1"}
+#'
+#' @rawNamespace S3method(effects::Effect, fit_model)
+#' @export
+Effect.fit_model_aja<- function(focal.predictors, mod, which_formula = "X1", pad_values = c(), ...){
+  
   if(FALSE){
     tar_load(vast_fit)
+    focal.predictors = c("Depth", "SST_seasonal", "BT_seasonal")
+    mod = fit_base
+    which_formula = "X1"
+    xlevels = 100
+    pad_values = c(0)
+    
+    covariate_data_full<- mod$effects$covariate_data_full
+    catchability_data_full<- mod$effects$catchability_data_full
+  }
+  
+  # Error checks
+  if(mod$data_list$n_c > 1 & which_formula %in% c("X1", "X2")){
+    stop("`Effect.fit_model` is not currently designed for multivariate models using density covariates")
+  }
+  if(!all(c("covariate_data_full", "catchability_data_full") %in% ls(.GlobalEnv))){
+    stop("Please load `covariate_data_full` and `catchability_data_full` into global memory")
+  }
+  if(!requireNamespace("effects")){
+    stop("please install the effects package")
+  }
+  if(!("effects" %in% names(mod))){
+    stop("`effects` slot not detected in input to `Effects.fit_model`. Please update model using later package version.")
+  }
+  
+  # Identify formula-specific stuff
+  if(which_formula=="X1"){
+    formula_orig = mod$X1_formula
+    parname = "gamma1_cp"
+    mod$call = mod$effects$call_X1
+  }else if(which_formula=="X2"){
+    formula_orig = mod$X2_formula
+    parname = "gamma2_cp"
+    mod$call = mod$effects$call_X2
+  }else if(which_formula=="Q1"){
+    formula_orig = mod$Q1_formula
+    parname = "lambda1_k"
+    mod$call = mod$effects$call_Q1
+  }else if(which_formula=="Q2"){
+    formula_orig = mod$Q2_formula
+    parname = "lambda2_k"
+    mod$call = mod$effects$call_Q2
+  }else{
+    stop("Check `which_formula` input")
+  }
+  
+  # Extract parameters / covariance
+  whichnum = which(names(mod$parameter_estimates$par) == parname)
+  mod$parhat = mod$parameter_estimates$par[whichnum]
+  if(is.null(mod$parameter_estimates$SD$cov.fixed)){
+    mod$covhat = array(0, dim = rep(length(mod$parhat), 2))
+  } else {
+    mod$covhat = mod$parameter_estimates$SD$cov.fixed[whichnum, whichnum, drop = FALSE]
+  }
+  
+  # # Fill in values that are mapped off
+  # if(parname %in% names(mod$tmb_list$Obj$env$map)){
+  #   mod$parhat = mod$parhat[mod$tmb_list$Obj$env$map[[parname]]]
+  #   mod$covhat = mod$covhat[mod$tmb_list$Obj$env$map[[parname]], mod$tmb_list$Obj$env$map[[parname]], drop = FALSE]
+  #   mod$parhat = ifelse(is.na(mod$parhat), 0, mod$parhat)
+  #   mod$covhat = ifelse(is.na(mod$covhat), 0, mod$covhat)
+  # }
+  
+  # add names
+  names(mod$parhat)[] = parname
+  if(length(pad_values) != 0){
+    parhat = rep(NA, length(mod$parhat) + length(pad_values))
+    parhat[setdiff(1:length(parhat), pad_values)] = mod$parhat
+    covhat = array(NA, dim = dim(mod$covhat) + rep(length(pad_values), 2))
+    covhat[setdiff(1:length(parhat), pad_values), setdiff(1:length(parhat), pad_values)] = mod$covhat
+    mod$parhat = ifelse(is.na(parhat), 0, parhat)
+    mod$covhat = ifelse(is.na(covhat), 0, covhat)
+    #parname = c("padded_intercept", parname)
+  }
+  #rownames(mod$covhat) = colnames(mod$covhat) = names(mod$parhat)
+  
+  # Augment stuff
+  formula_full = stats::update.formula(formula_orig, linear_predictor ~. + 0)
+  mod$coefficients = mod$parhat
+  mod$vcov = mod$covhat
+  mod$formula = formula_full
+  mod$family = stats::gaussian(link = "identity")
+  
+  if( FALSE ){
+    Tmp = model.matrix(formula_full, data=fit$effects$catchability_data )
+  }
+  
+  # Functions for package
+  family.fit_model = function(x,...) x$family
+  vcov.fit_model = function(x,...) x$vcov
+  
+  # dummy functions to make Effect.default work
+  dummyfuns = list(variance = function(mu) mu, initialize = expression(mustart = y + 0.1), dev.resids = function(...) stats::poisson()$dev.res(...) )
+  
+  # Replace family (for reasons I don't really understand)
+  fam = mod$family
+  for(i in names(dummyfuns)){
+    if(is.null(fam[[i]])) fam[[i]] = dummyfuns[[i]]
+  }
+  
+  # allow calculation of effects ...
+  if(length(formals(fam$variance)) >1) {
+    warning("overriding variance function for effects: computed variances may be incorrect")
+    fam$variance = dummyfuns$variance
+  }
+  
+  # Bundle arguments
+  args = list(call = mod$call, coefficients = mod$coefficients, vcov = mod$vcov, family = fam, formula = formula_full)
+  
+  # Do call
+  effects::Effect.default(focal.predictors, mod, ..., sources = args)
+}
+  
+get_vast_covariate_effects<- function(vast_fit, params_plot, params_plot_levels, effects_pad_values, nice_category_names, out_dir, ...){
+  if(FALSE){
+    tar_load(vast_fit)
+    params_plot<- c("Depth", "SST_seasonal", "BT_seasonal")
+    params_plot_levels<- 100
+    effects_pad_values = c(1)
     nice_category_names = "American lobster"
   }
   
-  # Must add data-frames to global environment (hope to fix in future)
-  if(is.null(vast_fit$effects)){
-    vast_fit$effects<- list()
-    if(!is.null(vast_fit$catchability_data)) {
-      catchability_data_full = data.frame(vast_fit$catchability_data, linear_predictor = 0)
-      Q1_formula_full = update.formula(vast_fit$Q1_formula, linear_predictor ~ . + 0)
-      call_Q1 = lm(Q1_formula_full, data = catchability_data_full)$call
-      Q2_formula_full = update.formula(vast_fit$Q2_formula, linear_predictor ~ . + 0)
-      call_Q2 = lm(Q2_formula_full, data = catchability_data_full)$call
-      vast_fit$effects = c(Return$effects, list(call_Q1 = call_Q1, call_Q2 = call_Q2, catchability_data_full = catchability_data_full))
-    }
-    if (!is.null(vast_fit$covariate_data)) {
-      covariate_data_full = data.frame(vast_fit$covariate_data, linear_predictor = 0)
-      X1_formula_full = update.formula(vast_fit$X1_formula, linear_predictor ~  . + 0)
-      call_X1 = lm(X1_formula_full, data = covariate_data_full)$call
-      X2_formula_full = update.formula(vast_fit$X2_formula, linear_predictor ~  . + 0)
-      call_X2 = lm(X2_formula_full, data = covariate_data_full)$call
-      vast_fit$effects = c(vast_fit$effects, list(call_X1 = call_X1, call_X2 = call_X2, covariate_data_full = covariate_data_full))
-    }
-  }
+  # Load covariate_data_full and catchability_data_full into global memory
+  assign("covariate_data_full", vast_fit$effects$covariate_data_full, envir = .GlobalEnv)
+  assign("catchability_data_full", vast_fit$effects$catchability_data_full, envir = .GlobalEnv)
   
-  # Must add data-frames to global environment
-  covariate_data_full = vast_fit$effects$covariate_data_full
-  catchability_data_full = vast_fit$effects$catchability_data_full
+  # Going to loop through each of the values and create a dataframe with all of the information...
+  x1_rescale<- function(x) plogis(x)
+  x2_rescale<- function(x) exp(x)
   
-  # Define formula.
-  X1_formula = vast_fit$X1_formula
-  X2_formula = vast_fit$X2_formula
-  
-  # Get effects...
-  depth_plot<- data.frame(Effect.fit_model(focal.predictors = c("Depth"), mod = vast_fit, which_formula = "X2", xlevels = 100))
-  
-  ## What's happening here...breaking into Effect.fit_model
-  focal.predictors = c("Depth")
-  mod = vast_fit
-  which_formula = "X2"
-  xlevels = 100
-  
-  if(mod$data_list$n_c > 1) {
-    stop("`Effect.fit_model` is not currently designed for multivariate models")
-  }
-  if(!all(c("covariate_data_full", "catchability_data_full") %in% ls(.GlobalEnv))) {
-    stop("Please load `covariate_data_full` and `catchability_data_full` into global memory")
-  }
-  if(!requireNamespace("effects")) {
-    stop("please install the effects package")
-  }
-  if(!("effects" %in% names(mod))) {
-    stop("`effects` slot not detected in input to `Effects.fit_model`. Please update model using later package version.")
-  }
-  if(which_formula == "X1") {
-    formula_orig = mod$X1_formula
-    parname = "gamma1_cp"
-    mod$call = mod$effects$call_X1
-  } else if(which_formula == "X2") {
-    formula_orig = mod$X2_formula
-    parname = "gamma2_cp"
-    mod$call = mod$effects$call_X2
-  } else if(which_formula == "Q1") {
-    formula_orig = mod$Q1_formula
-    parname = "lambda1_k"
-    mod$call = mod$effects$call_Q1
-  } else if(which_formula == "Q2") {
-    formula_orig = mod$Q2_formula
-    parname = "lambda2_k"
-    mod$call = mod$effects$call_Q2
-  } else {
-    stop("Check `which_formula` input")
-  }
-  whichnum = which(names(mod$parameter_estimates$par) == parname)
-  mod$parhat = mod$parameter_estimates$par[whichnum]
-  mod$covhat = mod$parameter_estimates$SD$cov.fixed[whichnum, whichnum, drop = FALSE]
-  if(parname %in% names(mod$tmb_list$Obj$env$map)) {
-    mod$parhat = mod$parhat[mod$tmb_list$Obj$env$map[[parname]]]
-    mod$covhat = mod$covhat[mod$tmb_list$Obj$env$map[[parname]], mod$tmb_list$Obj$env$map[[parname]], drop = FALSE]
-    mod$parhat = ifelse(is.na(mod$parhat), 0, mod$parhat)
-    mod$covhat = ifelse(is.na(mod$covhat), 0, mod$covhat)
-  }
-  names(mod$parhat)[] = parname
-  rownames(mod$covhat) = colnames(mod$covhat) = names(mod$parhat)
-  formula_full = stats::update.formula(formula_orig, linear_predictor ~ . + 0)
-  mod$coefficients = mod$parhat
-  mod$vcov = mod$covhat
-  mod$formula = formula_full
-  mod$family = stats::gaussian(link = "identity")
-  family.fit_model = function(x, ...) x$family
-  vcov.fit_model = function(x, ...) x$vcov
-  dummyfuns = list(variance = function(mu) mu, initialize = expression(mustart = y +  0.1), dev.resids = function(...) stats::poisson()$dev.res(...))
-  fam = mod$family
-  for (i in names(dummyfuns)) {
-    if (is.null(fam[[i]])) 
-      fam[[i]] = dummyfuns[[i]]
-  }
-  if (length(formals(fam$variance)) > 1) {
-    warning("overriding variance function for effects: computed variances may be incorrect")
-    fam$variance = dummyfuns$variance
-  }
-  args = list(call = mod$call, coefficients = mod$coefficients, vcov = mod$vcov, family = fam, formula = formula_full)
-  
-  ## Effects::Effect.default
-  focal.predictors<- focal.predictors
-  mod<- mod
-  sources<- args
-  
-  sources<- if(missing(sources)) 
-    effSources(mod) else sources
-  
-  formula<- if(is.null(sources$formula)) 
-    insight::find_formula(mod)$conditional else sources$formula
-  
-  if(is.null(focal.predictors)) 
-    return(formula)
-  
-  cl<- if(is.null(sources$call)) {
-    if(isS4(mod)) 
-      mod@call else mod$call
-  } else sources$call
-  cl$formula <- formula
-  
-  type<- if(is.null(sources$type)) 
-    "glm" else sources$type
-  fam<- try(family(mod), silent = TRUE)
-  if(inherits(fam, "try-error")) 
-    fam <- NULL
-  if(!is.null(sources$family)) {
-    fam <- sources$family
-  }
-  if(!is.null(fam)) {
-    fam$aic <- function(...) NULL
-    if (!is.null(fam$variance)) {
-      if (length(formals(fam$variance)) > 1) 
-        stop("Effect plots are not implemented for families with more than\n             one parameter in the variance function (e.g., negitave binomials).")
+  for(i in seq_along(params_plot)){
+    pred_dat_temp_X1<- data.frame(Effect.fit_model_aja(focal.predictors = params_plot[i], mod = vast_fit, which_formula = "X1", xlevels = params_plot_levels, pad_values = effects_pad_values)) %>%
+      mutate(., "Lin_pred" = "X1") 
+    pred_dat_temp_X2<- data.frame(Effect.fit_model_aja(focal.predictors = params_plot[i], mod = vast_fit, which_formula = "X2", xlevels = params_plot_levels, pad_values = effects_pad_values)) %>%
+      mutate(., "Lin_pred" = "X2") 
+    
+    # Combine into one...
+    pred_dat_out_temp<- bind_rows(pred_dat_temp_X1, pred_dat_temp_X2)
+    
+    if(i == 1){
+      pred_dat_out<- pred_dat_out_temp
+    } else {
+      pred_dat_out<- bind_rows(pred_dat_out, pred_dat_out_temp)
     }
   }
-  cl$family<- fam
-  coefficients<- if(is.null(sources$coefficients)) 
-    effCoef(mod) else sources$coefficients
-  vcov<- if(is.null(sources$vcov)) 
-    as.matrix(vcov(mod, complete = TRUE)) else sources$vcov
-  zeta<- if(is.null(sources$zeta)) 
-    NULL else sources$zeta
-  cl$control<- switch(type, glm = glm.control(epsilon = Inf, maxit = 1), polr = list(maxit = 1), multinom = c(maxit = 1))
-  cl$method<- sources$method
-  .m<- switch(type, glm = match(c("formula", "data", "family", "contrasts", "subset", "control", "offset"), names(cl), 0L), polr = match(c("formula", "data", "family", "contrasts", "subset", "control", "method"), names(cl), 0L), multinom = match(c("formula", "data", "family", "contrasts", "subset", "family", "maxit", "offset"), names(cl), 0L))
-  cl<- cl[c(1L, .m)]
-  cl[[1L]]<- as.name(type)
-  mod2<- eval(cl)
-  mod2$coefficients<- coefficients
-  mod2$vcov<- vcov
-  if (!is.null(zeta)) 
-    mod2$zeta <- zeta
-  if (type == "glm") {
-    mod2$weights <- as.vector(with(mod2, prior.weights * (family$mu.eta(linear.predictors)^2/family$variance(fitted.values))))
-  }
-  class(mod2) <- c("fakeeffmod", class(mod2))
-  Effect(focal.predictors, mod2, ...)
   
-  ## What's happening there...Effect.lm
-  # Levels for the different covariates -- this is interesting, there's 100 for Season and Year_Cov. 
-  if (is.numeric(xlevels)){
-    if (length(xlevels) > 1 || round(xlevels != xlevels)) stop("xlevels must be a single whole number or a list")
-    form <- Effect.default(NULL, mod) #returns the fixed-effects formula
-    terms <- attr(terms(form), "term.labels")
-    predictors <- all.vars(parse(text=terms))
-    xlevs <- list()
-    for (pred in predictors){
-      xlevs[[pred]] <- xlevels
-    }
-    xlevels <- xlevs
-  }
-  
-  if (!missing(partial.residuals)) residuals <- partial.residuals
-  partial.residuals <- residuals
-  if (missing(transformation)) 
-    transformation <- list(link = family(mod)$linkfun, inverse = family(mod)$linkinv)
-  if (missing(fixed.predictors)) fixed.predictors <- NULL
-  fixed.predictors <- applyDefaults(fixed.predictors, list(given.values=NULL, typical=mean, apply.typical.to.factors=FALSE, offset=mean), arg="fixed.predictors")
-  if (missing(given.values)) given.values <- fixed.predictors$given.values
-  # new 1/22/18 to allow for automatical equal weighting of factor levels
-  if(!is.null(given.values)){
-    if (given.values[1] == "default") given.values <- NULL
-    if (given.values[1] == "equal") given.values <- .set.given.equal(mod)}
-  # end new code
-  if (missing(typical)) typical <- fixed.predictors$typical
-  if (missing(offset)) offset <- fixed.predictors$offset
-  apply.typical.to.factors <- fixed.predictors$apply.typical.to.factors
-  if (!missing(confint)) se <- confint
-  confint <- applyDefaults(se, list(compute=TRUE, level=.95, type="pointwise"),
-                           onFALSE=list(compute=FALSE, level=.95, type="pointwise"),
-                           arg="se")
-  se <- confint$compute
-  if (missing(confidence.level)) confidence.level <- confint$level
-  confidence.type <- match.arg(confint$type, c("pointwise", "Scheffe", "scheffe"))
-  default.levels <- NULL # just for backwards compatibility
-  data <- if (partial.residuals){
-    all.vars <- all.vars(formula(mod))
-    expand.model.frame(mod, all.vars)[, all.vars]
-  }
-  else NULL
-  if (!is.null(given.values) && !all(which <- names(given.values) %in% names(coef(mod))))
-    stop("given.values (", names(given.values[!which]), ") not in the model")
-  off <- if (is.numeric(offset) && length(offset) == 1) offset
-  else if (is.function(offset)) {
-    mod.off <- model.offset(model.frame(mod))
-    if (is.null(mod.off)) 0 else offset(mod.off)
-  }
-  else stop("offset must be a function or a number")
-  formula.rhs <- formula(mod)[[3]]
-  if (!missing(x.var)){
-    if (!is.numeric(x.var)) {
-      x.var.name <- x.var
-      x.var <- which(x.var == focal.predictors)
-    }
-    if (length(x.var) == 0) stop("'", x.var.name, "' is not among the focal predictors")
-    if (length(x.var) > 1) stop("x.var argument must be of length 1")
-  }
-  model.components <- Analyze.model(focal.predictors, mod, xlevels, default.levels, formula.rhs,
-                                    partial.residuals=partial.residuals, quantiles=quantiles, x.var=x.var, data=data, typical=typical)
-  excluded.predictors <- model.components$excluded.predictors
-  predict.data <- model.components$predict.data
-  predict.data.all.rounded <- predict.data.all <- if (partial.residuals) na.omit(data[, all.vars(formula(mod))]) else NULL
-  factor.levels <- model.components$factor.levels
-  factor.cols <- model.components$factor.cols
-  n.focal <- model.components$n.focal
-  x <- model.components$x
-  X.mod <- model.components$X.mod
-  cnames <- model.components$cnames
-  X <- model.components$X
-  x.var <- model.components$x.var
-  formula.rhs <- formula(mod)[c(1, 3)]
-  Terms <- delete.response(terms(mod))
-  mf <- model.frame(Terms, predict.data, xlev = factor.levels, na.action=NULL)
-  mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = mod$contrasts)
-  if (is.null(x.var)) partial.residuals <- FALSE
-  factors <- sapply(predict.data, is.factor)
-  if (partial.residuals){
-    for (predictor in focal.predictors[-x.var]){
-      if (!factors[predictor]){
-        values <- unique(predict.data[, predictor])
-        predict.data.all.rounded[, predictor] <- values[apply(outer(predict.data.all[, predictor], values, function(x, y) (x - y)^2), 1, which.min)]
-      }
-    }
-  }
-  mod.matrix.all <- model.matrix(mod)
-  wts <- weights(mod)
-  if (is.null(wts))
-    wts <- rep(1, length(residuals(mod)))
-  mod.matrix <- Fixup.model.matrix(mod, mod.matrix, mod.matrix.all,
-                                   X.mod, factor.cols, cnames, focal.predictors, 
-                                   excluded.predictors, typical, given.values, 
-                                   apply.typical.to.factors) 
-  # 11/3/2017.  Check to see if the model is full rank
-  # Compute a basis for the null space, using estimibility package
-  null.basis <- estimability::nonest.basis(mod)  # returns basis for null space
-  # check to see if each row of mod.matrix is estimable
-  is.estimable <- estimability::is.estble(mod.matrix, null.basis) # TRUE if effect is estimable else FALSE
-  # substitute 0 for NA in coef vector and compute effects
-  scoef <- ifelse(is.na(mod$coefficients), 0L, mod$coefficients)
-  effect <- off + mod.matrix %*% scoef
-  effect[!is.estimable] <- NA  # set all non-estimable effects to NA
-  # end estimability check
-  if (partial.residuals){
-    res <- na.omit(residuals(mod, type="working"))
-    fitted <- na.omit(if (inherits(mod, "glm")) predict(mod, type="link") else predict(mod))
-    partial.residuals.range <- range(fitted + res)
-  }
-  else {
-    res <- partial.residuals.range <- NULL
-  }
-  result <- list(term = paste(focal.predictors, collapse="*"),
-                 formula = formula(mod), response = response.name(mod),
-                 variables = x, fit = effect, x = predict.data[, 1:n.focal, drop=FALSE],
-                 x.all=predict.data.all.rounded[, focal.predictors, drop=FALSE],
-                 model.matrix = mod.matrix,
-                 data = X,
-                 discrepancy = 0, offset=off,
-                 residuals=res, partial.residuals.range=partial.residuals.range,
-                 x.var=x.var)
-  if (se) {
-    if (any(family(mod)$family == c("binomial", "poisson"))) {
-      z <- if (confidence.type == "pointwise") {
-        qnorm(1 - (1 - confidence.level)/2)
-      } else {
-        p <- length(na.omit(coef(mod)))
-        scheffe(confidence.level, p)
-      }
-    }
-    else {
-      z <- if (confidence.type == "pointwise") {
-        qt(1 - (1 - confidence.level)/2, df = mod$df.residual)
-      } else {
-        p <- length(na.omit(coef(mod)))
-        scheffe(confidence.level, p, mod$df.residual)
-      }
-    }
-    V <- vcov.(mod, complete=FALSE)
-    mmat <- mod.matrix[, !is.na(mod$coefficients)] # remove non-cols with NA coeffs
-    eff.vcov <- mmat %*% V %*% t(mmat)
-    rownames(eff.vcov) <- colnames(eff.vcov) <- NULL
-    var <- diag(eff.vcov)
-    result$vcov <- eff.vcov
-    result$se <- sqrt(var)
-    result$se[!is.estimable] <- NA
-    result$lower <- effect - z * result$se
-    result$upper <- effect + z * result$se
-    result$confidence.level <- confidence.level
-  }
-  if (is.null(transformation$link) && is.null(transformation$inverse)) {
-    transformation$link <- I
-    transformation$inverse <- I
-  }
-  result$transformation <- transformation
-  result$family <- family(mod)$family
-  # 2018-10-08 result$family kept to work with legacy code  
-  result$link <- family(mod) 
-  class(result) <- "eff"
-  result
-  
-  
-  
-  
-  
-  
-  effects::Effect.default(focal.predictors, mod, ..., sources = args)
-  
-  
-  depth_plot$Variable<- rep("Depth", nrow(depth_plot))
-  names(depth_plot)[1]<- "VarValue"
-  sst_plot<- data.frame(Effect.fit_model(focal.predictors = c("Seasonal_SST"), mod = vast_fit, which_formula = "X2", xlevels = 100))
-  sst_plot$Variable<- rep("Seasonal SST", nrow(sst_plot))
-  names(sst_plot)[1]<- "VarValue"
-  bt_plot<-  data.frame(Effect.fit_model(focal.predictors = c("Seasonal_BT"), mod = vast_fit, which_formula = "X2", xlevels = 100))
-  bt_plot$Variable<- rep("Seasonal BT", nrow(bt_plot))
-  names(bt_plot)[1]<- "VarValue"
-  
-  plot_all<- bind_rows(depth_plot, sst_plot, bt_plot)
-  plot_all$Variable<- factor(plot_all$Variable, levels = c("Depth", "Seasonal SST", "Season BT"))
-  
-  
- 
-  plot(pred)
-  
+  # Save and return it
+  saveRDS(pred_dat_out, file = paste(out_dir, "/", nice_category_names, "_covariate_effects.rds", sep = ""))
+  return(pred_dat_out)
 }
 
-library(pdp)
-
-# Make function to interface with pdp
-pred.fun = function( object, newdata ){
-  predict( x=object,
-           Lat_i = object$data_frame$Lat_i,
-           Lon_i = object$data_frame$Lon_i,
-           t_i = object$data_frame$t_i,
-           a_i = object$data_frame$a_i,
-           what = "P1_iz",
-           new_covariate_data = NULL,
-           new_catchability_data = NULL,
-           do_checks = FALSE)
-}
-
-# Run partial
-Partial = partial( object = vast_fit,
-                   pred.var = "Depth",
-                   pred.fun = pred.fun,
-                   new_covariate_data = NULL,
-                   train = vast_fit$covariate_data,
-                   new_catchability_data = NULL)
-
-# Error in catchability_data when NULL and when `vast_fit$catchability_data`
-
-
-
-
-
-
-for(i in seq_along(res_folders)){
-  
-  for(j in seq_along(fore_challenges)){
-    # Get the extension...
-    fore_challenge_use<- paste(fore_challenges[j], "to2019", sep = "")
-    
-    # Find model fit file...
-    res_use<- res_files[which(grepl(fore_challenge_use, res_files))]
-    
-    # Load it     
-    t1<- readRDS(res_use)
-    
-    
-  }
-}
-
-Effect.fit_model<- function(focal.predictors, mod, which_formula = "X1", ...) 
+plot_vast_covariate_effects<- function(vast_covariate_effects, vast_fit, nice_category_names, out_dir, ...){
   
   if(FALSE){
-    mod = vast_fit
-    focal.predictors = c("Depth", "SST_seasonal", "BT_seasonal")
-    which_formula = "X1"
-    xlevels = 100
+    vast_covariate_effects<- read_rds(file = "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/results/tables/American lobster_covariate_effects.rds")
+    tar_load(vast_fit)
+    
+    vast_covariate_effects = pred_dat_out
+    vast_fit = fit_base
+    nice_category_names = "American lobster"
+    plot_rows = 2
+    out_dir = "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/results/plots_maps/"
   }
-{
-  if (mod$data_list$n_c > 1) {
-    stop("`Effect.fit_model` is not currently designed for multivariate models")
-  }
-  if (!all(c("covariate_data_full", "catchability_data_full") %in% 
-           ls(.GlobalEnv))) {
-    stop("Please load `covariate_data_full` and `catchability_data_full` into global memory")
-  }
-  if (!requireNamespace("effects")) {
-    stop("please install the effects package")
-  }
-  if (!("effects" %in% names(mod))) {
-    stop("`effects` slot not detected in input to `Effects.fit_model`. Please update model using later package version.")
-  }
-  if (which_formula == "X1") {
-    formula_orig = mod$X1_formula
-    parname = "gamma1_cp"
-    mod$call = mod$effects$call_X1
-  } else if (which_formula == "X2") {
-    formula_orig = mod$X2_formula
-    parname = "gamma2_cp"
-    mod$call = mod$effects$call_X2
-  } else if (which_formula == "Q1") {
-    formula_orig = mod$Q1_formula
-    parname = "lambda1_k"
-    mod$call = mod$effects$call_Q1
-  } else if (which_formula == "Q2") {
-    formula_orig = mod$Q2_formula
-    parname = "lambda2_k"
-    mod$call = mod$effects$call_Q2
-  } else {
-    stop("Check `which_formula` input")
-  }
-  whichnum = which(names(mod$parameter_estimates$par) == parname)
-  mod$parhat = mod$parameter_estimates$par[whichnum]
-  mod$covhat = mod$parameter_estimates$SD$cov.fixed[whichnum, whichnum, drop = FALSE]
-  if (parname %in% names(mod$tmb_list$Obj$env$map)) {
-    mod$parhat = mod$parhat[mod$tmb_list$Obj$env$map[[parname]]]
-    mod$covhat = mod$covhat[mod$tmb_list$Obj$env$map[[parname]], mod$tmb_list$Obj$env$map[[parname]], drop = FALSE]
-    mod$parhat = ifelse(is.na(mod$parhat), 0, mod$parhat)
-    mod$covhat = ifelse(is.na(mod$covhat), 0, mod$covhat)
-  }
-  names(mod$parhat)[] = parname
-  rownames(mod$covhat) = colnames(mod$covhat) = names(mod$parhat)
-  formula_full = stats::update.formula(formula_orig, linear_predictor ~  . + 0)
-  mod$coefficients = mod$parhat
-  mod$vcov = mod$covhat
-  mod$formula = formula_full
-  mod$family = stats::gaussian(link = "identity")
-  family.fit_model = function(x, ...) x$family
-  vcov.fit_model = function(x, ...) x$vcov
-  dummyfuns = list(variance = function(mu) mu, initialize = expression(mustart = y + 0.1), dev.resids = function(...) stats::poisson()$dev.res(...))
-  fam = mod$family
-  for (i in names(dummyfuns)) {
-    if (is.null(fam[[i]])) 
-      fam[[i]] = dummyfuns[[i]]
-  }
-  if (length(formals(fam$variance)) > 1) {
-    warning("overriding variance function for effects: computed variances may be incorrect")
-    fam$variance = dummyfuns$variance
-  }
-  args = list(call = mod$call, coefficients = mod$coefficients, 
-              vcov = mod$vcov, family = fam, formula = formula_full)
-  effects::Effect.default(focal.predictors, mod, ..., sources = args)
+  
+  # Some reshaping...
+  names_stay<- c("fit", "se", "lower", "upper", "Lin_pred")
+  vast_cov_eff_l<- vast_covariate_effects %>%
+    pivot_longer(., names_to = "Variable", values_to = "Covariate_Value", -{{names_stay}}) %>%
+    drop_na(Covariate_Value)
+  
+  # Plotting time...
+  # Need y max by linear predictors...
+  ylim_dat<- vast_cov_eff_l %>%
+    group_by(., Lin_pred, Variable) %>%
+    summarize(., "Min" = min(lower, na.rm = TRUE),
+              "Max" = max(upper, na.rm = TRUE))
+  
+  plot_out<- ggplot() +
+    geom_ribbon(data = vast_cov_eff_l, aes(x = Covariate_Value, ymin = lower, ymax = upper), fill = "#bdbdbd") +
+    geom_line(data = vast_cov_eff_l, aes(x = Covariate_Value, y = fit)) +
+    xlab("Scaled covariate value") +
+    ylab("Linear predictor fitted value") +
+    facet_grid(Lin_pred ~ Variable, scales = "free") +
+    theme_bw() +
+    theme(strip.background = element_blank()) 
+  
+  # Add in sample rug...
+  names_keep<- unique(vast_cov_eff_l$Variable)
+  samp_dat<- vast_fit$covariate_data %>%
+    dplyr::select({{names_keep}}) %>%
+    gather(., "Variable", "Covariate_Value")
+  
+  plot_out2<- plot_out +
+    geom_rug(data = samp_dat, aes(x = Covariate_Value))
+  
+  # Save and return it
+  ggsave(plot_out2, file = paste(out_dir, "/", nice_category_names, "_covariate_effects.jpg", sep = ""))
 }
+
+
+######
+## Plot samples, knots and mesh
+######
+vast_plot_design<- function(vast_fit, land, spat_grid, xlim = c(-80, -55), ylim = c(35, 50), land_color = "#f0f0f0", out_dir){
+  if(FALSE){
+    tar_load(vast_fit)
+    tar_load(land_sf)
+    spat_grid = "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/predict/predict_stack_SST_seasonal_mean.grd"
+    land = land_sf
+    xlim = c(-80, -55)
+    ylim = c(35, 50)
+    land_color = "#f0f0f0"
+  }
+  
+  # Read in raster
+  spat_grid<- rotate(raster::stack(spat_grid)[[1]])
+  
+  # Intensity surface of sample locations and then a plot of the knot locations/mesh over the top?
+  samp_dat<- vast_fit$data_frame %>%
+    distinct(., Lon_i, Lat_i, .keep_all = TRUE) %>%
+    st_as_sf(., coords = c("Lon_i", "Lat_i"), remove = FALSE, crs = st_crs(land))
+  
+  cell_samps<- table(cellFromXY(spat_grid, data.frame("x" = samp_dat$Lon_i, "y" = samp_dat$Lat_i)))
+                     
+  # Put back into raster...
+  spat_grid[]<- 0
+  spat_grid[as.numeric(names(cell_samps))]<- cell_samps
+  spat_grid_plot<- as.data.frame(spat_grid, xy = TRUE)
+  names(spat_grid_plot)[3]<- "Samples"
+  spat_grid_plot$Samples<- ifelse(spat_grid_plot$Samples == 0, NA, spat_grid_plot$Samples)
+
+  tow_samps<- ggplot() +
+    geom_tile(data = spat_grid_plot, aes(x = x, y = y, fill = Samples)) +
+    scale_fill_gradient2(name = "Tow samples", low = "#bdbdbd", high = "#525252", na.value = "white") +
+    geom_sf(data = land, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+    coord_sf(xlim = xlim, ylim = ylim, expand = 0) +
+    theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt")) +
+    ggtitle("Tow samples")
+  
+  # Knots and mesh...
+  # Getting spatial information
+  spat_data<- vast_fit$extrapolation_list
+  knots<- data.frame("Lon" = as.numeric(spat_data$Data_Extrap$Lon), "Lat" = as.numeric(spat_data$Data_Extrap$Lat)) %>%
+    distinct(., Lon, Lat)
+ 
+  tow_samps_knots<- tow_samps +
+    geom_point(data = knots, aes(x = Lon, y = Lat), fill = "#41ab5d", pch = 21, size = 0.75) +
+    ggtitle("VAST spatial grid knots")
+  
+  # Get mesh as sf
+  mesh_sf<- vast_mesh_to_sf(vast_fit, crs_transform = "+proj=longlat +datum=WGS84 +no_defs")$triangles
+  tow_samps_mesh<- ggplot() +
+    geom_sf(data = land, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+    geom_sf(data = mesh_sf, fill = NA, color = "#41ab5d") +
+    coord_sf(xlim = xlim, ylim = ylim, expand = 0) +
+    theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt")) +
+    ggtitle("INLA Mesh")
+  
+  # Plot em together
+  plot_out<- tow_samps + tow_samps_knots + tow_samps_mesh + plot_layout(guides = 'collect')
+    
+  
+  # Save it
+  ggsave(tow_samps_knots, file = paste(out_dir, "/", "samples_and_knots_plot.jpg", sep = ""))
+}
+
+
+#####
+## Plot covariate values
+#####
+
+plot_spattemp_cov_ts<- function(predict_covariates_stack_agg, summarize = "seasonal", ensemble_stat = "mean", all_tows_with_all_covs, regions, land, out_dir){
+  if(FALSE){
+    tar_load(predict_covariates_stack_agg_out)
+    predict_covariates_stack_agg<- predict_covariates_stack_agg_out
+    summarize = "seasonal"
+    ensemble_stat = "mean"
+    tar_load(all_tows_with_all_covs)
+    tar_load(land_sf)
+    land = land_sf
+    tar_load(index_shapefiles)
+    out_dir<- "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/results/plots_maps/"
+  }
+  
+  # Get raster stack covariate files
+  rast_files_load<- list.files(predict_covariates_stack_agg, pattern = paste0(summarize, "_", ensemble_stat, ".grd"), full.names = TRUE)
+  
+  # Get variable names
+  cov_names_full<- list.files(predict_covariates_stack_agg, pattern = paste0(summarize, "_", ensemble_stat, ".grd"), full.names = FALSE)
+  predict_covs_names<- gsub(paste("_", ensemble_stat, ".grd", sep = ""), "", gsub("predict_stack_", "", cov_names_full))
+  
+  # Loop through
+  for(i in seq_along(rast_files_load)){
+    # Get variable names
+    cov_names_full<- list.files(predict_covariates_stack_agg, pattern = paste0(summarize, "_", ensemble_stat, ".grd"), full.names = FALSE)[i]
+    predict_covs_names<- gsub(paste("_", ensemble_stat, ".grd", sep = ""), "", gsub("predict_stack_", "", cov_names_full))
+    
+    # Prediction values
+    spattemp_summs<- data.frame(raster::extract(raster::rotate(raster::stack(rast_files_load[i])), index_shapefiles, fun = mean))
+    spattemp_summs$Region<- factor(unique(as.character(index_shapefiles$Region)), levels = c("NMFS_and_DFO", "DFO", "Scotian_Shelf", "NMFS", "Gulf_of_Maine", "Georges_Bank", "Southern_New_England", "Mid_Atlantic_Bight"))
+    spattemp_summs<- spattemp_summs %>%
+      drop_na(., Region)
+    
+    # Gather
+    spattemp_summs_df<- spattemp_summs %>%
+      pivot_longer(., names_to = "Time", values_to = "Value", -Region)
+    
+    # Formatting Time
+    spattemp_summs_df<- spattemp_summs_df %>%
+      mutate(., Date = gsub("X", "", gsub("[.]", "-", Time)))
+    spattemp_summs_df$Date<- as.Date(paste(as.numeric(gsub("([0-9]+).*$", "\\1", spattemp_summs_df$Date)), ifelse(grepl("Spring", spattemp_summs_df$Date), "-04-15", ifelse(grepl("Summer", spattemp_summs_df$Date), "-07-15", ifelse(grepl("Winter", spattemp_summs_df$Date), "-12-15", "-10-15"))), sep = ""))
+    
+    
+    # Data values
+    cov_dat<- all_tows_with_all_covs %>%
+      dplyr::select(., Season_Match, DECDEG_BEGLON, DECDEG_BEGLAT, {{predict_covs_names}})
+    cov_dat$Date<- as.Date(paste(as.numeric(gsub("([0-9]+).*$", "\\1", cov_dat$Season_Match)), ifelse(grepl("Spring", cov_dat$Season_Match), "-04-15", ifelse(grepl("Summer", cov_dat$Season_Match), "-07-15", ifelse(grepl("Winter", cov_dat$Season_Match), "-12-15", "-10-15"))), sep = "")) 
+    
+    # Get summary by region...
+    cov_dat<- cov_dat %>%
+      st_as_sf(., coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"), crs = st_crs(index_shapefiles), remove = FALSE) %>%
+      st_join(., index_shapefiles, join = st_within) %>%
+      st_drop_geometry()
+    
+    cov_dat_plot<- cov_dat %>%
+      group_by(., Date, Region) %>%
+      summarize_at(., .vars = {{predict_covs_names}}, .funs = mean, na.rm = TRUE) 
+    
+    cov_dat_plot$Region<- factor(cov_dat_plot$Region, levels = c("NMFS_and_DFO", "DFO", "Scotian_Shelf", "NMFS", "Gulf_of_Maine", "Georges_Bank", "Southern_New_England", "Mid_Atlantic_Bight"))
+    
+    cov_dat_plot<- cov_dat_plot %>%
+      drop_na(., c({{predict_covs_names}}, Region))
+    
+    # Plot
+    if(predict_covs_names == "Depth"){
+      plot_out<- ggplot() +
+        geom_histogram(data = spattemp_summs_df, aes(y = Value, color = Region)) +
+        scale_color_manual(name = "Region", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')) +
+        geom_histogram(data = cov_dat_plot, aes(y = Depth), fill = "black", pch = 21, alpha = 0.2) + 
+        facet_wrap(~Region, nrow = 2) +
+        theme_bw()
+    }
+    
+    if(predict_covs_names == "BS_seasonal"){
+      plot_out<- ggplot() +
+        geom_line(data = spattemp_summs_df, aes(x = Date, y = Value, color = Region)) +
+        scale_color_manual(name = "Region", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')) +
+        geom_point(data = cov_dat_plot, aes(x = Date, y = BS_seasonal), fill = "black", pch = 21, alpha = 0.2) + 
+        facet_wrap(~Region, nrow = 2) +
+        theme_bw()
+    }
+    
+    if(predict_covs_names == "SS_seasonal"){
+      plot_out<- ggplot() +
+        geom_line(data = spattemp_summs_df, aes(x = Date, y = Value, color = Region)) +
+        scale_color_manual(name = "Region", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')) +
+        geom_point(data = cov_dat_plot, aes(x = Date, y = SS_seasonal), fill = "black", pch = 21, alpha = 0.2) + 
+        facet_wrap(~Region, nrow = 2) +
+        theme_bw()
+    }
+    
+    if(predict_covs_names == "BT_seasonal"){
+      plot_out<- ggplot() +
+        geom_line(data = spattemp_summs_df, aes(x = Date, y = Value, color = Region)) +
+        scale_color_manual(name = "Region", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')) +
+        geom_point(data = cov_dat_plot, aes(x = Date, y = BT_seasonal), fill = "black", pch = 21, alpha = 0.2) + 
+        facet_wrap(~Region, nrow = 2) +
+        theme_bw()
+    }
+    
+    if(predict_covs_names == "SST_seasonal"){
+      plot_out<- ggplot() +
+        geom_line(data = spattemp_summs_df, aes(x = Date, y = Value, color = Region)) +
+        scale_color_manual(name = "Region", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')) +
+        geom_point(data = cov_dat_plot, aes(x = Date, y = SST_seasonal), fill = "black", pch = 21, alpha = 0.2) + 
+        facet_wrap(~Region, nrow = 2) +
+        theme_bw()
+    }
+    
+    ggsave(paste(out_dir, "/", predict_covs_names, "_covariate_plot.jpg", sep = ""), plot_out)
+  }
+}
+
+#####
+## VAST inla mesh to sf object
+#####
+#' @title Convert VAST INLA mesh to sf object
+#' 
+#' @description Convert inla.mesh to sp objects, totally taken from David Keith here https://github.com/Dave-Keith/Paper_2_SDMs/blob/master/mesh_build_example/convert_inla_mesh_to_sf.R and Finn Lindgren here 
+# # https://groups.google.com/forum/#!topic/r-inla-discussion-group/z1n1exlZrKM
+#'
+#' @param vast_fit A fitted VAST model 
+#' @param crs_transform Optional crs to transform mesh into
+#' @return A list with \code{sp} objects for triangles and vertices:
+# \describe{
+#   \item{triangles}{\code{SpatialPolygonsDataFrame} object with the triangles in
+#   the same order as in the original mesh, but each triangle looping through
+#   the vertices in clockwise order (\code{sp} standard) instead of
+#   counterclockwise order (\code{inla.mesh} standard). The \code{data.frame}
+#   contains the vertex indices for each triangle, which is needed to link to
+#   functions defined on the vertices of the triangulation.
+#   \item{vertices}{\code{SpatialPoints} object with the vertex coordinates,
+#   in the same order as in the original mesh.}
+# }
+#' @export
+# 
+vast_mesh_to_sf <- function(vast_fit, crs_transform = "+proj=longlat +datum=WGS84 +no_defs") {
+  if(FALSE){
+    tar_load(vast_fit)
+    crs_transform = "+proj=longlat +datum=WGS84 +no_defs"
+  }
+  require(sp) || stop("Install sp, else thine code shan't work for thee")
+  require(sf) || stop('Install sf or this code will be a mess')
+  require(INLA) || stop("You need the R-INLA package for this, note that it's not crantastic...
+                        install.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
+  
+  # Get the extrapolation mesh information from the vast_fitted object
+  mesh<- vast_fit$spatial_list$MeshList$anisotropic_mesh
+  mesh['crs']<- vast_fit$extrapolation_list$projargs
+  
+  # Grab the CRS if it exists, NA is fine (NULL spits a warning, but is also fine)
+  crs <- sp::CRS(mesh$crs)
+  
+  # Make sure the CRS isn't a geocentric one, which is won't be if yo look up geocentric..
+  #isgeocentric <- identical(inla.as.list.CRS(crs)[["proj"]], "geocent")
+  isgeocentric <- inla.crs_is_geocent(mesh$crs)
+  # Look up geo-centric coordinate systems, nothing we'll need to worry about, but stop if so
+  if (isgeocentric || (mesh$manifold == "S2")) {
+    stop(paste0(
+      "'sp and sf' don't support storing polygons in geocentric coordinates.\n",
+      "Convert to a map projection with inla.spTransform() before calling inla.mesh2sf()."))
+  }
+  # This pulls out from the mesh the triangles as polygons, this was the piece I couldn't figure out.
+  triangles <- SpatialPolygonsDataFrame(Sr = SpatialPolygons(
+    lapply(
+      1:nrow(mesh$graph$tv),
+      function(x) {
+        tv <- mesh$graph$tv[x, , drop = TRUE]
+        Polygons(list(Polygon(mesh$loc[tv[c(1, 3, 2, 1)],1:2,drop = FALSE])),ID = x)
+      }
+    ),
+    proj4string = crs
+  ),
+  data = as.data.frame(mesh$graph$tv[, c(1, 3, 2), drop = FALSE]),
+  match.ID = FALSE
+  )
+  
+  # This one is easy, just grab the vertices (points)
+  vertices <- SpatialPoints(mesh$loc[, 1:2, drop = FALSE], proj4string = crs)
+  
+  # Make these sf objects
+  triangles <- st_as_sf(triangles)
+  vertices <- st_as_sf(vertices)
+  
+  # Transform?
+  if(!is.null(crs_transform)){
+    triangles<- st_transform(triangles, crs = crs_transform)
+    vertices<- st_transform(vertices, crs = crs_transform)
+  }
+  
+  # Add your output list.
+  return_sf<- list(triangles = triangles, vertices = vertices)
+  return(return_sf)
+} 

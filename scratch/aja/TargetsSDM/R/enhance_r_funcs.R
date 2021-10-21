@@ -267,30 +267,47 @@ dynamic_2d_extract<- function(rast_ts_stack, stack_name, t_summ, t_position, sf_
       
       # Get the exact date match
       sf_points_date_col<- as.character(st_drop_geometry(sf_points[,{{date_col_name}}])[,1])
-      sf_points_date_col<- ymd(sf_points_date_col)
+      sf_points_date_col<- switch(t_summ_use,
+                                  "daily" = ymd(sf_points_date_col),
+                                  "monthly" = format(as.Date(sf_points_date_col), "%Y-%m"),
+                                  "seasonal" = format(as.Date(sf_points_date_col), "%Y-%m"),
+                                  "annual" = format(as.Date(sf_points_date_col), "%Y"))
       
       # May need to revisit this at some point, but for now, shouldn't influence the results..
-      summ_df$Date_Match<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
+      if(t_summ_use == "daily"){
+        summ_df$Date_Match<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
+      } 
+      if(t_summ_use == "monthly" | t_summ_use == "seasonal"){
+        summ_df$Date_Match<- match(sf_points_date_col, format(as.Date(colnames(sf_extract)), "%Y-%m"))
+      }
+      if(t_summ_use == "annual"){
+        summ_df$Date_Match<- match(sf_points_date_col, format(as.Date(colnames(sf_extract)), "%Y"))
+      }
       
       # Column index start based on t_summ_use. Seasonal needs more finagling.
       if(t_summ_use != "seasonal"){
-        summ_df$Start_Summ<- switch(t_summ_use,
-                                    "daily" = summ_df$Date_Match,
-                                    "monthly" = match(format(sf_points_date_col, "%Y-%m"), format(rast_ts_match, "%Y-%m")),
-                                    "annual" = match(format(sf_points_date_col, "%Y"), format(rast_ts_match, "%Y")))
+        # Might need to come back and check this!
+        rast_ts_dates<- as.Date(gsub("X", "", gsub("[.]", "-", names(rast_ts_stack))))
         
-        # Now index end
-        summ_df$End_Summ<- switch(t_summ_use,
-                                  "daily" = summ_df$Date_Match,
-                                  "monthly" = sapply(format(sf_points_date_col, "%Y-%m"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y-%m")))),
-                                  "annual" = sapply(format(sf_points_date_col, "%Y"), FUN = function(x) max(which(x == format(rast_ts_match, "%Y")))))
+        if(t_summ_use == "daily"){
+          summ_df$Start_Summ<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
+          summ_df$End_Summ<- match(sf_points_date_col, as.Date(colnames(sf_extract)))
+        } 
+        if(t_summ_use == "monthly" | t_summ_use == "seasonal"){
+          summ_df$Start_Summ<- sapply(sf_points_date_col, FUN = function(x) min(which(x == format(rast_ts_dates, "%Y-%m"))))
+          summ_df$End_Summ<- sapply(sf_points_date_col, FUN = function(x) max(which(x == format(rast_ts_dates, "%Y-%m"))))
+        }
+        if(t_summ_use == "annual"){
+          summ_df$Start_Summ<- sapply(sf_points_date_col, FUN = function(x) min(which(x == format(rast_ts_dates, "%Y"))))
+          summ_df$End_Summ<- sapply(sf_points_date_col, FUN = function(x) max(which(x == format(rast_ts_dates, "%Y"))))
+        }
       } else {
         # Season bits, need a year - season combo for both the points AND columns of sf_extract.
         colnames_orig<- as.Date(gsub("X", "", gsub("[.]", "-", colnames(sf_extract))))
         colnames_season<- month_season_table$Season[match(format(colnames_orig, "%m"), month_season_table$Month)]
         colnames_season_match<- paste(format(colnames_orig, "%Y"), colnames_season, sep = "-")
         
-        sf_points$Season_Match<- paste(format(sf_points_date_col, "%Y"), month_season_table$Season[match(format(sf_points_date_col, "%m"), month_season_table$Month)], sep = "-")
+        sf_points$Season_Match<- paste(format(as.Date(paste(sf_points_date_col, "-01", sep = "")), "%Y"), month_season_table$Season[match(format(as.Date(paste(sf_points_date_col, "-01", sep = "")), "%m"), month_season_table$Month)], sep = "-")
         
         # Start index
         summ_df$Start_Summ<- match(sf_points$Season_Match, colnames_season_match)
@@ -407,6 +424,13 @@ dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_positio
     date_col_name = "DATE"
     df_sf ="df"
     out_dir = here::here("data/combined")
+    
+    dynamic_covariates_list = dynamic_covariates_list_use
+    t_summ = "monthly"
+    t_position = NULL
+    sf_points = tows_sf
+    date_col_name = "Date"
+    df_sf = "sf"
   }
   
   # For each of the covariate layers in `dynamic_covariates_list` we are going to run our `dynamic_2d_extract` function. I think this might require some creative manipulating of the `sf_points` so we don't lose covariates as we move through them...
@@ -430,12 +454,16 @@ dynamic_2d_extract_wrapper<- function(dynamic_covariates_list, t_summ, t_positio
   if(df_sf == "sf"){
     # Keep it as sf object
     out<- tows_with_covs_out
-    saveRDS(out, file = paste(out_dir, "all_tows_all_covs_sf.rds", sep = "/"))
+    if(!is.null(out_dir)){
+      saveRDS(out, file = paste(out_dir, "all_tows_all_covs_sf.rds", sep = "/"))
+    }
     return(out)
   } else {
     # Drop the geometry and save the data frame
     out<- st_drop_geometry(tows_with_covs_out)
-    saveRDS(out, file = paste(out_dir, "all_tows_all_covs.rds", sep = "/"))
+    if(!is.null(out_dir)){
+      saveRDS(out, file = paste(out_dir, "all_tows_all_covs.rds", sep = "/"))
+    }
     return(out)
   }
 }

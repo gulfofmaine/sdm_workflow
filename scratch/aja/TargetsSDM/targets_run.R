@@ -4,13 +4,14 @@
 library(targets)
 library(parallel)
 library(doFuture)
+library(tictoc)
 
 cores_avail<- detectCores()
 registerDoFuture()
 plan(multisession, workers = cores_avail-2)
 
 # Clean everything?
-clean_start<- TRUE
+clean_start<- FALSE
 if(clean_start){
   tar_destroy()
 }
@@ -23,11 +24,13 @@ setwd("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM")
 tar_manifest(fields = "command")
 
 # Graph
-tar_glimpse()
-tar_visnetwork(label = "time", reporter = "forecast", targets_only = TRUE)
+# tar_glimpse()
+# tar_visnetwork(label = "time", reporter = "forecast", targets_only = TRUE)
 
 # Run it
+tic()
 tar_make()
+toc()
 
 # Check on warnings
 warning_ind<- which(!is.na(tar_meta(fields = warnings)$warnings))

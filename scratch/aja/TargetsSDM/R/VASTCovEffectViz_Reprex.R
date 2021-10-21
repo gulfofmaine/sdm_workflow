@@ -195,7 +195,8 @@ catchability_data_full = fit_adjust2_run$effects$catchability_data_full
 # Plot 1st linear predictor
 pred = Effect.fit_model( fit_adjust2_run,
                          focal.predictors = c("BOT_DEPTH"),
-                         which_formula = "X1", 
-                         xlevels = 100)
-
+                         which_formula = "X2", 
+                         xlevels = 100,
+                         pad_values = 1)
+plot(pred)
 # Error in mod.matrix %*% scoef : non-conformable arguments -- same as seasonal model error.
