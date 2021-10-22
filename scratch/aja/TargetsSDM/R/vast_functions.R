@@ -2381,3 +2381,163 @@ vast_mesh_to_sf <- function(vast_fit, crs_transform = "+proj=longlat +datum=WGS8
   return_sf<- list(triangles = triangles, vertices = vertices)
   return(return_sf)
 } 
+
+#' @title Plot VAST model predicted density surfaces
+#' 
+#' @description Creates either a panel plot or a gif of VAST model predicted density surfaces
+#'
+#' @param vast_fit = A VAST `fit_model` object.
+#' @param spatial_var = An estimated spatial coefficient or predicted value. Currently works for `D_gct`, `R1_gct`, `R2_gct`, `P1_gct`, `P2_gct`, `Omega1_gc`, `Omega2_gc`, `Epsilon1_gct`, `Epsilon2_gct`.
+#' @param all_times = A vector of all of the unique time steps available from the VAST fitted model
+#' @param plot_times = Either NULL to make a plot for each time in `all_times` or a vector of all of the times to plot, which must be a subset of `all_times`
+#' @param land_sf = Land sf object
+#' @param xlim = A two element vector with the min and max longitudes 
+#' @param ylim = A two element vector with the min and max latitudes 
+#' @param panel_or_gif = A character string of either "panel" or "gif" indicating how the multiple plots across time steps should be displayed
+#' @param out_dir = Output directory to save the panel plot or gif
+#' 
+#' @return A VAST fit_model object, with the inputs and and outputs, including parameter estimates, extrapolation gid info, spatial list info, data info, and TMB info.
+#'
+#' @export
+
+vast_fit_plot_spatial<- function(vast_fit, spatial_var, nice_category_names, mask, all_times = all_times, plot_times = NULL, land_sf, xlim, ylim, panel_or_gif = "gif", out_dir, land_color = "#d9d9d9", panel_cols = NULL, panel_rows = NULL, ...){
+  if(FALSE){
+    tar_load(vast_fit)
+    template = raster("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/HighResTemplate.grd")
+    tar_load(vast_seasonal_data)
+    all_times = as.character(levels(vast_seasonal_data$VAST_YEAR_SEASON))
+    plot_times = NULL
+    tar_load(land_sf)
+    tar_load(region_shapefile)
+    mask = region_shapefile
+    land_color = "#d9d9d9"
+    res_data_path = "~/Box/RES_Data/"
+    xlim = c(-85, -55)
+    ylim = c(30, 50)
+    panel_or_gif = "gif"
+    panel_cols = NULL
+    panel_rows = NULL
+    
+    vast_fit = fit_barrier
+    spatial_var = "Epsilon1_gct"
+    nice_category_names = "Atlantic halibut"
+    mask = shp
+    all_times = as.character(unique(Hali_data$EST_YEAR))
+    plot_times = NULL
+    land_sf = land_use
+    xlim = xlim_use
+    ylim = ylim_use
+    panel_or_gif = "panel"
+    out_dir = here::here()
+    land_color = "#d9d9d9"
+    panel_cols = 6
+    panel_rows = 7
+  }
+  
+  # Plotting at spatial knots...
+  # First check the spatial_var, only a certain subset are being used...
+  if(!spatial_var %in% c("D_gct", "R1_gct", "R2_gct", "P1_gct", "P2_gct", "Omega1_gc", "Omega2_gc", "Epsilon1_gct", "Epsilon2_gct")){
+    stop(print("Check `spatial_var` input. Currently must be one of `D_gct`, `R1_gct`, `R2_gct`, `P1_gct`, `P2_gct`, `Omega1_gc`, `Omega2_gc`, `Epsilon1_gct`, `Epsilon2_gct`."))
+  }
+  
+  # Getting prediction array
+  pred_array<- vast_fit$Report[[{{spatial_var}}]]
+  if(spatial_var == "D_gct"){
+    pred_array<- log(pred_array+1)
+  }
+  
+  # Getting time info
+  if(!is.null(plot_times)){
+    plot_times<- all_times[which(all_times) %in% plot_times]
+  } else {
+    plot_times<- all_times
+  }
+  
+  # Getting spatial information
+  spat_data<- vast_fit$extrapolation_list
+  loc_g<- spat_data$Data_Extrap[which(spat_data$Data_Extrap[, "Include"] > 0), c("Lon", "Lat")]
+  CRS_orig<- sp::CRS("+proj=longlat")
+  CRS_proj<- sp::CRS(spat_data$projargs)
+  land_sf<- st_crop(land_sf, xmin = xlim[1], ymin = ylim[1], xmax = xlim[2], ymax = ylim[2])
+  
+  # Looping through...
+  rasts_out<- vector("list", dim(pred_array)[length(dim(pred_array))])
+  rasts_range<- pred_array
+  rast_lims_min<- ifelse(spatial_var %in% c("D_gct", "R1_gct", "R2_gct", "P1_gct", "P2_gct"), 0, min(rasts_range))
+  rast_lims_max<- ifelse(spatial_var %in% c("D_gct", "R1_gct", "R2_gct", "P1_gct", "P2_gct"), round(max(rasts_range) + 0.0000001, 2), max(rasts_range))
+  rast_lims<- c(rast_lims_min, rast_lims_max)
+  
+  if(length(dim(pred_array)) == 2){
+    
+    data_df<- data.frame(loc_g, z = pred_array)
+    
+    # Interpolation
+    pred_df<- na.omit(data.frame("x" = data_df$Lon, "y" = data_df$Lat, "layer" = data_df$z))
+    pred_df_interp<- interp(pred_df[,1], pred_df[,2], pred_df[,3], duplicate = "mean", extrap = TRUE,
+                            xo=seq(-87.99457, -57.4307, length = 115),
+                            yo=seq(22.27352, 48.11657, length = 133))
+    pred_df_interp_final<- data.frame(expand.grid(x = pred_df_interp$x, y = pred_df_interp$y), z = c(round(pred_df_interp$z, 2)))
+    pred_sp<- st_as_sf(pred_df_interp_final, coords = c("x", "y"), crs = CRS_orig)
+    
+    pred_df_temp<- pred_sp[which(st_intersects(pred_sp, mask, sparse = FALSE) == TRUE),]
+    coords_keep<- as.data.frame(st_coordinates(pred_df_temp))
+    row.names(coords_keep)<- NULL
+    pred_df_use<- data.frame(cbind(coords_keep, "z" = as.numeric(pred_df_temp$z)))
+    names(pred_df_use)<- c("x", "y", "z")
+    
+    plot_out<- ggplot() +
+      geom_tile(data = pred_df_use, aes(x = x, y = y, fill = z)) +
+      scale_fill_viridis_c(name = spatial_var, option = "viridis", na.value = "transparent", limits = rast_lims) +
+      annotate("text", x = -65, y = 37.5, label = spatial_var) +
+      geom_sf(data = land_sf, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+      coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
+      theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt"))
+    
+    ggsave(filename = paste(out_dir, "/", nice_category_names, "_", spatial_var, ".png", sep = ""), plot_out, width = 11, height = 8, units = "in")
+    return(plot_out)
+  } else {
+    
+    for (tI in 1:dim(pred_array)[3]) {
+      data_df<- data.frame(loc_g, z = pred_array[,1,tI])
+      
+      # Interpolation
+      pred_df<- na.omit(data.frame("x" = data_df$Lon, "y" = data_df$Lat, "layer" = data_df$z))
+      pred_df_interp<- interp(pred_df[,1], pred_df[,2], pred_df[,3], duplicate = "mean", extrap = TRUE,
+                              xo=seq(-87.99457, -57.4307, length = 115),
+                              yo=seq(22.27352, 48.11657, length = 133))
+      pred_df_interp_final<- data.frame(expand.grid(x = pred_df_interp$x, y = pred_df_interp$y), z = c(round(pred_df_interp$z, 2)))
+      pred_sp<- st_as_sf(pred_df_interp_final, coords = c("x", "y"), crs = CRS_orig)
+      
+      pred_df_temp<- pred_sp[which(st_intersects(pred_sp, mask, sparse = FALSE) == TRUE),]
+      coords_keep<- as.data.frame(st_coordinates(pred_df_temp))
+      row.names(coords_keep)<- NULL
+      pred_df_use<- data.frame(cbind(coords_keep, "z" = as.numeric(pred_df_temp$z)))
+      names(pred_df_use)<- c("x", "y", "z")
+   
+      time_plot_use<- plot_times[tI]
+      
+      rasts_out[[tI]]<- ggplot() +
+        geom_tile(data = pred_df_use, aes(x = x, y = y, fill = z)) +
+        scale_fill_viridis_c(name = spatial_var, option = "viridis", na.value = "transparent", limits = rast_lims) +
+        annotate("text", x = -65, y = 37.5, label = time_plot_use) +
+        geom_sf(data = land_sf, fill = land_color, lwd = 0.2, na.rm = TRUE) +
+        coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
+        theme(panel.background = element_rect(fill = "white"), panel.border = element_rect(fill = NA), axis.text.x=element_blank(), axis.text.y=element_blank(), axis.ticks=element_blank(), axis.title = element_blank(), plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt"))
+    }
+    if(panel_or_gif == "panel"){
+      # Panel plot
+      all_plot<- wrap_plots(rasts_out, ncol = panel_cols, nrow = panel_rows, guides = "collect", theme(plot.margin = margin(t = 0.05, r = 0.05, b = 0.05, l = 0.05, unit = "pt")))
+      ggsave(filename = paste0(out_dir, "/", nice_category_names, "_", spatial_var, ".png"), all_plot, width = 11, height = 8, units = "in")
+      return(all_plot)
+    } else {
+      # Make a gif
+      plot_loop_func<- function(plot_list){
+        for (i in seq_along(plot_list)) {
+          plot_use<- plot_list[[i]]
+          print(plot_use)
+        }
+      }
+      invisible(save_gif(plot_loop_func(rasts_out), paste0(out_dir, "/", nice_category_names, "_", spatial_var, ".gif"), delay = 0.75, progress = FALSE))
+    }
+  }
+}
