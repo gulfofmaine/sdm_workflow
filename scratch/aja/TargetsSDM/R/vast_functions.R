@@ -60,6 +60,7 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
     fit_year_max = fit_year_max
     pred_years = pred_years
     out_dir = here::here("scratch/aja/TargetsSDM/data/predict")
+    covs_rescale = c("Depth", "BS_seasonal", "BT_seasonal", "SS_seasonal", "SST_seasonal")
   }
   
   ####
@@ -121,9 +122,9 @@ make_vast_predict_df<- function(predict_covariates_stack_agg, extra_covariates_s
     }
   }
   
-  # Only going to keep information from fit_year_min through pred_years...
+  # Only going to keep information from fit_year_max through pred_years...
   pred_covs_out_final<- pred_covs_out %>%
-    dplyr::filter(., EST_YEAR >= fit_year_min & EST_YEAR <= max(pred_years))
+    dplyr::filter(., EST_YEAR > fit_year_max & EST_YEAR <= max(pred_years))
   
   # New implementation...
   pred_covs_out_final<- pred_covs_out_final %>%
@@ -380,10 +381,6 @@ make_vast_covariate_data<- function(vast_seasonal_data, out_dir){
   # Some work to make sure that we don't allow covariates for the "DUMMY" observations to be used at the knots...
   vast_seasonal_data_temp<- vast_seasonal_data
   
-  vast_seasonal_data_temp<- vast_seasonal_data_temp %>%
-    mutate(., "DECDEC_BEGLON" = ifelse(vast_seasonal_data_temp$EST_YEAR <= 2020 & vast_seasonal_data_temp$SURVEY == "DUMMY", 0, vast_seasonal_data_temp$DECDEG_BEGLON),
-           "DECDEC_BEGLAT" = ifelse(vast_seasonal_data_temp$EST_YEAR <= 2020 & vast_seasonal_data_temp$SURVEY == "DUMMY", 0, vast_seasonal_data_temp$DECDEG_BEGLAT))
-  
   # Select columns we want from the "full" vast_seasonal_data dataset
   vast_cov_dat<- data.frame(
     "Year" = as.numeric(vast_seasonal_data_temp$VAST_YEAR_SEASON)-1,
@@ -395,6 +392,8 @@ make_vast_covariate_data<- function(vast_seasonal_data, out_dir){
     "Lat" = vast_seasonal_data_temp$DECDEG_BEGLAT,
     "Lon" = vast_seasonal_data_temp$DECDEG_BEGLON
   )
+  
+  
   
   # Save and return 
   saveRDS(vast_cov_dat, file = paste(out_dir, "vast_covariate_data.rds", sep = "/"))
@@ -534,7 +533,7 @@ vast_make_extrap_grid<- function(region_shapefile, index_shapes, strata.limits, 
 #' 
 #' @export
 
-vast_make_settings <- function(extrap_grid, n_knots, FieldConfig, RhoConfig, OverdispersionConfig, bias.correct, knot_method, Options, strata.limits){
+vast_make_settings <- function(extrap_grid, n_knots, FieldConfig, RhoConfig, OverdispersionConfig, bias.correct, knot_method, inla_method, Options, strata.limits){
   
   # For debugging
   if(FALSE){
@@ -548,10 +547,12 @@ vast_make_settings <- function(extrap_grid, n_knots, FieldConfig, RhoConfig, Ove
     strata.limits = strata_use
     n_knots = 400
     knot_method = "samples"
+    inla_method = "Barrier"
   }
   
   # Run FishStatsUtils::make_settings
   settings_out<- make_settings(n_x = n_knots, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(2, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = knot_method, treat_nonencounter_as_zero = FALSE, strata.limits = strata.limits)
+  settings_out$Method<- inla_method
   
   # Adjust options?
   options_new<- settings_out$Options
@@ -561,10 +562,100 @@ vast_make_settings <- function(extrap_grid, n_knots, FieldConfig, RhoConfig, Ove
       options_new[[which(names(options_new) == names(options_adjust_i))]]<- options_adjust_i
     }
     settings_out<- make_settings(n_x = n_knots, Region = "User", purpose = "index2", FieldConfig = FieldConfig, RhoConfig = RhoConfig, ObsModel = c(1, 1), OverdispersionConfig = OverdispersionConfig, bias.correct = bias.correct, knot_method = knot_method, treat_nonencounter_as_zero = FALSE, strata.limits = strata.limits, Options = options_new)
+    settings_out$Method<- inla_method
   }
   
   # Return it
   return(settings_out)
+}
+
+####
+#' @title Make VAST spatial info
+#' 
+#' @description Create a tagged list with VAST spatial information needed
+#'
+#' @param extrap_grid = User created extrapolation grid from vast_make_extrap_grid.
+#' @param vast_settings = A
+#' @param vast_sample_data = A 
+#' @param out_dir = A
+#'
+#' @return Returns a tagged list with extrapolation and spatial info in different slots
+#' 
+#' @export 
+
+vast_make_spatial_lists<- function(extrap_grid, vast_settings, tidy_mod_data, out_dir){
+  
+  # For debugging
+  if(FALSE){
+    tar_load(vast_extrap_grid)
+    extrap_grid = vast_extrap_grid
+    tar_load(vast_settings)
+    tar_load(tidy_mod_data)
+    inla_method = "Barrier"
+    out_dir = here::here()
+  }
+  
+  
+  # Run FishStatsUtiles::make_extrapolation_info
+  vast_extrap_info<- make_extrapolation_info(Region = vast_settings$Region, strata.limits = vast_settings$strata.limits, input_grid = extrap_grid, DirPath = out_dir)
+  
+  # Run FishStatsUtils::make_spatial_info
+  vast_spatial_info<- make_spatial_info(n_x = vast_settings$n_x, Lon_i = tidy_mod_data$DECDEG_BEGLON, Lat_i = tidy_mod_data$DECDEG_BEGLAT, Extrapolation_List = vast_extrap_info, knot_method = vast_settings$knot_method, Method = vast_settings$Method, grid_size_km = vast_settings$grid_size_km, fine_scale = vast_settings$fine_scale, DirPath = out_dir, Save_Results = TRUE)
+  
+  # Combine into one list of lists
+  spatial_lists_out<- list(vast_extrap_info, vast_spatial_info)
+  names(spatial_lists_out)<- c("Extrapolation_List", "Spatial_List")
+  return(spatial_lists_out)
+}
+
+
+####
+#' @title Reduce VAST prediction dataframe from regular grid to knot locations
+#' 
+#' @description Reduce VAST prediction dataframe from regular grid to knot locations
+#'
+#' @param extrap_grid = User created extrapolation grid from vast_make_extrap_grid.
+#' @param vast_settings = A
+#' @param vast_sample_data = A 
+#' @param out_dir = A
+#'
+#' @return Returns a tagged list with extrapolation and spatial info in different slots
+#' 
+#' @export 
+
+reduce_vast_predict_df<- function(vast_predict_df = vast_predict_df, vast_spatial_lists = vast_spatial_lists, out_dir = here::here("data/predict")){
+  
+  # For debugging
+  if(FALSE){
+    tar_load(vast_predict_df)
+    tar_load(vast_spatial_lists)
+  }
+  
+  
+  # Knots_sf
+  knots_info<- vast_spatial_lists$Spatial_List
+  knots_sf<- st_as_sf(data.frame(knots_info$loc_x), coords = c("E_km", "N_km"), crs = attributes(knots_info$loc_i)$projCRS)
+  
+  # Get unique prediction locations and assign each prediction location to its nearest knot?
+  pred_df_temp<- vast_predict_df %>%
+    distinct(., DECDEG_BEGLON, DECDEG_BEGLAT)
+  pred_sf<- points_to_sf(pred_df_temp) %>%
+    st_transform(., crs = st_crs(knots_sf)) 
+  
+  pred_nearest_knot<- pred_sf %>%
+    mutate(., "Nearest_knot" = st_nearest_feature(x = ., y = knots_sf)) %>%
+    st_drop_geometry()
+  
+  # Merge this with full prediction dataset
+  pred_df_out<- vast_predict_df %>%
+    left_join(., pred_nearest_knot) 
+  
+  # Average covariate values based on nearest knot location and output reduced dataframe
+  pred_df_out<- pred_df_out %>%
+    distinct(., ID, DATE, Nearest_knot, .keep_all = TRUE) %>%
+    dplyr::select(-Nearest_knot)
+  
+  return(pred_df_out)
 }
 
 ####
@@ -626,7 +717,7 @@ vast_make_coveff<- function(X1_coveff_vec, X2_coveff_vec, Q1_coveff_vec, Q2_cove
 #'
 #' @export
 
-vast_build_sdm <- function(settings, extrap_grid, Method, sample_data, covariate_data, X1_formula, X2_formula, X_contrasts, Xconfig_list, catchability_data, Q1_formula, Q2_formula, index_shapes){
+vast_build_sdm <- function(settings, extrap_grid, sample_data, covariate_data, X1_formula, X2_formula, X_contrasts, Xconfig_list, catchability_data, Q1_formula, Q2_formula, index_shapes, spatial_info_dir){
   
   # For debugging
   if(FALSE){
@@ -687,24 +778,27 @@ vast_build_sdm <- function(settings, extrap_grid, Method, sample_data, covariate
     stop(paste("Check names in sample data. Must include:", paste0(samp_dat_names, collapse = ","), sep = " "))
   }
   
-  cov_dat_names1<- unlist(str_extract_all(X1_formula, boundary("word"))[[2]])
-  
-  # Remove some stuff associated with the splines...
-  spline_words<- c("bs", "degree", "TRUE", "intercept", unique(as.numeric(unlist(str_extract_all(X1_formula, pattern = "[0-9]+", simplify = TRUE)))), "FALSE")
-  cov_dat_names1<- cov_dat_names1[-which(cov_dat_names1 %in% spline_words)]
-  cov_dat_names2<- unlist(str_extract_all(X2_formula, boundary("word"))[[2]])
-  cov_dat_names2<- cov_dat_names2[-which(cov_dat_names2 %in% spline_words)]
-  cov_dat_names_all<- unique(c(cov_dat_names1, cov_dat_names2))
-  if(!(all(cov_dat_names_all %in% names(covariate_data)))){
-    stop(paste("Check names in covariate data. Must include", paste0(cov_dat_names_all, collapse = ","), sep = " "))
+  # Covariate data frame names
+  if(!is.null(covariate_data)){
+    cov_dat_names1<- unlist(str_extract_all(X1_formula, boundary("word"))[[2]])
+    
+    # Remove some stuff associated with the splines...
+    spline_words<- c("bs", "degree", "TRUE", "intercept", unique(as.numeric(unlist(str_extract_all(X1_formula, pattern = "[0-9]+", simplify = TRUE)))), "FALSE")
+    cov_dat_names1<- cov_dat_names1[-which(cov_dat_names1 %in% spline_words)]
+    cov_dat_names2<- unlist(str_extract_all(X2_formula, boundary("word"))[[2]])
+    cov_dat_names2<- cov_dat_names2[-which(cov_dat_names2 %in% spline_words)]
+    cov_dat_names_all<- unique(c(cov_dat_names1, cov_dat_names2))
+    if(!(all(cov_dat_names_all %in% names(covariate_data)))){
+      stop(paste("Check names in covariate data. Must include", paste0(cov_dat_names_all, collapse = ","), sep = " "))
+    }
   }
-  
+ 
   if(!(all(c("X1config_cp", "X2config_cp", "Q1config_k", "Q2config_k") %in% names(Xconfig_list)))){
     stop(paste("Check names of Xconfig_list. Must be", paste0(c("X1config_cp", "X2config_cp", "Q1config_k", "Q2config_k"), collapse = ","), sep = ""))
   }
   
   # Run VAST::fit_model with correct info and settings
-  vast_build_out<- fit_model_aja("settings" = settings, "input_grid" = extrap_grid, "Method" = Method, "Lat_i" = sample_data[, 'Lat'], "Lon_i" = sample_data[, 'Lon'], "t_i" = sample_data[, 'Year'], "c_i" = rep(0, nrow(sample_data)), "b_i" = sample_data[, 'Biomass'], "a_i" = sample_data[, 'Swept'], "PredTF_i" = sample_data[, 'Pred_TF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = covariate_data, "X1_formula" = X1_formula, "X2_formula" = X2_formula, "X_contrasts" = X_contrasts, "catchability_data" = catchability_data, "Q1_formula" = Q1_formula, "Q2_formula" = Q2_formula, "Q1config_k" = Xconfig_list[['Q1config_k']], "Q2config_k" = Xconfig_list[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+  vast_build_out<- fit_model_aja("settings" = settings, "Method" = settings$Method, "input_grid" = extrap_grid, "Lat_i" = sample_data[, 'Lat'], "Lon_i" = sample_data[, 'Lon'], "t_i" = sample_data[, 'Year'], "c_i" = rep(0, nrow(sample_data)), "b_i" = sample_data[, 'Biomass'], "a_i" = sample_data[, 'Swept'], "PredTF_i" = sample_data[, 'Pred_TF'], "X1config_cp" = Xconfig_list[['X1config_cp']], "X2config_cp" = Xconfig_list[['X2config_cp']], "covariate_data" = covariate_data, "X1_formula" = X1_formula, "X2_formula" = X2_formula, "X_contrasts" = X_contrasts, "catchability_data" = catchability_data, "Q1_formula" = Q1_formula, "Q2_formula" = Q2_formula, "Q1config_k" = Xconfig_list[['Q1config_k']], "Q2config_k" = Xconfig_list[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes, "DirPath" = spatial_info_dir)
   
   # Return it
   return(vast_build_out)
@@ -723,7 +817,7 @@ vast_build_sdm <- function(settings, extrap_grid, Method, sample_data, covariate
 #' 
 #' @export
 
-vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
+vast_make_adjustments <- function(vast_build, index_shapes, spatial_info_dir, adjustments = NULL){
   
   # For debugging
   if(FALSE){
@@ -737,7 +831,7 @@ vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
   
   # If no adjustments are needed, just need to pull information from vast_build and then set "run_model" to TRUE
   if(is.null(adjustments)){
-    vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+    vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes, "DirPath" = spatial_info_dir)
   }
   
   # If there are adjustments, need to make those and then re run model. 
@@ -790,10 +884,10 @@ vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
     # Now, re-build and fit model. This is slightly different if we have changed map or not...
     if(any(names(adjustments) %in% c("log_sigmaXi1_cp", "log_sigmaXi2_cp", "lambda1_k", "lambda2_k"))){
       # Adding Map argument
-      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_k']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "Map" = map_adjust_out, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_k" = vast_build$input_args$data_args_input[['Q1config_k']], "Q2config_k" = vast_build$input_args$data_args_input[['Q2config_k']], "Map" = map_adjust_out, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes, "DirPath" = spatial_info_dir)
     } else {
       # No need for Map argument, just build and fit
-      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build$input_args$data_args_input[['Q2config_cp']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+      vast_build_adjust_out<- fit_model_aja("settings" = vast_build$settings, "input_grid" = vast_build$input_args$data_args_input$input_grid, "Method" = vast_build$settings$Method, "Lat_i" = vast_build$data_frame[, 'Lat_i'], "Lon_i" = vast_build$data_frame[, 'Lon_i'], "t_i" = vast_build$data_frame[, 't_i'], "c_iz" = vast_build$data_frame[, 'c_iz'], "b_i" = vast_build$data_frame[, 'b_i'], "a_i" = vast_build$data_frame[, 'a_i'], "PredTF_i" = vast_build$data_list[['PredTF_i']], "X1config_cp" = vast_build$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build$input_args$data_args_input$covariate_data, "X1_formula" = vast_build$input_args$data_args_input$X1_formula, "X2_formula" = vast_build$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build$input_args$data_args_input[['Q2config_cp']], "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = FALSE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes, "DirPath" = spatial_info_dir)
     }
   }
   # Return it
@@ -813,16 +907,20 @@ vast_make_adjustments <- function(vast_build, index_shapes, adjustments = NULL){
 #'
 #' @export
 
-vast_fit_sdm <- function(vast_build_adjust, nmfs_species_code, index_shapes, out_dir){
+vast_fit_sdm <- function(vast_build_adjust, nmfs_species_code, index_shapes, spatial_info_dir, out_dir){
   
   # For debugging
   if(FALSE){
     tar_load(vast_adjust)
     vast_build_adjust = vast_adjust
+    nmfs_species_code = nmfs_species_code
+    out_dir = here::here("results/mod_fits")
+    tar_load(index_shapefiles)
+    index_shapes = index_shapefiles
   }
   
   # Build and fit model
-  vast_fit_out<- fit_model_aja("settings" = vast_build_adjust$settings, "input_grid" = vast_build_adjust$input_args$data_args_input$input_grid, "Method" = vast_build_adjust$settings$Method, "Lat_i" = vast_build_adjust$data_frame[, 'Lat_i'], "Lon_i" = vast_build_adjust$data_frame[, 'Lon_i'], "t_i" = vast_build_adjust$data_frame[, 't_i'], "c_iz" = vast_build_adjust$data_frame[, 'c_iz'], "b_i" = vast_build_adjust$data_frame[, 'b_i'], "a_i" = vast_build_adjust$data_frame[, 'a_i'], "PredTF_i" = vast_build_adjust$data_list[['PredTF_i']], "X1config_cp" = vast_build_adjust$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build_adjust$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build_adjust$input_args$data_args_input$covariate_data, "X1_formula" = vast_build_adjust$input_args$data_args_input$X1_formula, "X2_formula" = vast_build_adjust$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build_adjust$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build_adjust$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build_adjust$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build_adjust$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build_adjust$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build_adjust$input_args$data_args_input[['Q2config_cp']], "Map" = vast_build_adjust$tmb_list$Map, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = TRUE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes)
+  vast_fit_out<- fit_model_aja("settings" = vast_build_adjust$settings, "input_grid" = vast_build_adjust$input_args$data_args_input$input_grid, "Method" = vast_build_adjust$settings$Method, "Lat_i" = vast_build_adjust$data_frame[, 'Lat_i'], "Lon_i" = vast_build_adjust$data_frame[, 'Lon_i'], "t_i" = vast_build_adjust$data_frame[, 't_i'], "c_iz" = vast_build_adjust$data_frame[, 'c_iz'], "b_i" = vast_build_adjust$data_frame[, 'b_i'], "a_i" = vast_build_adjust$data_frame[, 'a_i'], "PredTF_i" = vast_build_adjust$data_list[['PredTF_i']], "X1config_cp" = vast_build_adjust$input_args$data_args_input[['X1config_cp']], "X2config_cp" = vast_build_adjust$input_args$data_args_input[['X2config_cp']], "covariate_data" = vast_build_adjust$input_args$data_args_input$covariate_data, "X1_formula" = vast_build_adjust$input_args$data_args_input$X1_formula, "X2_formula" = vast_build_adjust$input_args$data_args_input$X2_formula, "X_contrasts" = vast_build_adjust$input_args$data_args_input$X_contrasts, "catchability_data" = vast_build_adjust$input_args$data_args_input$catchability_data, "Q1_formula" = vast_build_adjust$input_args$data_args_input$Q1_formula, "Q2_formula" = vast_build_adjust$input_args$data_args_input$Q2_formula, "Q1config_cp" = vast_build_adjust$input_args$data_args_input[['Q1config_cp']], "Q2config_cp" = vast_build_adjust$input_args$data_args_input[['Q2config_cp']], "Map" = vast_build_adjust$tmb_list$Map, "newtonsteps" = 1, "getsd" = TRUE, "getReportCovariance" = TRUE, "run_model" = TRUE, "test_fit" = FALSE,  "Use_REML" = FALSE, "getJointPrecision" = FALSE, "index_shapes" = index_shapes, "DirPath" = spatial_info_dir)
   
   # Save and return it
   saveRDS(vast_fit_out, file = paste(out_dir, "/", nmfs_species_code, "_", "fitted_vast.rds", sep = "" ))

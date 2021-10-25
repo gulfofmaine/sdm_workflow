@@ -1,0 +1,127 @@
+---
+title: "VAST Species Distribution Model Workflow Vingette"
+author: "Andrew Allyn"
+date: "10/22/2021"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library(devtools)
+library(VAST)
+library(tidyverse)
+library(splines)  # Used to include basis-splines
+library(effects)  # Used to visualize covariate effects
+library(sf)
+library(raster)
+library(patchwork)
+library(akima)
+library(lubridate)
+
+# Source a bunch of "vast" helper function. These are all located here: https://github.com/aallyn/sdm_workflow/tree/main-covariate-effects/scratch/aja/TargetsSDM/R/vast_functions. Working on getting this into a nicer package style.
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/nmfs_functions.R?token=ABTDHL5MMDOALYDWHXFSPS3BPQGUQ")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/dfo_functions.R?token=ABTDHL7NY6HVW4DZQ334NXLBPQGSI")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/combo_functions.R?token=ABTDHLZHQBVMGJTM4TYXI7LBPQGV6")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/covariate_functions.R?token=ABTDHL647HVWY7V2XC2D5UTBPQGXO")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/vast_functions.R?token=ABTDHL7Q4J4RFBGYPNW3XF3BPMDDE")
+```
+
+```{r, echo = FALSE}
+# Access GMRI CSS Style
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+# Overview
+This vingette walks through the species distribution modeling process using Jim Thorson's Vector Autoregressive Spatio-Temporal (VAST) modeling approach. We break this modeling workflow process into eight stages. For each stage, we have developed functions that we hope will help make the modeling process more efficient. Ultimately, at the Gulf of Maine Research Institute, we have leveraged these functions using R {targets} package to create an integrated, "smart" workflow. However, for this vingette, we walk through the different stages outside of the {targets} style implementation as we don't anticipate that everyone will use the {targets} workflow implementaton.
+
+For folks who are new to the VAST modeling framework, we suggest starting with the "VAST for Beginners" RMarkdown document. This document takes a deeper dive into the VAST modeling approach to dissect the different components and provide more context on model outputs. 
+
+# Stage 1: Preparing tow and biological data
+The first stage of the species distribution modeling process is preparing the data. Here, we think about two different datasets. The first, `tow_data` are the data corresponding to each of the unique tows/net sets/samples/etc. The second, `occu_data`, are the occurrence catch data for each species (or size/age/stage class). These data could be presence/absence, abundance or biomass. Given our regular work that uses government fisheries independent survey data, we focus on `occu_data` which are the biomass of a species at each tow location. With this structure, we expect that the `tow_data` dataset is not going to be as long as the `occu_data` dataset because unique tow information is going to be repeated for each species (or size/age/stage class) caught at a given town in the `occu_data` dataset. 
+
+For this step, we have a suite of functions that we use to work specifically with the NOAA NMFS Northeast Fisheries Science Center spring and fall bottom trawl survey and Department of Fisheries and Oceans Canada summer bottom trawl survey. We walk through these steps and show the functions. However, we expect that users outside of the Gulf of Maine Research Institue will likely have their own "raw" data files and will do their own preparation process. 
+
+```{r}
+# Setting directories for the raw data files -- this is only going to applicable to GMRI researchers
+nmfs_dat_dir<- "~/Box/RES_Data/NMFS_trawl/processed_data"
+dfo_dat_dir<- here::here("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/dfo/raw")
+
+# Read in a species table -- this makes the data a bit more managageable as we won't be inputting assumed absences for every single species ever recorded on the survey.
+species<- read_csv("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/species_table.csv")
+
+# Loading data -- nmfs is all in one file, dfo has multiple different raw files we need
+nmfs_raw_dat<- nmfs_load(nmfs_dat_dir)
+dfo_GSINF<- dfo_GSINF_load(dfo_dat_dir)
+dfo_GSMISSIONS<- dfo_GSMISSIONS_load(dfo_dat_dir)
+dfo_GSCAT<- dfo_GSCAT_load(dfo_dat_dir)
+
+# Running nmfs data prep functions
+nmfs_tows<- nmfs_get_tows(nmfs_raw = nmfs_raw_dat, out_dir = here::here("data/nmfs/clean"))
+nmfs_occu<- nmfs_make_tidy_occu(nmfs_raw = nmfs, nmfs_tows = nmfs_tows, species_table = species, out_dir = here::here("data/nmfs/clean"))
+
+# Running DFO data prep functions
+dfo_tows<- dfo_get_tows(dfo_GSINF = dfo_GSINF, dfo_GSMISSIONS = dfo_GSMISSIONS, out_dir = here::here("data/dfo/clean"))
+dfo_occu<- dfo_make_tidy_occu(dfo_GSCAT = dfo_GSCAT, dfo_tows = dfo_tows, species_table = species, out_dir = here::here("data/dfo/clean"))
+
+# Combining to get a single `tow_data` dataset and a single `occu_data` dataset
+all_tows<- bind_nmfs_dfo_tows(nmfs_tows = nmfs_tows, dfo_tows = dfo_tows, out_dir = here::here("data/combined"))
+all_occu<- bind_nmfs_dfo_tidy_occu(nmfs_tidy_occu = nmfs_occu, dfo_tidy_occu = dfo_occu, out_dir = here::here("data/combined"))
+```
+
+As we mentioned above, we don't expect that all users are going to use these same prep functions. That said, it is important that the structure of the `all_tows` dataframe and the `all_occu` dataframe have a similar structure to use the other functions. **Improvements could certainly made here to make things even more flexible**. At a minimum, `all_tows` should have columns named: `EST_YEAR`,  `DECDEG_BEGLAT`, `DECDEG_BEGLON`, `ID`, `DATE` (in YYY-MM-DD format) and `SEASON` and `SURVEY` (if applicable and fitting seasonal model or a model using survey as a catchability factor). `all_occu` should have columns named `ID`, `PRESENCE`, `BIOMASS`, `ABUNDANCE`, `SURVEY` and then a column with a species ID code. 
+```{r}
+tow_name_check<- c("ID", "DATE", "EST_YEAR", "DECDEG_BEGLAT", "DECDEG_BEGLON")
+all(tow_name_check %in% names(all_tows))
+
+species_name_col<- "NMFS_SVSPP"
+occu_name_check<- c("ID", "PRESENCE", "BIOMASS", "ABUNDANCE", "SURVEY", {{species_name_col}})
+all(occu_name_check %in% names(all_occu))
+```
+
+# Stage 2: Enhancing tow data with static and dynamic covariates
+After we have prepped the `all_tows` and `all_occu` dataframes, we enhance the tow data with covariates that we anticipate including to describe the distribution and abundance of the fish species. This process can be a huge time suck in the modeling process. To help increase our efficiency and get to "the good stuff" where we are actually fitting and assessing the species distribution models, we've written two key functions: `static_extract` and `dynamic_2d_extract`. The `static_extract` function is fairly straightforward and will overlay the tow location points onto a raster layer and get the covariate values. The `dynamic_2d_extract` function has a lot more bells and whistles. In particular, we designed the function to allow summaries of dynamic 2d variables (e.g., sea surface temperature, bottom temperature) over different time scales. For example, we can get a "seasonal" or "annual" average sea surface temperature at each location, or we could provide an integer value (e.g., 90) and define how those 90 days should be positioned relative to the time of the tow (prior, saddling the observation, or past the observation). We'd encourage users to take a look at these functions to learn more about them and their potential. 
+
+For this vingette, we will go ahead and enance the tow data by extracting depth, a seasonal sea surface temperature and a seasonal bottom temperature at each of the tow locations. Additionally, we will use some conveinance wrapper functions (`static_extract_wrapper` and `dynamic_2d_extract_wrapper`) that we wrote. These wrappers help process multiple different static raster layers or dynamic raster stacks that are stored in list. Additionally, we will run the `static_extract_wrapper` (and `static_extract`) function first and then run the `dynamic_2d_extract_wrapper` and `dynamic_2d_extract` function.
+
+```{r}
+#####
+## Static covariates
+#####
+# Read in static raster layer files from a directory and store them in a list. 
+static_dir<- "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/covariates/static"
+static_files<- list.files(static_dir, pattern = ".grd", full.names = TRUE)
+static_layers<- vector("list", length(static_files))
+
+for(i in seq_along(static_files)){
+  static_layers[[i]]<- raster(static_files[[i]])
+}
+
+# Names?
+names(static_layers)[i]<- "Depth"
+
+# Get all_tows into sf object
+all_tows_sf<- points_to_sf(all_tows)
+
+# Run static_extract_wrapper
+all_tows_with_static_covs<- static_extract_wrapper(static_covariates_list = static_layers, sf_points = all_tows_sf, date_col_name = "DATE", df_sf = "sf", out_dir = "~/Desktop/")
+
+# Check it out
+summary(all_tows_with_static_covs)
+
+#####
+## Dynamic covariates
+#####
+# Read in dynamic raster stack files from a directory and store them in a list. 
+dynamic_dir<- "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/covariates/dynamic"
+dynamic_files_all<- list.files(dynamic_dir, pattern = ".grd", full.names = TRUE)
+dynamic_files<- dynamic_files_all[c(4, 2)] # Salinity also in this director
+dynamic_stacks<- vector("list", length(dynamic_files))
+
+for(i in seq_along(dynamic_files)){
+  dynamic_stacks[[i]]<- raster::stack(dynamic_files[[i]])
+}
+
+# Names?
+names(dynamic_stacks)<- c("SST", "BT")
+
+# Run dynamic_2d_extract_wrapper function
+all_tows_with_all_covs<- dynamic_2d_extract_wrapper(dynamic_covariates_list = dynamic_stacks, t_summ = "seasonal", t_position = NULL, sf_points = all_tows_with_static_covs, date_col_name = "DATE", df_sf = "df", out_dir = "~/Desktop/")

@@ -1,0 +1,252 @@
+---
+title: "VAST Species Distribution Model Workflow Vingette"
+author: "Andrew Allyn"
+date: "10/22/2021"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library(devtools)
+library(VAST)
+library(tidyverse)
+library(splines)  # Used to include basis-splines
+library(effects)  # Used to visualize covariate effects
+library(sf)
+library(raster)
+library(patchwork)
+library(akima)
+library(lubridate)
+library(profvis)
+
+# Source a bunch of "vast" helper function. These are all located here: https://github.com/aallyn/sdm_workflow/tree/main-covariate-effects/scratch/aja/TargetsSDM/R/vast_functions. Working on getting this into a nicer package style.
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/nmfs_functions.R?token=ABTDHL5MMDOALYDWHXFSPS3BPQGUQ")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/dfo_functions.R?token=ABTDHL7NY6HVW4DZQ334NXLBPQGSI")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/combo_functions.R?token=ABTDHLZHQBVMGJTM4TYXI7LBPQGV6")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/covariate_functions.R?token=ABTDHL647HVWY7V2XC2D5UTBPQGXO")
+source_url("https://raw.githubusercontent.com/aallyn/sdm_workflow/main-covariate-effects/scratch/aja/TargetsSDM/R/vast_functions.R?token=ABTDHL7Q4J4RFBGYPNW3XF3BPMDDE")
+```
+
+```{r, echo = FALSE}
+# Access GMRI CSS Style
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+# Overview
+This vignette walks through the species distribution modeling process using Jim Thorson's Vector Autoregressive Spatio-Temporal (VAST) modeling approach. We break this modeling workflow process into eight stages. For each stage, we have developed functions that we hope will help make the modeling process more efficient. Importantly, if you already have what we would describe as a "tidy model dataset" then you can skip ahead a bit and work from stage 5, where a "tidy model dataset" has each row as a unique tow/species/catch record along with values for any covariates we would want to include in the species distribution model as additional columns.
+
+Ultimately, at the Gulf of Maine Research Institute, we have leveraged these functions and linked the different stages together using R {targets} package to create an integrated, "smart" workflow. However, for this vingette, we walk through the different stages outside of the {targets} style implementation as we don't anticipate that everyone will use the {targets} workflow implementation.
+
+Finally, for folks who are new to the VAST modeling framework, we suggest starting with the "VAST for Beginners" RMarkdown document. This document takes a deeper dive into the VAST modeling approach to dissect the different components and provide more context on model outputs. 
+
+# Stage 1: Preparing tow and biological data
+The first stage of the species distribution modeling process is preparing the data. Here, we think about two different datasets. The first, `tow_data` are the data corresponding to each of the unique tows/net sets/samples/etc. The second, `occu_data`, are the occurrence catch data for each species (or size/age/stage class). These data could be presence/absence, abundance or biomass. Given our regular work that uses government fisheries independent survey data, we focus on `occu_data` which are the biomass of a species at each tow location. With this structure, we expect that the `tow_data` dataset is not going to be as long as the `occu_data` dataset because unique tow information is going to be repeated for each species (or size/age/stage class) caught at a given town in the `occu_data` dataset. 
+
+For this step, we have a suite of functions that we use to work specifically with the NOAA NMFS Northeast Fisheries Science Center spring and fall bottom trawl survey and Department of Fisheries and Oceans Canada summer bottom trawl survey. We walk through these steps and show the functions. However, we expect that users outside of the Gulf of Maine Research Institue will likely have their own "raw" data files and will do their own preparation process. 
+
+```{r}
+# Setting directory to run the vignette -- update this or get rid of it if possible!
+main_dir<- "~/Desktop/SDM_Workflow_Vignette/"
+
+# Setting directories for the raw data files -- this is only going to applicable to GMRI researchers
+nmfs_dat_dir<- "~/Box/RES_Data/NMFS_trawl/processed_data"
+dfo_dat_dir<- here::here("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/dfo/raw")
+
+# Read in a species table -- this makes the data a bit more managageable as we won't be inputting assumed absences for every single species ever recorded on the survey.
+species<- read_csv("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/species_table.csv")
+
+# Loading data -- nmfs is all in one file, dfo has multiple different raw files we need
+nmfs_raw_dat<- nmfs_load(nmfs_dat_dir)
+dfo_GSINF<- dfo_GSINF_load(dfo_dat_dir)
+dfo_GSMISSIONS<- dfo_GSMISSIONS_load(dfo_dat_dir)
+dfo_GSCAT<- dfo_GSCAT_load(dfo_dat_dir)
+
+# Running nmfs data prep functions
+nmfs_tows<- nmfs_get_tows(nmfs_raw = nmfs_raw_dat, out_dir = main_dir)
+nmfs_occu<- nmfs_make_tidy_occu(nmfs_raw = nmfs_raw_dat, nmfs_tows = nmfs_tows, species_table = species, out_dir = main_dir)
+
+# Running DFO data prep functions
+dfo_tows<- dfo_get_tows(dfo_GSINF = dfo_GSINF, dfo_GSMISSIONS = dfo_GSMISSIONS, out_dir = main_dir)
+dfo_occu<- dfo_make_tidy_occu(dfo_GSCAT = dfo_GSCAT, dfo_tows = dfo_tows, species_table = species, out_dir = main_dir)
+
+# Combining to get a single `tow_data` dataset and a single `occu_data` dataset
+all_tows<- bind_nmfs_dfo_tows(nmfs_tows = nmfs_tows, dfo_tows = dfo_tows, out_dir = main_dir)
+all_occu<- bind_nmfs_dfo_tidy_occu(nmfs_tidy_occu = nmfs_occu, dfo_tidy_occu = dfo_occu, out_dir = main_dir)
+```
+
+As we mentioned above, we don't expect that all users are going to use these same prep functions. That said, it is important that the structure of the `all_tows` dataframe and the `all_occu` dataframe have a similar structure to use the other functions. **Improvements could certainly made here to make things even more flexible**. At a minimum, `all_tows` should have columns named: `EST_YEAR`,  `DECDEG_BEGLAT`, `DECDEG_BEGLON`, `ID`, `DATE` (in YYY-MM-DD format) and `SEASON` and `SURVEY` (if applicable and fitting seasonal model or a model using survey as a catchability factor). `all_occu` should have columns named `ID`, `PRESENCE`, `BIOMASS`, `ABUNDANCE`, `SURVEY` and then a column with a species ID code. 
+```{r}
+tow_name_check<- c("ID", "DATE", "EST_YEAR", "DECDEG_BEGLAT", "DECDEG_BEGLON")
+all(tow_name_check %in% names(all_tows))
+
+species_name_col<- "NMFS_SVSPP"
+occu_name_check<- c("ID", "PRESENCE", "BIOMASS", "ABUNDANCE", "SURVEY", {{species_name_col}})
+all(occu_name_check %in% names(all_occu))
+```
+
+# Stage 2: Enhancing tow data with static and dynamic covariates
+After we have prepped the `all_tows` and `all_occu` dataframes, we enhance the tow data with covariates that we anticipate including to describe the distribution and abundance of the fish species. This process can be a huge time suck in the modeling process. To help increase our efficiency and get to "the good stuff" where we are actually fitting and assessing the species distribution models, we've written two key functions: `static_extract` and `dynamic_2d_extract`. The `static_extract` function is fairly straightforward and will overlay the tow location points onto a raster layer and get the covariate values. The `dynamic_2d_extract` function has a lot more bells and whistles. In particular, we designed the function to allow summaries of dynamic 2d variables (e.g., sea surface temperature, bottom temperature) over different time scales. For example, we can get a "seasonal" or "annual" average sea surface temperature at each location, or we could provide an integer value (e.g., 90) and define how those 90 days should be positioned relative to the time of the tow (prior, saddling the observation, or past the observation). We'd encourage users to take a look at these functions to learn more about them and their potential. 
+
+For this vingette, we will go ahead and enance the tow data by extracting depth, a seasonal sea surface temperature and a seasonal bottom temperature at each of the tow locations. Additionally, we will use some conveinance wrapper functions (`static_extract_wrapper` and `dynamic_2d_extract_wrapper`) that we wrote. These wrappers help process multiple different static raster layers or dynamic raster stacks that are stored in list. Additionally, we will run the `static_extract_wrapper` (and `static_extract`) function first and then run the `dynamic_2d_extract_wrapper` and `dynamic_2d_extract` function.
+
+```{r}
+#####
+## Static covariates
+#####
+# Read in static raster layer files from a directory and store them in a list. 
+static_dir<- "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/covariates/static"
+static_files<- list.files(static_dir, pattern = ".grd", full.names = TRUE)
+static_layers<- vector("list", length(static_files))
+
+for(i in seq_along(static_files)){
+  static_layers[[i]]<- raster(static_files[[i]])
+}
+
+# Names?
+names(static_layers)[i]<- "Depth"
+
+# Get all_tows into sf object
+all_tows_sf<- points_to_sf(all_tows)
+
+# Run static_extract_wrapper
+all_tows_with_static_covs<- static_extract_wrapper(static_covariates_list = static_layers, sf_points = all_tows_sf, date_col_name = "DATE", df_sf = "sf", out_dir = main_dir)
+
+# Check it out
+summary(all_tows_with_static_covs)
+
+#####
+## Dynamic covariates
+#####
+# Read in dynamic raster stack files from a directory and store them in a list. 
+dynamic_dir<- "~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/covariates/dynamic"
+dynamic_files<- list.files(dynamic_dir, pattern = ".grd", full.names = TRUE)
+dynamic_stacks<- vector("list", length(dynamic_files))
+
+for(i in seq_along(dynamic_files)){
+  dynamic_stacks[[i]]<- raster::stack(dynamic_files[[i]])
+}
+
+# Names?
+names(dynamic_stacks)<- c("BS", "BT", "SS", "SST")
+
+# Run dynamic_2d_extract_wrapper function
+all_tows_with_all_covs<- dynamic_2d_extract_wrapper(dynamic_covariates_list = dynamic_stacks, t_summ = "seasonal", t_position = NULL, sf_points = all_tows_with_static_covs, date_col_name = "DATE", df_sf = "df", out_dir = main_dir)
+
+# Check it out
+summary(all_tows_with_all_covs)
+```
+
+At this point, we add an additional processing step that rescales our covariate values. Some species distribution modeling approaches are going to do this atuomatically for us (e.g., mgcv::gam centers and scales variables). VAST, however, does not. So, we do that explicitly here before moving onto stage 3. During this rescaling process, we also save the scaling information for each of the covariates. This is important if later on we want to bring in new data to make predictions so that we can rescale the new values using the same scaling parameters. 
+```{r}
+# Rescale
+depth_cut<- 500 # Most sampling occurs on the shelf, just a few rogue off shelf observations and don't want those influencing parameter estimates/model fit
+all_tows_with_all_covs_rescale<- rescale_all_covs(all_tows_with_all_covs, depth_cut = depth_cut, type = "AJA", center = TRUE, scale = TRUE, out_dir = main_dir)
+
+# Get rescaling parameters for later use
+rescale_params<- get_rescale_params(all_tows_with_all_covs, depth_cut = depth_cut, out_dir = main_dir)
+```
+
+# Stage 3: Make a tidy model dataframe
+Now that we have covariate values at each of the tow locations, we can wrap up the "prep and enhancement" stages by merging these data back with our occupancy dataframe to create a tidy model dataframe. This dataframe has a row for every unique tow-species-catch observation, as well as additional columns with the values for any of the covariates we might be interested in including as predictor variables in our species distribution model. 
+
+```{r}
+tidy_mod_data<- make_tidy_mod_data(all_tidy_occu = all_occu, all_tows = all_tows_with_all_covs_rescale, out_dir = main_dir)
+summary(tidy_mod_data)
+head(tidy_mod_data)
+```
+
+# Stage 4: Making VAST datasets
+At this point, you have either followed along through the first three stages to prep and enhance the data OR you've skipped ahead of those steps as you already have a "tidy model dataset" in hand, where each row is a unique tow/species/catch observation and you have additional columns for different covariate values you are interested in including in the species distribution model. 
+
+It's worth mentioning that armed with this "tidy model dataset" you could pursue a variety of different species distribution modeling approaches, which might require varying degrees of additional preparation. For example, if you wanted to fit a "delta" generalized additive model, you could go ahead and do something like `gam_fit<- mgcv::gam(PRESENCE ~ s(Depth) + s(SST_Seasonal), family = "binomial")` for the first presence/absence stage of the model. 
+
+With the VAST modeling approach, we still have a bit more work to do before we can fit the model. The specific steps for this depend on whether we are fitting an annual model or a model at a sub-annual time step (like a seasonal model, which we go over in more detail later). Regardless of the time step of the model, ultimately, we are after a "sample" dataframe, which includes information for each of the observations of biomass, a "covariate" dataframe (if applicable), which includes the covariate values for each of the observations, and a "catchability" dataframe (if applicable), which includes the catchability covariate values for each of the observations. 
+
+In this vignette, we will start with a very basic model that has no covariates and attempts to describe all of the variability in distribution and abundance with a "year" fixed effect term, spatial and spatio-temporal variability turned "on". For that model, all we are going to need is a "sample" dataframe. 
+
+*Quick naming note!* For our workflow, we try to be very explicit about the dataframes passed to the VAST modeling engine. There are some expectations, both with VAST functions and with some of our helper functions, about naming conventions. So, I guess that is all just to say when in doubt err on the side of following the naming conventions used here. 
+
+```{r}
+# Filter tidy model data to keep only one species of interest -- Halibut in this case
+tidy_mod_data_run<- tidy_mod_data %>%
+  dplyr::filter(., DFO_SPEC == 30)
+
+# Prep the sample dataframe, we also include a "Pred_TF" column -- when Pred_TF == 1, the observation is only included in the predictions and NOT in the model fitting. This is a helpful way to do some quick model validation.
+vast_sample_data<- data.frame("Year" = tidy_mod_data_run$EST_YEAR, "Lat" = tidy_mod_data_run$DECDEG_BEGLAT, "Lon" = tidy_mod_data_run$DECDEG_BEGLON, "Biomass" = tidy_mod_data_run$BIOMASS, "Swept" = ifelse(tidy_mod_data_run$SURVEY == "NMFS", 0.0384, 0.0404), "Pred_TF" = rep(0, nrow(tidy_mod_data_run)))
+```
+
+# Stage 5: Making VAST settings
+Along with the key dataframes (i.e., "sample", "covariate" and "catchability" dataframes), the other important components to the VAST model are the extrapolation grid, a tagged settings list, and defining (if applicable) the structure of density covariates (as in `X1_formula`) and catchability covariates (as in `Q1_formula`) . With the extrapolation grid, we create our own grid based on a region shapefile using a helper function `vast_make_extrap_grid`, which leverages `FishStatsUtils::make_extrapolation_info`. 
+
+*A note about the extrapolation grid* One of the key things happening behind the scenes with the extrapolation grid is assigning each of the grid locations to a different strata (or regions), which then allows us to get overall stratified biomass indices. This spatial overlay or filtering is done based on the `strata.limits` argument within `FishStatsUtils::make_extrapolation_info` and there are some nice options available where we could specify strata based on a numeric value, depth gradients, or lat/lon bounding boxes. With an interest in biomass indices based on shapefiles (rather than a specific box), we did some work to accommodate this and wrote a few new functions -- a `make_extrapolation_info_aja` function that uses `Prepare_User_Extrapolation_Data_Fn_aja` and acomodates a `sf` multipolygon shapefile as input to generate biomass indices within the spatial regions defined by the polygon.
+
+```{r}
+# First, we need our region shapefile
+region_shape<- st_read("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/region_shapefile/full_survey_region.shp")
+
+# Second, get our index area shapefile
+# We could just use this same shapefile in the "index_shapes" argument, but to show off the new functions we wrote, we will also want to have a sf multipolygon shapefiles with areas defined within this general region
+index_areas<- c("DFO", "NMFS")
+
+for(i in seq_along(index_areas)){
+  index_area_temp<- st_read(paste0("~/GitHub/sdm_workflow/scratch/aja/TargetsSDM/data/supporting/index_shapefiles/", index_areas[i], ".shp"))
+  
+  if(i < length(index_areas)){
+    index_area_shapes<- index_area_temp
+  } else {
+    index_area_shapes<- bind_rows(index_area_shapes, index_area_temp)
+  }
+}
+
+index_area_shapes
+
+# Finally, run `vast_make_extrap_grid` function after specifying the strata we want to use
+strata_use<- data.frame("STRATA" = c("DFO", "NMFS"))
+vast_extrap_grid<- vast_make_extrap_grid(region_shapefile = region_shape, index_shapes = index_area_shapes, strata.limits = strata_use, cell_size = 35000)
+
+# Let's just look at this quickly...
+vast_grid_sf<- st_as_sf(vast_extrap_grid, coords = c("Lon", "Lat"), crs = 4326, remove = FALSE)
+
+ggplot() +
+  geom_sf(data = vast_grid_sf, aes(color = Region)) +
+  theme_bw()
+
+# There's one NA?? Could this be causing our error later on??
+summary(vast_extrap_grid)
+
+vast_extrap_grid_nona<- vast_extrap_grid %>%
+  filter(., !is.na(STRATA))
+```
+
+Similarly, we have a `vast_make_settings` function that uses `FishStatsUtils::make_settings` and has a bit more flexibility to accommodate our own extrapolation grid while also requiring us to be a bit more explicit about the setting passed to the VAST modeling engine. For example, we could specify `purpose = "index2"` within the a `FishStatsUtils::make_settings` call or a `FishStatsUtils::fit_model` call and this would trigger a specific model configuration for spatial (omega), spatio-temporal variability (epsilon) and other model parameters. Rather than using those defaults, we would suggest explicitly generating those settings.
+
+```{r}
+# First, the field and rho configuration settings. Field config sets up the spatial/spatio-temporal components and how many factors should be estimated. Rho config sets up autoregressive structure on intercepts and spatio-temporal components.
+field_config<- c("Omega1" = 1, "Epsilon1" = 1, "Omega2" = 1, "Epsilon2" = 1)
+rho_config<- c("Beta1" = 0, "Beta2" = 0, "Epsilon1" = 0, "Epsilon2" = 0)
+
+# Now, call the settings function -- knot_method = "samples" throws errors!
+vast_settings<- vast_make_settings(extrap_grid = vast_extrap_grid_nona, n_knots = 400, FieldConfig = field_config, RhoConfig = rho_config, OverdispersionConfig = c(0, 0), bias.correct = TRUE, knot_method = "grid", inla_method = "Barrier", Options = c("Calculate_Range"=TRUE), strata.limits = strata_use)
+```
+
+Finally, we can define how we w
+```{r}
+# Make covariate configuration bits...just NULL for now
+coveff_out<- list("X1config_cp" = NULL, "X2config_cp" = NULL, "Q1config_k" = NULL, "Q2config_k" = NULL)
+```
+
+# Stage 6: Fit the VAST model
+We are finally getting to the good stuff! Now that we have our datasets, the extrapolation grid, and the model settings, we can go ahead and fit a VAST model! You could certainly do this with the `fit_model` wrapper. To continue with the use of the sf multipolygon shapefile to specify different regions and with an eye towards the "full" workflow that we implemented, we are going to use our `vast_build_sdm` function that calls `fit_model`.
+
+```{r}
+# Running the `vast_build_sdm` function to get everything ready to go while not estimating parameters, yet, as `run_model = FASLE`
+vast0<- vast_build_sdm(settings = vast_settings, extrap_grid = vast_extrap_grid_nona, sample_data = vast_sample_data, covariate_data = NULL, X1_formula = NULL, X2_formula = NULL, Q1_formula = NULL, Q2_formula = NULL, Xconfig_list = coveff_out, X_contrasts = NULL, index_shapes = index_area_shapes, spatial_info_dir = main_dir)
+```
+
+We've also written a function that can make some adjustments to the `vast0` base model. This becomes much more important later on, particularly to use the `Map` list in the TMB object to pool different parameters when running a seasonal model. For this basic example, we don't need to make any adjustments and can instead go right to the `vast_fit_sdm` function. Like the `vast_build_sdm` function, this fitting function is mostly just a wrapper around VAST's `fit_model` function.
+
+```{r}
+tic()
+vast_fitted<- vast_fit_sdm(vast_build_adjust = vast0, nmfs_species_code = 101, index_shapes = index_area_shapes, spatial_info_dir = main_dir, out_dir = main_dir)
+toc()
+```
+

@@ -5,7 +5,7 @@ library(targets)
 library(parallel)
 library(doFuture)
 library(tictoc)
-
+# 
 cores_avail<- detectCores()
 registerDoFuture()
 plan(multisession, workers = cores_avail-2)
