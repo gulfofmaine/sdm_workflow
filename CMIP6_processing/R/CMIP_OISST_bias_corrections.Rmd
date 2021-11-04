@@ -13,7 +13,7 @@ params:
   climate_stop: "2014"
 editor_options: 
   chunk_output_type: console
-  
+
 ---
 
 ```{r setup, include=FALSE}
