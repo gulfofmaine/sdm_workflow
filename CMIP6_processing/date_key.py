@@ -24,9 +24,15 @@ import pandas as pd
 # Set Workspace:
 workspace = "local"
 
+# Set username
+UsrName='mdzaugis'
+
+# Set spp experiment
+experiment='ssp1_26'
+
 # Root paths for sdm_workflows project - local/docker
 root_locations = {
-  "local" : "/Users/akemberling/Box/",
+  "local": f"/Users/{UsrName}/Box/",
   "docker": "/home/jovyan/"}
 
 # Set root based on workspace
@@ -35,14 +41,14 @@ print(f"Working via {workspace} directory at: {box_root}")
 
 
 # Path to cmip data sources on BOX
-cmip_path = {"surf_sal"  : f"{box_root}RES_Data/CMIP6/SurSalinity/StGrid/",
-             "bot_sal"   : f"{box_root}RES_Data/CMIP6/BottomSal/StGrid/",
-             "surf_temp" : f"{box_root}RES_Data/CMIP6/SST/StGrid/",
-             "bot_temp"  : f"{box_root}RES_Data/CMIP6/BottomT/StGrid/"}
+cmip_path = {"surf_sal"  : f"{box_root}RES_Data/CMIP6/{experiment}/SurSalinity/StGrid/",
+             "bot_sal"   : f"{box_root}RES_Data/CMIP6/{experiment}/BottomSal/StGrid/",
+             "surf_temp" : f"{box_root}RES_Data/CMIP6/{experiment}/SST/StGrid/",
+             "bot_temp"  : f"{box_root}RES_Data/CMIP6/{experiment}/BottomT/StGrid/"}
 
 
 # Pick a variable
-cmip_var = "bot_temp"
+cmip_var = "surf_temp"
 
            
            
@@ -130,7 +136,7 @@ for time_index, short_name in zip(time_indices, ssal_files):
 
 
 # 2. Convert Dictionaries to pd.dataframe
-historic_df = pd.DataFrame.from_dict(historic_runs)
+historic_df = pd.DataFrame.from_dict(historic_runs)  # Historical runs only need to be cataloged once
 project_df  = pd.DataFrame.from_dict(projection_runs)
 over_df  = pd.DataFrame.from_dict(over_run)
 
@@ -142,7 +148,7 @@ historic_df.iloc[:, [2]]
 ####  Save Keys to Box  ####
 
 # save them to box
-folder_location = f"{box_root}RES_Data/CMIP6/DateKeys/"
+folder_location = f"{box_root}RES_Data/CMIP6/{experiment}/DateKeys/"
 historic_df.to_csv(f"{folder_location}{cmip_var}/{cmip_var}_historic_runs.csv", index = False)
 project_df.to_csv(f"{folder_location}{cmip_var}/{cmip_var}_future_projections.csv", index = False)
 over_df.to_csv(f"{folder_location}{cmip_var}/{cmip_var}_over_run.csv", index = False)

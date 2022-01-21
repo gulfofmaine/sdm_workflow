@@ -34,22 +34,23 @@ source_list = ['IPSL-CM6A-LR',
 'FIO-ESM-2-0',
 'GISS-E2-1-G',
 'INM-CM4-8',
-'INM-CM5-0',2L',
-'MRI-ESM2-0',
+'INM-CM5-0',
+'MIROC-ES2L',
 'NESM3',
 'NorESM2-LM',
-'NorESM2-
-'MIROC-ESMM',
+'NorESM2-MM',
 'UKESM1-0-LL']
 
-# enter the var of interest
+
+# enter the var of interest {so, thetao, tos}
 variable_id = 'so'
 
 # enter the table (based on the frequency of measurements)
 table_id = 'Omon'
 
-# Enter the experiments of interest
-filter_list = ['historical', 'ssp585']
+# Enter the experiments of interest {'historical', 'ssp585', 'ssp126'}
+filter_list = ['ssp126']
+experiment_run = 'ssp126'
 
 
 grp1 = 'source_id' # used for grouping normally don't need to change
@@ -59,7 +60,7 @@ grp2 = 'member_id' # used for grouping normally don't need to change
 # save path
 UsrName='mdzaugis'
 Group='RES_Data'
-Folder='CMIP6/'
+Folder='CMIP6/SSP1_26/'
 
 path = fcts.shared_path(user_name=UsrName, group=Group, folder=Folder)
 # Browse Catalog
@@ -72,9 +73,10 @@ AllModels = pd.read_csv('https://storage.googleapis.com/cmip6/cmip6-zarr-consoli
 #Load data
 
 # To access an individual run
-df = AllModels.query(f"source_id == 'CESM2' & variable_id == 'thetao' & experiment_id == 'historical' & member_id == 'r4i1p1f1' & table_id == 'Omon'")
+df = AllModels.query(f"source_id == 'NorESM2-MM' & variable_id == 'so' & experiment_id == 'ssp126' & member_id == 'r1i1p1f1' & table_id == 'Omon'")
 filteredModels_grid = df.reset_index(drop=True)
 
+# To run a suite of models
 df_var = AllModels.query(f"variable_id == '{variable_id}' & table_id == '{table_id}' & experiment_id == @filter_list")
 filteredModels = fcts.ExperimentFilter(df_var, grp1, grp2)
 filteredModels_grid = filteredModels.query(f"source_id == @source_list").reset_index(drop=True)
@@ -87,7 +89,7 @@ TOP = False  # True if looking for surface, False for bottom
 
 # Only has to be defined once
 gcs = gcsfs.GCSFileSystem(token='anon')
-i=0
+#i=0
 for i in range(len(filteredModels_grid)):
     source_id = filteredModels_grid.source_id[i]
     member_id = filteredModels_grid.member_id[i]
@@ -166,7 +168,7 @@ for i in range(len(filteredModels_grid)):
                             drop=True)
         if experiment_id == 'historical':
             atlantic = atlantic.sel(time=slice('1950-01-01', None))
-        elif experiment_id == 'ssp585':
+        elif experiment_id == experiment_run:   # Need to update this experiment ID for each run
             atlantic = atlantic.isel(time=slice(None, 1032))
         else:
             print("Need to enter date range")
@@ -174,7 +176,7 @@ for i in range(len(filteredModels_grid)):
         # single index
         if experiment_id == 'historical':
             atlantic = ds.sel(**kwlon, **kwlat, time=slice("1950-01-01", None))
-        elif experiment_id == 'ssp585':
+        elif experiment_id == experiment_run: # Need to update this experiment ID for each run
             atlantic = ds.sel(**kwlon, **kwlat, time=slice(None, '2100-12-31'))
         else:
             print("Need to enter date range")
@@ -216,74 +218,75 @@ for i in range(len(filteredModels_grid)):
 
 # Sea Surface Temperature
 if variable_id == 'tos':
-    source_id = filteredModels_grid.source_id[i]
-    member_id = filteredModels_grid.member_id[i]
-    experiment_id = filteredModels_grid.experiment_id[i]
-    variable_id = filteredModels_grid.variable_id[i]
-    savePath = f'{path}RawTmpFiles/{variable_id}_{source_id}_{member_id}_{experiment_id}.nc'
+    for i in range(len(filteredModels_grid)):
+        source_id = filteredModels_grid.source_id[i]
+        member_id = filteredModels_grid.member_id[i]
+        experiment_id = filteredModels_grid.experiment_id[i]
+        variable_id = filteredModels_grid.variable_id[i]
+        savePath = f'{path}RawTmpFiles/{variable_id}_{source_id}_{member_id}_{experiment_id}.nc'
 
-    # get the path to a specific zarr store 0 index is first on list
-    zstore = filteredModels_grid.zstore.values[i]
+        # get the path to a specific zarr store 0 index is first on list
+        zstore = filteredModels_grid.zstore.values[i]
 
-    # create a mutable-mapping-styly interface to the store
-    mapper = gcs.get_mapper(zstore)
+        # create a mutable-mapping-styly interface to the store
+        mapper = gcs.get_mapper(zstore)
 
-    # open it using xarray and zarr
-    ds = xr.open_zarr(mapper, consolidated=True)
+        # open it using xarray and zarr
+        ds = xr.open_zarr(mapper, consolidated=True)
 
-    lons = ['lon', 'longitude', 'nav_lon']
-    lats = ['lat', 'latitude', 'nav_lat']
+        lons = ['lon', 'longitude', 'nav_lon']
+        lats = ['lat', 'latitude', 'nav_lat']
 
-    lonNames = list(ds.cf[['longitude']].coords)
-    latNames = list(ds.cf[['latitude']].coords)
+        lonNames = list(ds.cf[['longitude']].coords)
+        latNames = list(ds.cf[['latitude']].coords)
 
-    x_coord = list(set(lonNames).intersection(lons))[0]
-    y_coord = list(set(latNames).intersection(lats))[0]
+        x_coord = list(set(lonNames).intersection(lons))[0]
+        y_coord = list(set(latNames).intersection(lats))[0]
 
-    x_coordMin = ds[x_coord].values.min()
-    x_coordMax = ds[x_coord].values.max()
-
-
-    if len(ds[variable_id][x_coord].dims) == 2:
-        multiIndex = True
-    else:
-        multiIndex = False
+        x_coordMin = ds[x_coord].values.min()
+        x_coordMax = ds[x_coord].values.max()
 
 
-    if x_coordMin < 0:
-        xmin = -100
-        xmax = -40
-    else:
-        xmin = 260
-        xmax = 320
-
-    kwlon = {x_coord: slice(xmin, xmax)}
-    kwlat = {y_coord: slice(20, 70)}
-
-    if multiIndex == True:
-        # for multi index
-        atlantic = ds.where((xmin < ds[x_coord]) & (ds[x_coord] < xmax)
-                            & (20 < ds[y_coord]) & (ds[y_coord] < 70),
-                            drop=True)
-        if experiment_id == 'historical':
-            atlantic = atlantic.sel(time=slice('1950-01-01', None))
-        elif experiment_id == 'ssp585':
-            atlantic = atlantic.isel(time=slice(None, 1032))
+        if len(ds[variable_id][x_coord].dims) == 2:
+            multiIndex = True
         else:
-            print("Need to enter date range")
-    else:
-        # single index
-        if experiment_id == 'historical':
-            atlantic = ds.sel(**kwlon, **kwlat, time=slice("1950-01-01", None))
-        elif experiment_id == 'ssp585':
-            atlantic = ds.sel(**kwlon, **kwlat, time=slice(None, '2100-12-31'))
+            multiIndex = False
+
+
+        if x_coordMin < 0:
+            xmin = -100
+            xmax = -40
         else:
-            print("Need to enter date range")
+            xmin = 260
+            xmax = 320
 
-    delayed_obj = atlantic.to_netcdf(savePath, compute=False)
+        kwlon = {x_coord: slice(xmin, xmax)}
+        kwlat = {y_coord: slice(20, 70)}
 
-    with ProgressBar():
-        results = delayed_obj.compute()
+        if multiIndex == True:
+            # for multi index
+            atlantic = ds.where((xmin < ds[x_coord]) & (ds[x_coord] < xmax)
+                                & (20 < ds[y_coord]) & (ds[y_coord] < 70),
+                                drop=True)
+            if experiment_id == 'historical':
+                atlantic = atlantic.sel(time=slice('1950-01-01', None))
+            elif experiment_id == experiment_run:  # Need to update this experiment ID for each run
+                atlantic = atlantic.isel(time=slice(None, 1032))
+            else:
+                print("Need to enter date range")
+        else:
+            # single index
+            if experiment_id == 'historical':
+                atlantic = ds.sel(**kwlon, **kwlat, time=slice("1950-01-01", None))
+            elif experiment_id == experiment_run:  # Need to update this experiment ID for each run
+                atlantic = ds.sel(**kwlon, **kwlat, time=slice(None, '2100-12-31'))
+            else:
+                print("Need to enter date range")
+
+        delayed_obj = atlantic.to_netcdf(savePath, compute=False)
+
+        with ProgressBar():
+            results = delayed_obj.compute()
 
 
 
