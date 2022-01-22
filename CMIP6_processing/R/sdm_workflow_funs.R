@@ -16,28 +16,26 @@ months_numeric <- str_pad(seq(from = 1, to = 12, by = 1), width = 2, side = "lef
 
 
 # date keys for the different cmip runs
-cmip_date_key <- list(
+cmip_date_key_fun <- function(experiment){
+  cmip_date_key <- list(
   "surf_temp" = list(
-    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_historic_runs.csv', col_types = cols()),
-    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_future_projections.csv', col_types = cols()),
-    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_temp/surf_temp_over_run.csv', col_types = cols())),
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys_historical/surf_temp/surf_temp_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/surf_temp/surf_temp_future_projections.csv'), col_types = cols()),
+    "extended_projections" = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/surf_temp/surf_temp_over_run.csv'), col_types = cols())),
   "surf_sal" = list(
-    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_historic_runs.csv', col_types = cols()),
-    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_future_projections.csv', col_types = cols()),
-    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/surf_sal/surf_sal_over_run.csv', col_types = cols())),
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys_historical/surf_sal/surf_sal_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/surf_sal/surf_sal_future_projections.csv'), col_types = cols()),
+    "extended_projections" = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/surf_sal/surf_sal_over_run.csv'), col_types = cols())),
   "bot_temp" = list(
-    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_historic_runs.csv', col_types = cols()),
-    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_future_projections.csv', col_types = cols()),
-    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_temp/bot_temp_over_run.csv', col_types = cols())),
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys_historical/bot_temp/bot_temp_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/bot_temp/bot_temp_future_projections.csv'), col_types = cols()),
+    "extended_projections" = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/bot_temp/bot_temp_over_run.csv'), col_types = cols())),
   "bot_sal" = list(
-    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_historic_runs.csv', col_types = cols()),
-    "future_projections"   = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_future_projections.csv', col_types = cols()),
-    "extended_projections" = read_csv('~/Box/RES_Data/CMIP6/DateKeys/bot_sal/bot_sal_over_run.csv', col_types = cols())
+    "historic_runs"        = read_csv('~/Box/RES_Data/CMIP6/DateKeys_historical/bot_sal/bot_sal_historic_runs.csv', col_types = cols()),
+    "future_projections"   = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/bot_sal/bot_sal_future_projections.csv'), col_types = cols()),
+    "extended_projections" = read_csv(paste0('~/Box/RES_Data/CMIP6/', experiment,'/DateKeys/bot_sal/bot_sal_over_run.csv'), col_types = cols())
   )
-  
-  
-  
-  )
+  )}
 
 
 ####  OISST Processing  ####
@@ -84,17 +82,21 @@ import_oisst_clim <- function(climatology_period = "1985-2014",
 #' 
 #' @description Load the collection of CMIP6 Scenarios for a selection of variables.
 #'
-#' @param cmip_var Indicaation of what variable you want to load with raster::stack()
+#' @param cmip_var Indication of what variable you want to load with raster::stack()
+#' @param experiment Name of the ssp experiment you want to load
 #'
 #' @return
 #' @export
 #'
 #' @examples
 import_cmip_collection <- function(cmip_var = c("bot_sal", "bot_temp", "surf_temp", "surf_sal"),
+                                   experiment = experiment,
                                    os.use = "unix"){
+  # Experiment Folder
+  expfolder <- paste0("CMIP6/", experiment)
   
   # CMIP Folder Path
-  cmip_path  <- shared.path(os.use, "RES_Data", "CMIP6")
+  cmip_path  <- shared.path(os.use, "RES_Data", expfolder)
   
   
   # Set folder path to single variable extractions
@@ -614,7 +616,7 @@ time_period_quantile <- function(time_period = c("historic", "projection"),
 }
 
 
-# Shorthand function for easy accessof memory use
+# Shorthand function for easy access of memory use
 lsos <- function(..., n = 10) {
   .ls.objects(..., order.by = "Size", decreasing = TRUE, head = TRUE, n = n)
 }
