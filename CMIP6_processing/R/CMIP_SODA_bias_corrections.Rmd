@@ -546,7 +546,7 @@ full_95th <- stack(stack(historic_95), stack(projection_95))
 
 ```{r}
 # Path to the bias correction folder
-var_path <- paste0(cmip_path, experiment, "/BiasCorrected/", pick_var)
+var_path <- paste0(cmip_path, experiment, "/BiasCorrected/EnsembleData/", pick_var,"/", pick_var)
 
 
 # File Names

@@ -9,6 +9,11 @@ output:
         collapsed: FALSE
     code_folding: show
 params: 
+  experiment: 
+      label: "Select CMIP experiment"
+      value: "ssp1_26"
+      input: select
+      choices: ["ssp1_26", "ssp1_85"]
   climate_start: "1985"
   climate_stop: "2014"
 editor_options: 
@@ -36,7 +41,7 @@ library(knitr)
 
 
 # Load the build code and stratification function
-box_paths  <- research_access_paths(os.use = "unix")
+box_paths  <- research_access_paths() # os.use = "unix" Doesn't seem to be an argument??
 res_path   <- box_paths$res
 oisst_path <- box_paths$oisst_mainstays
 cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
@@ -49,6 +54,9 @@ temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
 
 ####  Functions  ####
 source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
+
+experiment <- params$experiment
+cmip_date_key <- cmip_date_key_fun(experiment)
 ```
 
 
@@ -70,7 +78,7 @@ pick_var <- "surf_temp"
 
 
 # Load all the CMIP Scenarios - cropped to study area
-cmip_data <- import_cmip_collection(cmip_var = pick_var)
+cmip_data <- import_cmip_collection(cmip_var = pick_var, experiment)
 ```
 
 
@@ -500,7 +508,7 @@ full_95th <- stack(stack(historic_95), stack(projection_95))
 
 ```{r}
 # Path to the bias correction folder
-var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
+var_path <- paste0(cmip_path, experiment, "/BiasCorrected/EnsembleData/", pick_var,"/", pick_var)
 
 
 # File Names
