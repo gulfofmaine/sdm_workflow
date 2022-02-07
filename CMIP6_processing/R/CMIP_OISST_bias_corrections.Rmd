@@ -365,13 +365,15 @@ plot(cmip_anoms_bcorrect[[1]][[1]],
 ### Saving Bias Corrected CMIP6 Runs
 
 ```{r, eval = FALSE}
-# iwalk(cmip_anoms_bcorrect, function(bias_corrections, run_name){
+#iwalk(cmip_anoms_bcorrect, function(bias_corrections, run_name){
 #    paste0(cmip_path, "BiasCorrected/", pick_var)
-#    out_location <- paste0(cmip_path, "BiasCorrected/", pick_var, "/", run_name, ".grd")
+#    out_location <- paste0(cmip_path, experiment, "/BiasCorrected/IndividualModels/", pick_var, "/", run_name, ".grd")
 #    message(paste0("Saving ", run_name, " at: \n", out_location))
-#    # writeRaster(bias_corrections, out_location, overwrite = T)
-#   
+#    writeRaster(bias_corrections, out_location, overwrite = T)
+   
 # })
+
+
 ```
 
 

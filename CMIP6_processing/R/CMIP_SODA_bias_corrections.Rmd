@@ -16,7 +16,7 @@ params:
     choices: ["ssp1_26", "ssp1_85"]
   variable: 
     label: "Select a SODA Variable to Process:" 
-    value: "surf_sal"
+    value: "bot_temp"
     input: select
     choices: ["surf_sal", "bot_sal", "bot_temp"]
   climate_start: "1985"
@@ -417,6 +417,22 @@ plot(cmip_anoms_bcorrect[[1]][[1]],
      main = "Single Month of Bias Corrected Data", 
      col = temp_pal)
 ```
+
+
+### Saving Bias Corrected CMIP6 Runs
+
+```{r, eval = FALSE}
+iwalk(cmip_anoms_bcorrect, function(bias_corrections, run_name){
+    paste0(cmip_path, "BiasCorrected/", pick_var)
+    out_location <- paste0(cmip_path, experiment, "/BiasCorrected/IndividualModels/", pick_var, "/", run_name, ".grd")
+    message(paste0("Saving ", run_name, " at: \n", out_location))
+    writeRaster(bias_corrections, out_location, overwrite = T)
+   
+ })
+
+
+```
+
 
 
 ## Processing Mean/5th/95th
