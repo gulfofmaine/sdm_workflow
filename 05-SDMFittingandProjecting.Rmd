@@ -1,0 +1,15 @@
+# Species Distribution Model Fitting and Projecting
+
+**About:**
+
+
+
+## Steps
+
+
+
+## Next stages
+
+
+## ::: {#refs}
+:::
