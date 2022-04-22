@@ -9,9 +9,14 @@ output:
         collapsed: FALSE
     code_folding: show
 params: 
+  experiment: 
+    label: "Select CMIP experiment"
+    value: "ssp1_26"
+    input: select
+    choices: ["ssp1_26", "ssp1_85"]
   variable: 
     label: "Select a SODA Variable to Process:" 
-    value: "surf_sal"
+    value: "bot_temp"
     input: select
     choices: ["surf_sal", "bot_sal", "bot_temp"]
   climate_start: "1985"
@@ -39,7 +44,7 @@ library(knitr)
 
 
 # Load the build code and stratification function
-box_paths  <- research_access_paths(os.use = "unix")
+box_paths  <- research_access_paths() # os.use = "unix" Doesn't seem to be an argument??
 res_path   <- box_paths$res
 oisst_path <- box_paths$oisst_mainstays
 cmip_path  <- shared.path("unix", "RES_Data", "CMIP6")
@@ -52,6 +57,9 @@ temp_pal <- rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu"))
 
 ####  Functions  ####
 source(here("CMIP6_processing/R/sdm_workflow_funs.R"))
+
+experiment <- params$experiment
+cmip_date_key <- cmip_date_key_fun(experiment)
 ```
 
 
@@ -90,7 +98,8 @@ message(paste0("Loading CMIP6 Data for:  ", pick_var ))
 
 ```{r}
 # Load all the CMIP Scenarios - cropped to study area
-cmip_data <- import_cmip_collection(cmip_var = pick_var)
+cmip_data <- import_cmip_collection(cmip_var = pick_var, experiment)
+
 ```
 
 
@@ -410,6 +419,22 @@ plot(cmip_anoms_bcorrect[[1]][[1]],
 ```
 
 
+### Saving Bias Corrected CMIP6 Runs
+
+```{r, eval = FALSE}
+iwalk(cmip_anoms_bcorrect, function(bias_corrections, run_name){
+    paste0(cmip_path, "BiasCorrected/", pick_var)
+    out_location <- paste0(cmip_path, experiment, "/BiasCorrected/IndividualModels/", pick_var, "/", run_name, ".grd")
+    message(paste0("Saving ", run_name, " at: \n", out_location))
+    writeRaster(bias_corrections, out_location, overwrite = T)
+   
+ })
+
+
+```
+
+
+
 ## Processing Mean/5th/95th
 
 The following code sets up the sub-setting and matching components to process comparable model runs. Since the historical period and future projections cover different periods, they get run separately here, to be combined again after different data representing across-model quantiles have been pulled from them.
@@ -537,7 +562,7 @@ full_95th <- stack(stack(historic_95), stack(projection_95))
 
 ```{r}
 # Path to the bias correction folder
-var_path <- paste0(cmip_path, "BiasCorrected/", pick_var)
+var_path <- paste0(cmip_path, experiment, "/BiasCorrected/EnsembleData/", pick_var,"/", pick_var)
 
 
 # File Names

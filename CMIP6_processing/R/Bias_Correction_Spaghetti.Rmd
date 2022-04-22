@@ -8,9 +8,14 @@ output:
     toc_float:
         collapsed: FALSE
     code_folding: hide
+params: 
+  experiment: 
+      label: "Select CMIP experiment"
+      value: "ssp1_26"
+      input: select
+      choices: ["ssp1_26", "ssp1_85"]
 editor_options: 
   chunk_output_type: console
-
 ---
 
 ```{r setup, include=FALSE}
@@ -40,6 +45,7 @@ res_path   <- box_paths$res
 oisst_path <- box_paths$oisst_mainstays
 cmip_path  <- box_path("RES_Data", "CMIP6")
 soda_path  <- box_path("RES_Data", "SODA")
+experiment <- params$experiment
 
 # Set theme  
 theme_set(theme_bw())
@@ -312,10 +318,10 @@ rm(soda_bsal, soda_btemp, soda_ssal, oisst_monthly)
 ```{r means}
 
 # CMIP Bias Corrected
-cmip_stemp <- stack(str_c(cmip_path, "BiasCorrected/surf_temp_OISST_bias_corrected_mean.grd"))
-cmip_btemp <- stack(str_c(cmip_path, "BiasCorrected/bot_temp_SODA_bias_corrected_mean.grd"))
-cmip_ssal  <- stack(str_c(cmip_path, "BiasCorrected/surf_sal_SODA_bias_corrected_mean.grd"))
-cmip_bsal  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_corrected_mean.grd"))
+cmip_stemp <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_temp/surf_temp_OISST_bias_corrected_mean.grd"))
+cmip_btemp <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_temp/bot_temp_SODA_bias_corrected_mean.grd"))
+cmip_ssal  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_sal/surf_sal_SODA_bias_corrected_mean.grd"))
+cmip_bsal  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_sal/bot_sal_SODA_bias_corrected_mean.grd"))
 
 
 # Cmip matches to SODA/OISST Time Periods
@@ -359,10 +365,10 @@ masked_cmip <- imap(cmip_vars, function(masking_var, var_name){
 
 ```{r}
 # CMIP Bias Corrected
-cmip_stemp_5 <- stack(str_c(cmip_path, "BiasCorrected/surf_temp_OISST_bias_corrected_5thpercentile.grd"))
-cmip_btemp_5 <- stack(str_c(cmip_path, "BiasCorrected/bot_temp_SODA_bias_corrected_5thpercentile.grd"))
-cmip_ssal_5  <- stack(str_c(cmip_path, "BiasCorrected/surf_sal_SODA_bias_corrected_5thpercentile.grd"))
-cmip_bsal_5  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_corrected_5thpercentile.grd"))
+cmip_stemp_5 <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_temp/surf_temp_OISST_bias_corrected_5thpercentile.grd"))
+cmip_btemp_5 <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_temp/bot_temp_SODA_bias_corrected_5thpercentile.grd"))
+cmip_ssal_5  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_sal/surf_sal_SODA_bias_corrected_5thpercentile.grd"))
+cmip_bsal_5  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_sal/bot_sal_SODA_bias_corrected_5thpercentile.grd"))
 
 
 # Put them in a list
@@ -402,10 +408,10 @@ masked_cmip_5 <- imap(cmip_vars_5, function(masking_var, var_name){
 
 ```{r}
 # CMIP Bias Corrected
-cmip_stemp_95 <- stack(str_c(cmip_path, "BiasCorrected/surf_temp_OISST_bias_corrected_95thpercentile.grd"))
-cmip_btemp_95 <- stack(str_c(cmip_path, "BiasCorrected/bot_temp_SODA_bias_corrected_95thpercentile.grd"))
-cmip_ssal_95  <- stack(str_c(cmip_path, "BiasCorrected/surf_sal_SODA_bias_corrected_95thpercentile.grd"))
-cmip_bsal_95  <- stack(str_c(cmip_path, "BiasCorrected/bot_sal_SODA_bias_corrected_95thpercentile.grd"))
+cmip_stemp_95 <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_temp/surf_temp_OISST_bias_corrected_95thpercentile.grd"))
+cmip_btemp_95 <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_temp/bot_temp_SODA_bias_corrected_95thpercentile.grd"))
+cmip_ssal_95  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/surf_sal/surf_sal_SODA_bias_corrected_95thpercentile.grd"))
+cmip_bsal_95  <- stack(str_c(cmip_path, experiment, "/BiasCorrected/EnsembleData/bot_sal/bot_sal_SODA_bias_corrected_95thpercentile.grd"))
 
 
 # Put them in a list
