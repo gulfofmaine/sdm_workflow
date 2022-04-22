@@ -8,7 +8,7 @@ The goal of this project is to produce marine species distribution and abundance
 - use the fitted model to project species distribution and abundance from 1982 to 2100 with potential environmental conditions estimated from an ensemble of statistically downscaled, biased corrected, CMIP6 global climate models  
 - develop an RShiny application to visualize key findings and provide users easy access to results data.
 
-# Repository Orientation
+## Repository Orientation
 
 This repository pulls together methods and processes from five different species distibution modeling workflow stages. Given the diverse processes involved in this workflow, and that the different stages will not always be completed together (i.e., lab work may focus on CMIP6 environmental data, with no connection to a distribution modeling effort), some code exists in independent GitHub repositories. Rather than trying to force all the code into one repository or copy code over and risk it becoming outdated, we have decided to instead present the different stages while throroughly documenting the specific functions used and where they are located.  
 
@@ -32,9 +32,9 @@ This stage of the workflow is where we bring together the biological and environ
 
 The final stage of the workflow holds the development of an RShiny application to visualize species distribution model projection results and provide user access to these results data. The code for this stage is found within the app repository **add link**.
 
-# ::: {#refs}
-:::
+## References
 Thorson, J.T., Barnett, L.A.K., 2017. Comparing estimates of abundance trends and distribution shifts using single- and multispecies models of fishes and biogenic habitat. ICES J. Mar. Sci. 74, 1311–1321. https://doi.org/10.1093/icesjms/fsw193
+
 Thorson, J.T., 2019. Guidance for decisions using the Vector Autoregressive Spatio-Temporal (VAST) package in stock, ecosystem, habitat and climate assessments. Fish. Res. 210, 143–161. https://doi.org/10.1016/j.fishres.2018.10.013
 
 

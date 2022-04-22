@@ -11,5 +11,4 @@
 ## Next stages
 
 
-## ::: {#refs}
-:::
+## References

@@ -24,8 +24,7 @@ This stage of the workflow includes three steps. The first step is collecting da
 
 The products from these three steps include a raster layer of bottom depth, raster stacks for each of the historical environmental covariates (sea surface temperature, bottom temperature, sea surface salinity, bottom salinity), and then raster stacks for the bias corrected CMIP6 ensemble 5th percentile, mean, and 95th percentile of each of the environmental covariates. The depth and historical environmental covariate rasters are transfered into the TargetsSDM workflow repo within the `data/covariates/static` and `data/covariates/dynamic` folders **add link**, while the bias corrected CMIP6 ensemble rasters are transferred to the `data/predict/raw` folders within the TargetsSDM workflow repo. Ultimately, these rasters are then used during the species distribution model fitting and projection stage to enhance the tow data as potential covariates to use in the distribution models.  
 
-## ::: {#refs}
-:::
+## References
 
 Amante, C; Eakins, B W (2009): ETOPO1 Global Relief Model converted to PanMap layer format. NOAA-National Geophysical Data Center, PANGAEA, https://doi.org/10.1594/PANGAEA.769615
 Carton, J.A., G. Chepurin, X. Cao, B. Giese, 2000: A Simple Ocean Data Assimilation Analysis of the Global Upper Ocean 1950–95. Part I: Methodology. J. Phys. Oceanogr. 30, 294–309.
