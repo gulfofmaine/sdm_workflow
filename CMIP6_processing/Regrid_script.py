@@ -22,68 +22,72 @@ Folder = input()
 UsrName='mdzaugis'
 Group='RES_Data'
 Folder='CMIP6/'
+ExperimentFolder='CMIP6/SSP1_26/'
+Experiment='ssp126'
 
-path = fcts.shared_path(user_name=UsrName, group=Group, folder=Folder)
+CMIPpath = fcts.shared_path(user_name=UsrName, group=Group, folder=Folder)
+ExperimentPath = fcts.shared_path(user_name=UsrName, group=Group, folder=ExperimentFolder)
 
-dsTOS = glob.glob(f'{path}RawTmpFiles/tos*_ssp585*')
-dsTOS = glob.glob(f'{path}RawTmpFiles/tos*_historical*')
+dsTOS = glob.glob(f'{ExperimentPath}RawTmpFiles/tos*_{Experiment}*')
+dsTOS = glob.glob(f'{ExperimentPath}RawTmpFiles/tos*_historical*')
 for file in dsTOS:
-    gridfi = f'{path}GridFiles/OISST_grid.nc'
+    gridfi = f'{CMIPpath}GridFiles/OISST_grid.nc'
     base_filename = os.path.basename(file)
-    fileout = f'{path}SST/tmpfiles/stGrid_{base_filename}'
+    fileout = f'{ExperimentPath}SST/tmpfiles/stGrid_{base_filename}'
     cdo.remapdis(gridfi,  input=file, output=fileout, options='-f nc')
     ds = xr.open_dataset(fileout)
-    savepath = f'{path}SST/StGrid/stGrid_{base_filename}'
+    savepath = f'{ExperimentPath}SST/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(lon=slice(260, 320), lat=slice(20, 70))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsTOS))}')
 
-dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_ssp585*')
-dsThetao = glob.glob(f'{path}RawTmpFiles/thetao*_historical*')
+
+dsThetao = glob.glob(f'{ExperimentPath}RawTmpFiles/thetao*_{Experiment}*')
+dsThetao = glob.glob(f'{ExperimentPath}RawTmpFiles/thetao*_historical*')
 file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/thetao_CESM2_r4i1p1f1_historical.nc"
+
+## Completed regridding thetao_MRI-ESM2-0_r1i1p1f1_ssp126.nc out of 26 need to find more space to run on box
 for file in dsThetao:
-    gridfi = f'{path}GridFiles/SODA_grid.nc'
+    gridfi = f'{CMIPpath}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
-    fileout = f'{path}BottomT/tmpfiles/stGrid_{base_filename}'
+    fileout = f'{ExperimentPath}BottomT/tmpfiles/stGrid_{base_filename}'
     cdo.remapdis(gridfi,  input=file, output=fileout, options='-f nc')
     ds = xr.open_dataset(fileout)
-    savepath = f'{path}BottomT/StGrid/stGrid_{base_filename}'
+    savepath = f'{ExperimentPath}BottomT/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
     #ds_cropped = ds_cropped.isel(time=slice(None, 1032))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsThetao))}')
 
-dsSO = glob.glob(f'{path}RawTmpFiles/so*_ssp585*')
-dsSO = glob.glob(f'{path}RawTmpFiles/so*_historical*')
+dsSO = glob.glob(f'{ExperimentPath}RawTmpFiles/so*_{Experiment}*')
+dsSO = glob.glob(f'{ExperimentPath}RawTmpFiles/so*_historical*')
 file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/so_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
 for file in dsSO:
-    gridfi = f'{path}GridFiles/SODA_grid.nc'
+    gridfi = f'{CMIPpath}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
-    fileout = f'{path}BottomSal/tmpfiles/stGrid_{base_filename}'
+    fileout = f'{ExperimentPath}BottomSal/tmpfiles/stGrid_{base_filename}'
     cdo.remapdis(gridfi,  input=file, output=fileout, options='-f nc')
     ds = xr.open_dataset(fileout)
-    savepath = f'{path}BottomSal/StGrid/stGrid_{base_filename}'
+    savepath = f'{ExperimentPath}BottomSal/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
     #ds_cropped = ds_cropped.isel(time=slice(None, 1032))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsSO))}')
 
-dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_ssp585*')
-dsSurSO = glob.glob(f'{path}RawTmpFiles/Surface*_historical*')
+dsSurSO = glob.glob(f'{ExperimentPath}RawTmpFiles/Surface*_{Experiment}*')
+dsSurSO = glob.glob(f'{ExperimentPath}RawTmpFiles/Surface*_historical*')
 file = "/Users/mdzaugis/Box/RES_Data/CMIP6/RawTmpFiles/Surface_so_MRI-ESM2-0_r1i1p1f1_ssp585.nc"
 for file in dsSurSO:
-    gridfi = f'{path}GridFiles/SODA_grid.nc'
+    gridfi = f'{CMIPpath}GridFiles/SODA_grid.nc'
     base_filename = os.path.basename(file)
-    fileout = f'{path}SurSalinity/tmpfiles/stGrid_{base_filename}'
+    fileout = f'{ExperimentPath}SurSalinity/tmpfiles/stGrid_{base_filename}'
     cdo.remapdis(gridfi,  input=file, output=fileout, options='-f nc')
     ds = xr.open_dataset(fileout, decode_times=False)
-    savepath = f'{path}SurSalinity/StGrid/stGrid_{base_filename}'
+    savepath = f'{ExperimentPath}SurSalinity/StGrid/stGrid_{base_filename}'
     ds_cropped = ds.sel(longitude=slice(260, 320), latitude=slice(20, 70))
     ds_cropped.to_netcdf(savepath)
     os.remove(fileout)
     print(f'Completed regridding {base_filename} out of {str(len(dsSurSO))}')
-
-
