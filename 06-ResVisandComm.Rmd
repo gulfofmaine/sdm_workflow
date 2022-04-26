@@ -2,14 +2,12 @@
 
 **About:**
 
-
+This section of the repository details our process and code for developing the FishViz RShiny application to visualize and communicate key results from our modeling efforts. The code for this stage is available from the [FishViz App](https://github.com/aallyn/TargetsSDM) repository. 
 
 ## Steps
 
+## Products
 
 
-## Next stages
 
-
-## References
 

@@ -1,0 +1,24 @@
+# Biological Data Collection
+
+**About:**
+
+This section of the repository contains information and code detailing the collection and processing of fisheries-independent biological catch data from the NOAA Northeast Fisheries Science Center spring/fall surveys and the Department of Oceans Canada spring/summer surveys. The code for this stage is accessed through the [TargetsSDM repository](https://github.com/aallyn/TargetsSDM) and particularly, the R functions within the [nms_functions.R](https://github.com/aallyn/TargetsSDM/blob/main/R/nmfs_functions.R), [dfo_functions.R](https://github.com/aallyn/TargetsSDM/blob/main/R/dfo_functions.R) and [combo_functions.R](https://github.com/aallyn/TargetsSDM/blob/main/R/combo_functions.R) scripts. 
+
+## Steps
+This stage of the workflow has four steps, where the first three steps (loading the data, getting tow information, and making a tidy occupancy dataframe) are completed for each of the surveys independently and then the final step combines dataframes from each of the surveys. 
+
+1. Load the raw trawl data. The NOAA bottom trawl survey data were provided as a raw .Rdata file, which we load using the `nmfs_load` function. The DFO data were accessed through R using three different functions: `dfo_GSINF_load`, `dfo_GSMISSIONS_load` and `dfo_GSCAT_load`.
+
+2. Get tow information. With an eye towards eventually extracting environmental variables at unique tow locations, we created a dataset for each survey that includes the unique tow location information. For the NOAA bottom trawl, this is done using the `nmfs_get_tows` function and for the DFO bottom trawl we use the `dfo_get_tows` function. 
+
+3. Make a tidy occupancy dataframe. Most species distribution modeling approaches require a tidy occupancy dataframe, where at a minimum, each row of the dataframe includes the sample data for a species' occurrence at a given tow location and time. We created these tidy occupancy dataframes for the NOAA bottom trawl data with the `nmfs_make_tidy_occu` function and with the `dfo_make_tidy_occu` function.
+
+4. Combine the NOAA and DFO tow dataframes and the NOAA and DFO tidy occupancy dataframes. The final step in this stage combines the two tow dataframes for NOAA and DFO surveys using the `bind_nmfs_dfo_tows` function and combines the two tidy occupancy dataframes using the `bind_nmfs_dfo_tidy_occu` function.
+
+## Output
+
+The output from this stage is two dataframes: (1) a "tow" dataframe, which includes the location and time of each unique tow (or sample), and (2) an "occupancy" dataframe, which includes the catch data for each species at every unique tow. 
+
+## Next stages
+
+After completing these four steps, the combined tow dataframe is then used to [extract environmental covariates][Enhancing Biological Data With Environmental Data]. With the environmental covariates extracted, the tow information is then merged back with the tidy occupancy dataframe to create a tidy model dataframe, which we [ultimately confront with the VAST model][Species Distribution Model Fitting and Projecting].

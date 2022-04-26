@@ -1,0 +1,25 @@
+# Enhancing Biological Data With Environmental Data
+
+**About:**
+
+This section of the repository contains information and code detailing how we enhance the biological catch data samples/observations with environmental data, eventually using these environmental data as covariates in the fitted species distribution model. 
+
+## Steps
+
+There are three key steps to this stage: first extracting information from static (i.e., time-invariant) environmental variables, then extracting information for dynamic variables and finally merging these data with the tidy occupancy dataframe. The code for completing these steps is in the [TargetsSDM GitHub repository](https://github.com/aallyn/TargetsSDM), where we leverage functions in the [enhance_r_funcs.R](https://github.com/aallyn/TargetsSDM/blob/main/R/enhance_r_funcs.R) script, and in the [combo_functions.R](https://github.com/aallyn/TargetsSDM/blob/main/R/combo_functions.R) script.
+
+1. Extracting information from static environmental variables. We use the `static_extract` function to extract information for each of the raster layers in the `data/covariates/static` at each of the unique tow locations.
+
+2. Extracting information from dynamic environmental variables. To extract information for dynamic variables, we use the `dynamic_extract` function. Rather than the simple point/raster overlay completed with the `static_extract` function, the `dynamic_extract` function has more flexibility to summarize the dynamic environmental variables across different time scales (e.g., monthly, seasonal, annual averages or 90-day averages) and then complete the extraction at each unique tow location.
+
+3. Enhancing biological data with environmental data. The final step in this stage merges the tow information with environmental variables to the biological catch data tidy occupancy dataframe using the `make_tidy_mod_data` function. 
+
+Along with these key steps, we have also written a function to facilitate rescaling the environmental variables. rescaling isn't always necessary, depending on the variables and the distribution modeling approach being used. With the VAST models, rescaling the variables is recommended. We center and scale each of the variables with the `rescale_all_covs` function and then retain the scaling parameters for future use with the `get_rescale_params` function.
+
+## Products
+
+The product for this stage is a tidy model dataframe, where each row contains information on the location of the tow, the catch of a species, and the environmental variables at the tow location. 
+
+## Next stages
+
+From this stage, the tidy model dataframe is [confronted with the seasonal VAST species distribution model][Species Distribution Model Fitting and Projecting]. 

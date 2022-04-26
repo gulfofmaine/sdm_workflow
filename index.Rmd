@@ -19,25 +19,17 @@ gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 
 Welcome to the SDM Workflow Repository documentation. Here you will find documentation detailing the methods we used to project marine species distribution and abundance changes within the northwest Atlantic given future climate conditions from CMIP6 global climate models.
 
-**About:**
-This project and its results are the work of the Integrated Systems Ecology Laboratory at the Gulf of Maine Research Institute led by Dr. Kathy Mills.
+**About**
 
-Funding for this project was provided by a Department of Fisheries and Oceans Canada Ecosystems and Oceans Science Contribution grant and a NOAA Cooperative Insittute for the North Atlantic Region grant. 
+This project and its results are the work of the [Integrated Systems Ecology Laboratory](https://gmri.org/commitments/science/integrated-systems-ecology/) at the Gulf of Maine Research Institute led by [Dr. Kathy Mills](https://gmri.org/our-approach/staff/kathy-mills/).
 
-**Contacts:**
-For questions or more information, please email 
+Funding for this project was provided by a Department of Fisheries and Oceans Canada Ecosystems and Oceans Science Contribution grant and a NOAA Cooperative Institute for the North Atlantic Region grant. 
 
-**Acknowledgements:**
-The Gulf of Maine Research Institute is located in Portland, Maine. For thousands of years, the Abenaki people fished, hunted, farmed, and cared for these lands. The Abenaki people are part of a larger Wabanaki Confederacy who inhibited Maine lands, including the Penobscot, Passamaquody, Maliseet and Mi'kmaq sovereign peoples. We now live and do our work on their unceded homelands. 
+**Contacts**
 
-**Quick Links**
+For questions or more information, [please contact us](mailto:aallyn@gmri.org)!
 
-For quick access to some of the summary reports use these links:
+**Acknowledging Our Place**
 
-[1. CMIP Bias Correction Steps with OISST](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_OISST_bias_corrections.html)
+The Gulf of Maine Research Institute is located in Portland, Maine. For thousands of years, the Abenaki people fished, hunted, farmed, and cared for these lands. The Abenaki people are part of a larger Wabanaki Confederacy, including the Penobscot, Passamaquody, Maliseet and Mi'kmaq sovereign peoples. We now live and do our work on their unceded homelands. 
 
-[2. CMIP Bias Correction Steps with SODA](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_SODA_bias_corrections.html)
-
-[3. Bias-Corrected Time lines with Reference Data](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/Bias_Correction_Validation.html)
-
-[4. Bias-Corrected Time Lines for Study Regions](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/Bias_Correction_Spaghetti.html)
