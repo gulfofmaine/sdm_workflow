@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Project Overview {#intro}
 
 The goal of this project is to produce marine species distribution and abundance projections within the northwest Atlantic ocean, following open science principles to make all code and data available. To reach this goal, we
