@@ -11,7 +11,7 @@ This stage of the workflow has four steps, where the first three steps (loading 
 
 2. Get tow information. With an eye towards eventually extracting environmental variables at unique tow locations, we created a dataset for each survey that includes the unique tow location information. For the NOAA bottom trawl, this is done using the `nmfs_get_tows` function and for the DFO bottom trawl we use the `dfo_get_tows` function. 
 
-3. Make a tidy occupancy dataframe. Most species distribution modeling approaches require a tidy occupancy dataframe, where at a minimum, each row of the dataframe includes the sample data for a species' occurrence at a given tow location and time. We created these tidy occupancy dataframes for the NOAA bottom trawl data with the `nmfs_make_tidy_occu` function and with the `dfo_make_tidy_occu` function.
+3. Make a tidy occupancy dataframe. Most species distribution modeling approaches require a tidy occupancy dataframe. At a minimum, each row of this tidy occupancy dataframe includes the sample data for a species' occurrence at a given tow location and time. We created these tidy occupancy dataframes for the NOAA bottom trawl data with the `nmfs_make_tidy_occu` function and with the `dfo_make_tidy_occu` function.
 
 4. Combine the NOAA and DFO tow dataframes and the NOAA and DFO tidy occupancy dataframes. The final step in this stage combines the two tow dataframes for NOAA and DFO surveys using the `bind_nmfs_dfo_tows` function and combines the two tidy occupancy dataframes using the `bind_nmfs_dfo_tidy_occu` function.
 

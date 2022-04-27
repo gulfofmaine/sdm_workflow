@@ -16,7 +16,7 @@ There are three key steps to this stage: first extracting information from stati
 
 Along with these key steps, we have also written a function to facilitate rescaling the environmental variables. rescaling isn't always necessary, depending on the variables and the distribution modeling approach being used. With the VAST models, rescaling the variables is recommended. We center and scale each of the variables with the `rescale_all_covs` function and then retain the scaling parameters for future use with the `get_rescale_params` function.
 
-## Products
+## Output
 
 The product for this stage is a tidy model dataframe, where each row contains information on the location of the tow, the catch of a species, and the environmental variables at the tow location. 
 
