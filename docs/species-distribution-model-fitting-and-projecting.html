@@ -23,7 +23,7 @@
 <meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
 
 
-<meta name="date" content="2022-04-27" />
+<meta name="date" content="2022-04-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -102,7 +102,11 @@
 <li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
 <li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#output-4"><i class="fa fa-check"></i><b>6.2</b> Output<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a></li>
+<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="future-work-plans.html"><a href="future-work-plans.html#planned-activities"><i class="fa fa-check"></i><b>7.1</b> Planned Activities<span></span></a></li>
+<li class="chapter" data-level="7.2" data-path="future-work-plans.html"><a href="future-work-plans.html#potential-opportunities"><i class="fa fa-check"></i><b>7.2</b> Potential Opportunities<span></span></a></li>
+</ul></li>
 <li class="chapter" data-level="8" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>8</b> References<span></span></a></li>
 </ul>
 
@@ -140,12 +144,13 @@
 <p>2c. Make VAST covariate dataframe. This is the second dataframe we create from the VAST seasonal dataframe, and includes the information for habitat covariates at each of the tow locations. We make this dataframe using the <code>make_vast_covariate_data</code> function.</p>
 <p>2d. Make VAST catchability dataframe. The final dataframe we create is a catchability dataframe, this includes information for the survey that each observation was collected.</p></li>
 <li><p>Fitting the VAST seasonal model. To fit the VAST seasonal model, we first fit a base model, setting <code>run_model = FALSE</code> and then we make some adjustments to accommodate the seasonal structure.</p>
-<p>3a. Fitting VAST base model. After creating the dataframes, the extrapolation grid, and the model settings, we fit a base VAST model. While you could certainly do this with the <code>VAST::fit_model</code> function, we use a function we wrote, <code>vast_build_sdm</code>. Along with fitting nicely within our workflow and the objects we have created, this function also allows us to use sf multipolygon shapefiles to specify different regions/strata.</p>
+<p>3a. Fitting VAST base model. With the dataframes, the extrapolation grid, and the model settings created and defined, we fit a base VAST model. While you could certainly do this with the <code>VAST::fit_model</code> function, we use a function we wrote, <code>vast_build_sdm</code>. Along with fitting nicely within our workflow and the objects we have created, this function also allows us to use sf multipolygon shapefiles to specify different regions/strata.</p>
 <p>3b. Making adjustments to accommodate the seasonal model. After fitting the base model, we make some modifications to facilitate fitting the seasonal VAST model. Specifically, this requires adjusting the mapping the variance components for the season and year terms so that they are pooled and that we are not estimating an individual variance for each level of season and year. We so this using the <code>vast_make_adjustments</code> function.</p>
 <p>3c. Fitting VAST seasonal model. With the adjustments made, we then use the <code>vast_fit_sdm</code> function to fit the model. When doing this, we pass in the adjusted <code>fit_model</code> object with the correct parameter mapping.</p></li>
 <li><p>Making inferences from the fitted VAST seasonal model</p>
-<p>4a. Visualizing covariate effects</p>
-<p>4b. Making projections</p></li>
+<p>4a. Validating predictive skill of the model. One of the first things we want to do after fitting the model is assess its reliability. This can include evaluating the model fit to the data and with more recent versions of VAST, <a href="https://github.com/James-Thorson-NOAA/VAST/wiki/Percent-deviance-explained">we can get the deviance explained from the model</a>, which is particularly helpful when comparing different candidate model structures. Along with evaluating the model, we are especially interested in validating the predictive skill using a hold out, testing dataset. We open up this opportunity during the beginning of the modeling process by toggling the “Pred_TF” indicator for specific observations, so that they are used in the predictive component of the model and not used in the maximum likelihood estimation. We then uss our <code>vast_get_point_preds</code> to extract the model predictions for these “hold out” observations. We can then calculate any number of prediction skill statistics (e.g., AUC, RMSE, etc). To summarize multiple components of model prediction skill, we use our <code>taylor_diagram_func</code> function to generate and plot Taylor Diagrams (Taylor 2001).</p>
+<p>4b. Visualizing covariate effects. After checking the model for its fit to the data and predictive skill to holdout, testing data, we might want to visualize the fitted smooth functions defining the relationship between species occurrence and the environmental variables. To do that, we can run our <code>get_vast_covariate_effects</code> and <code>plot_vast_covariate_effects</code> functions.</p>
+<p>4b. Making projections. The final action in this stage is using the model to make projections using the future environmental conditions characterized by the ensemble of CMIP6 SSP5 8.5 scenario models. To do this, we collect the projected environmental data for each of the covariates using the <code>vast_post_fit_pred_df</code> function. We then use the <code>project.fit_model_wrapper</code> function to make the projections. This function was designed to mimic <a href="https://github.com/James-Thorson-NOAA/VAST/wiki/Projections">VAST’s <code>project.fit_model</code> function</a>, with some adjustments to accomodate the seasonal model structure.</p></li>
 </ol>
 </div>
 <div id="output-3" class="section level2 hasAnchor" number="5.2">

@@ -23,7 +23,7 @@
 <meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
 
 
-<meta name="date" content="2022-04-27" />
+<meta name="date" content="2022-04-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -102,7 +102,11 @@
 <li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
 <li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#output-4"><i class="fa fa-check"></i><b>6.2</b> Output<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a></li>
+<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="future-work-plans.html"><a href="future-work-plans.html#planned-activities"><i class="fa fa-check"></i><b>7.1</b> Planned Activities<span></span></a></li>
+<li class="chapter" data-level="7.2" data-path="future-work-plans.html"><a href="future-work-plans.html#potential-opportunities"><i class="fa fa-check"></i><b>7.2</b> Potential Opportunities<span></span></a></li>
+</ul></li>
 <li class="chapter" data-level="8" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>8</b> References<span></span></a></li>
 </ul>
 
@@ -124,12 +128,18 @@
 <div id="results-visualization-and-communication" class="section level1 hasAnchor" number="6">
 <h1><span class="header-section-number">Chapter 6</span> Results Visualization and Communication<a href="results-visualization-and-communication.html#results-visualization-and-communication" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p><strong>About:</strong></p>
-<p>This section of the repository details our process and code for developing the FishViz RShiny application to visualize and communicate key results from our modeling efforts. The code for this stage is available from the <a href="https://github.com/aallyn/TargetsSDM">FishViz App</a> repository.</p>
+<p>This section of the repository details our process and code for developing the FishViz RShiny application to visualize and communicate key results from our modeling efforts. The code for this stage is available from the <a href="https://github.com/gulfofmaine/FishVis">FishViz App</a> repository. The application is available <a href="https://gmri-isel.shinyapps.io/FishVis/">here</a>.</p>
 <div id="steps-4" class="section level2 hasAnchor" number="6.1">
 <h2><span class="header-section-number">6.1</span> Steps<a href="results-visualization-and-communication.html#steps-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This stage includes two steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Processing results from <a href="species-distribution-model-fitting-and-projecting.html#species-distribution-model-fitting-and-projecting">SDM Fitting and Projecting stage</a> to create summaries for RShiny App. We wrote a couple of functions to pull together our projection results for hosting on the repository. The code is found in the [TargetsSDM repository] and specifically the <code>run_shiny_funcs.R</code> script, which uses the functions in the <code>shiny_support_funcs.R</code> code.</p></li>
+<li><p>Running the app. With the results summarized and distributed to the application repository, we then run the code in the <a href="https://github.com/gulfofmaine/FishVis">FishViz App repository</a> to deploy the RShiny application.</p></li>
+</ol>
 </div>
 <div id="output-4" class="section level2 hasAnchor" number="6.2">
 <h2><span class="header-section-number">6.2</span> Output<a href="results-visualization-and-communication.html#output-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The output from this stage is the FishViz Application. Although this seems like the “final” stage, it really just starts the cycle again as we learn more about the model behavior by analyzing the outputs, and identify areas for model improvement.</p>
 
 </div>
 </div>

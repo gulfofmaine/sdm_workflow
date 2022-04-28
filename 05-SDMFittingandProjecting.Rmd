@@ -31,7 +31,7 @@ This is one of the more complicated stages of the workflow and has a variety of 
 
 3. Fitting the VAST seasonal model. To fit the VAST seasonal model, we first fit a base model, setting `run_model = FALSE` and then we make some adjustments to accommodate the seasonal structure. 
 
-     3a. Fitting VAST base model. After creating the dataframes, the extrapolation grid, and the model settings, we fit a base VAST model. While you could certainly do this with the `VAST::fit_model` function, we use a function we wrote, `vast_build_sdm`. Along with fitting nicely within our workflow and the objects we have created, this function also allows us to use sf multipolygon shapefiles to specify different regions/strata.
+     3a. Fitting VAST base model. With the dataframes, the extrapolation grid, and the model settings created and defined, we fit a base VAST model. While you could certainly do this with the `VAST::fit_model` function, we use a function we wrote, `vast_build_sdm`. Along with fitting nicely within our workflow and the objects we have created, this function also allows us to use sf multipolygon shapefiles to specify different regions/strata.
      
      3b. Making adjustments to accommodate the seasonal model. After fitting the base model, we make some modifications to facilitate fitting the seasonal VAST model. Specifically, this requires adjusting the mapping the variance components for the season and year terms so that they are pooled and that we are not estimating an individual variance for each level of season and year. We so this using the `vast_make_adjustments` function.  
      
@@ -39,9 +39,11 @@ This is one of the more complicated stages of the workflow and has a variety of 
 
 4. Making inferences from the fitted VAST seasonal model
 
-     4a. Visualizing covariate effects
+     4a. Validating predictive skill of the model. One of the first things we want to do after fitting the model is assess its reliability. This can include evaluating the model fit to the data and with more recent versions of VAST, [we can get the deviance explained from the model](https://github.com/James-Thorson-NOAA/VAST/wiki/Percent-deviance-explained), which is particularly helpful when comparing different candidate model structures. Along with evaluating the model, we are especially interested in validating the predictive skill using a hold out, testing dataset. We open up this opportunity during the beginning of the modeling process by toggling the "Pred_TF" indicator for specific observations, so that they are used in the predictive component of the model and not used in the maximum likelihood estimation. We then uss our `vast_get_point_preds` to extract the model predictions for these "hold out" observations. We can then calculate any number of prediction skill statistics (e.g., AUC, RMSE, etc). To summarize multiple components of model prediction skill, we use our `taylor_diagram_func` function to generate and plot Taylor Diagrams (Taylor 2001). 
      
-     4b. Making projections 
+     4b. Visualizing covariate effects. After checking the model for its fit to the data and predictive skill to holdout, testing data, we might want to visualize the fitted smooth functions defining the relationship between species occurrence and the environmental variables. To do that, we can run our `get_vast_covariate_effects` and `plot_vast_covariate_effects` functions. 
+     
+     4b. Making projections. The final action in this stage is using the model to make projections using the future environmental conditions characterized by the ensemble of CMIP6 SSP5 8.5 scenario models. To do this, we collect the projected environmental data for each of the covariates using the `vast_post_fit_pred_df` function. We then use the `project.fit_model_wrapper` function to make the projections. This function was designed to mimic [VAST's `project.fit_model` function](https://github.com/James-Thorson-NOAA/VAST/wiki/Projections), with some adjustments to accomodate the seasonal model structure. 
   
 ## Output
 

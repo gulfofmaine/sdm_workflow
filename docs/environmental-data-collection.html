@@ -23,7 +23,7 @@
 <meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
 
 
-<meta name="date" content="2022-04-25" />
+<meta name="date" content="2022-04-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -88,20 +88,26 @@
 <li class="chapter" data-level="4" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html"><i class="fa fa-check"></i><b>4</b> Enhancing Biological Data With Environmental Data<span></span></a>
 <ul>
 <li class="chapter" data-level="4.1" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#steps-2"><i class="fa fa-check"></i><b>4.1</b> Steps<span></span></a></li>
-<li class="chapter" data-level="4.2" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#products"><i class="fa fa-check"></i><b>4.2</b> Products<span></span></a></li>
+<li class="chapter" data-level="4.2" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#output-2"><i class="fa fa-check"></i><b>4.2</b> Output<span></span></a></li>
 <li class="chapter" data-level="4.3" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#next-stages-2"><i class="fa fa-check"></i><b>4.3</b> Next stages<span></span></a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html"><i class="fa fa-check"></i><b>5</b> Species Distribution Model Fitting and Projecting<span></span></a>
 <ul>
 <li class="chapter" data-level="5.1" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#steps-3"><i class="fa fa-check"></i><b>5.1</b> Steps<span></span></a></li>
-<li class="chapter" data-level="5.2" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#next-stages-3"><i class="fa fa-check"></i><b>5.2</b> Next stages<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#output-3"><i class="fa fa-check"></i><b>5.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="5.3" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#next-stages-3"><i class="fa fa-check"></i><b>5.3</b> Next stages<span></span></a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html"><i class="fa fa-check"></i><b>6</b> Results Visualization and Communication<span></span></a>
 <ul>
 <li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
-<li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#next-stages-4"><i class="fa fa-check"></i><b>6.2</b> Next stages<span></span></a></li>
+<li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#output-4"><i class="fa fa-check"></i><b>6.2</b> Output<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>7</b> References<span></span></a></li>
+<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="future-work-plans.html"><a href="future-work-plans.html#planned-activities"><i class="fa fa-check"></i><b>7.1</b> Planned Activities<span></span></a></li>
+<li class="chapter" data-level="7.2" data-path="future-work-plans.html"><a href="future-work-plans.html#potential-opportunities"><i class="fa fa-check"></i><b>7.2</b> Potential Opportunities<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>8</b> References<span></span></a></li>
 </ul>
 
       </nav>
@@ -129,7 +135,7 @@
 <ol style="list-style-type: decimal">
 <li><p>Collecting and processing historical environmental conditions data.</p>
 <p>1a. Bathymetry data. We dowloaded bathymetry data from NOAA’s ETOPO1 gobal relief model <a href="https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/bedrock/cell_registered/georeferenced_tiff/">online</a>.</p>
-<p>1b. Sea surface temperature. Sea surface temperature from OISSTv2 Data was downloaded as annual NetCDF files from the <a href="https://psl.noaa.gov/data/gridded/data.noaa.oisst.v2.highres.html">Physical Science Laboratory</a>. After downloading the data, we then used functions located in a separate repository dedicated to the pre-processing of different OISST products exists and can be found <a href="https://github.com/adamkemberling/oisst_mainstays">here</a>. This repository covers the acquisition of OISST daily data from NCEI through the creation of daily climatologies and anomaly timeseries. From these daily datasets we then derived monthly averages to match the time-steps of CMIP6 and SODA data.</p>
+<p>1b. Sea surface temperature. Sea surface temperature from OISSTv2 Data was downloaded as annual NetCDF files from <a href="https://psl.noaa.gov/data/gridded/data.noaa.oisst.v2.highres.html">NOAA’s Physical Sciences Laboratory</a>. After downloading the data, we then used functions located in a separate repository dedicated to the pre-processing of different OISST products exists and can be found <a href="https://github.com/adamkemberling/oisst_mainstays">here</a>. This repository covers the acquisition of OISST daily data from NCEI through the creation of daily climatologies and anomaly timeseries. From these daily datasets we then derived monthly averages to match the time-steps of CMIP6 and SODA data.</p>
 <p>1c. Bottom temperature, sea surface salinity and bottom salinity. We used the SODA product for these other environmental variables. We downloaded annual, monthly NetCDF files from the <a href="https://www2.atmos.umd.edu/~ocean/index_files/soda3.4.2_mn_download_b.htm">University of Maryland</a> server using their linux wget commands.</p></li>
 <li><p>Downloading and processing global climate model CMIP6 projected environmental conditions data. The process and associated code for downloading and processing projected environmental conditions data is in the <a href="https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing">CMIP6_processing folder</a>, which includes an associated <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/README.md">README file</a> to guide interested folks through our approach.</p></li>
 <li><p>Calculating reference climatologies and bias correcting CMIP6 projected data. The process and associated code for downloading and processing projected environmental conditions data is also in the <a href="https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing">CMIP6_processing folder</a>.</p></li>
