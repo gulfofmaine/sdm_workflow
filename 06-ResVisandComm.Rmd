@@ -6,10 +6,15 @@ This section of the repository details our process and code for developing the F
 
 ## Steps
 
-To run the application, we do some processing of the results from the [SDM Fitting and Projecting stage][Species Distribution Model Fitting and Projecting]. The code for this results processing and preparation is found in the 
+This stage includes two steps:
+
+1. Processing results from [SDM Fitting and Projecting stage][Species Distribution Model Fitting and Projecting] to create summaries for RShiny App. We wrote a couple of functions to pull together our projection results for hosting on the repository. The code is found in the [TargetsSDM repository] and specifically the `run_shiny_funcs.R` script, which uses the functions in the `shiny_support_funcs.R` code. 
+
+2. Running the app. With the results summarized and distributed to the application repository, we then run the code in the [FishViz App repository](https://github.com/gulfofmaine/FishVis) to deploy the RShiny application.
 
 ## Output
 
+The output from this stage is the FishViz Application. Although this seems like the "final" stage, it really just starts the cycle again as we learn more about the model behavior by analyzing the outputs, and identify areas for model improvement. 
 
 
 

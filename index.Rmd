@@ -21,9 +21,9 @@ Welcome to the SDM Workflow Repository documentation. Here you will find documen
 
 **About**
 
-This project and its results are the work of the [Integrated Systems Ecology Laboratory](https://gmri.org/commitments/science/integrated-systems-ecology/) at the Gulf of Maine Research Institute led by [Dr. Kathy Mills](https://gmri.org/our-approach/staff/kathy-mills/).
+This project and its results are the work of the [Integrated Systems Ecology Laboratory](https://gmri.org/commitments/science/integrated-systems-ecology/) at the Gulf of Maine Research Institute led by [Dr. Kathy Mills](https://gmri.org/our-approach/staff/kathy-mills/) with work from and [Andrew Allyn](https://gmri.org/our-approach/staff/andrew-allyn/), [Adam Kemberling](https://gmri.org/our-approach/staff/adam-kemberling/), Matt Dzaugis, and Lindsay Carlson.
 
-Funding for this project was provided by a Department of Fisheries and Oceans Canada Ecosystems and Oceans Science Contribution grant and a NOAA Cooperative Institute for the North Atlantic Region grant. 
+Funding for this project was provided by NOAA Fisheries through a Cooperative Institute for the North Atlantic Region grant and by a Department of Fisheries and Oceans Canada Ecosystems and Oceans Science Contribution grant. 
 
 **Contacts**
 

@@ -1,6 +1,6 @@
 # Future Work Plans
 
-## Planned activities
+## Planned Activities
 
 There are a couple of different planned activities that will build from the work we have accomplished so far within the sepcies distribution model projection space. These include:
 
@@ -11,3 +11,5 @@ There are a couple of different planned activities that will build from the work
 ## Potential Opportunities
 
 Along with these specific planned activities, we are also interested in continuing this work within two general arenas. First, we are interested in future opportunities that enable us to increase our understanding of distribution model predictive skill. In doing so, we hope to support the sustained improvement of distribution models, which will increase the accuracy and reliability of information passed along to stakeholders and increase their capacity to plan for and adapt to anticipated ecosystem changes. Second, we are interested in being part of the community that helps address the considerable challenge of visualizing and communicating the uncertainty in these model projection results. 
+
+Please feel free to [contact us](mailto:aallyn@gmri.org) if you are interested in discussing any of these research areas!

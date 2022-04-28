@@ -10,7 +10,7 @@ The goal of this project is to produce marine species distribution and abundance
 - integrate fisheries-independent bottom trawl data from the NOAA Northeast Fisheries Science Center spring/fall and Department of Fisheries and Oceans Canada spring/summer surveys 
 - fit a seasonal Vector Autoregressive Spatio-Temporal (VAST) model (Thorson and Barnett 2017, Thorson 2019), which accounts for habitat covariates, catchability covariates, persistent spatial variability, ephemeral spatio-temporal variability, and potential temporal correlations in species occurrence across the study domain in successive seasons  
 - make inferences from the fitted model, including evaluating model fit to the data and validating the predictive skill of the model using holdout, testing data  
-- use the fitted model to project species distribution and abundance from 1982 to 2100 with potential environmental conditions estimated from an ensemble of statistically downscaled, biased corrected, CMIP6 global climate models  
+- use the fitted model to project species distribution and abundance from 1982 to 2100 with potential environmental conditions characterized by an ensemble of delta-corrected, CMIP6 global climate models  
 - develop an RShiny application to visualize key findings and provide users easy access to results data
 
 ## Repository Orientation
