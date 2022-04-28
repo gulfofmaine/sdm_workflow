@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Environmental Data Collection | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</title>
+  <meta name="description" content="Chapter 3 Environmental Data Collection | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Environmental Data Collection | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Environmental Data Collection | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  
+  
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2022-04-25" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="biological-data-collection.html"/>
+<link rel="next" href="enhancing-biological-data-with-environmental-data.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="index.html#preface">Preface<span></span></a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Project Overview<span></span></a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#repository-orientation"><i class="fa fa-check"></i><b>1.1</b> Repository Orientation<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="biological-data-collection.html"><a href="biological-data-collection.html"><i class="fa fa-check"></i><b>2</b> Biological Data Collection<span></span></a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="biological-data-collection.html"><a href="biological-data-collection.html#steps"><i class="fa fa-check"></i><b>2.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="2.2" data-path="biological-data-collection.html"><a href="biological-data-collection.html#output"><i class="fa fa-check"></i><b>2.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="2.3" data-path="biological-data-collection.html"><a href="biological-data-collection.html#next-stages"><i class="fa fa-check"></i><b>2.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html"><i class="fa fa-check"></i><b>3</b> Environmental Data Collection<span></span></a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#steps-1"><i class="fa fa-check"></i><b>3.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="3.2" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#output-1"><i class="fa fa-check"></i><b>3.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="3.3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#next-stages-1"><i class="fa fa-check"></i><b>3.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html"><i class="fa fa-check"></i><b>4</b> Enhancing Biological Data With Environmental Data<span></span></a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#steps-2"><i class="fa fa-check"></i><b>4.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="4.2" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#products"><i class="fa fa-check"></i><b>4.2</b> Products<span></span></a></li>
+<li class="chapter" data-level="4.3" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#next-stages-2"><i class="fa fa-check"></i><b>4.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html"><i class="fa fa-check"></i><b>5</b> Species Distribution Model Fitting and Projecting<span></span></a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#steps-3"><i class="fa fa-check"></i><b>5.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#next-stages-3"><i class="fa fa-check"></i><b>5.2</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html"><i class="fa fa-check"></i><b>6</b> Results Visualization and Communication<span></span></a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#next-stages-4"><i class="fa fa-check"></i><b>6.2</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>7</b> References<span></span></a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="environmental-data-collection" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Environmental Data Collection<a href="environmental-data-collection.html#environmental-data-collection" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p><strong>About:</strong></p>
+<p>This section of the repository contains information and code detailing the gathering of environmental data to describe historical conditions as well as future projected conditions from an ensemble of CMIP6 global climate models. The code for this stage is found in a <a href="https://github.com/adamkemberling/oisst_mainstays">seperate repository focused on sea surface temperature</a> as well as within this repository and the CMIP6_Processing folder.</p>
+<div id="steps-1" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Steps<a href="environmental-data-collection.html#steps-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This stage of the workflow includes three steps. The first step collects data for historical conditions, which includes data from the National Geographic Data Center’s ETOPO1 Global Relief Model (Amante and Eakins 2009, NOAA NGDC 2009), the NOAA Optimum Interpolated Sea Surface Temperature v2 product (Huang et al. 2020) and the University of Maryland Simple Ocean Data Assimilation product (SODA; Carton et al. 2000, Carton and Griese 2008, Carton et al. 2018). The second step captures downloading and processing global climate model <a href="Riahi%20et%20al.%202017">CMIP6 projections for the SSP5 8.5 scenario</a>. Finally, the third steps bias corrects the global climate model projections using climatologies derived from the historical environmental conditions data sets.</p>
+<ol style="list-style-type: decimal">
+<li><p>Collecting and processing historical environmental conditions data.</p>
+<p>1a. Bathymetry data. We dowloaded bathymetry data from NOAA’s ETOPO1 gobal relief model <a href="https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/bedrock/cell_registered/georeferenced_tiff/">online</a>.</p>
+<p>1b. Sea surface temperature. Sea surface temperature from OISSTv2 Data was downloaded as annual NetCDF files from the <a href="https://psl.noaa.gov/data/gridded/data.noaa.oisst.v2.highres.html">Physical Science Laboratory</a>. After downloading the data, we then used functions located in a separate repository dedicated to the pre-processing of different OISST products exists and can be found <a href="https://github.com/adamkemberling/oisst_mainstays">here</a>. This repository covers the acquisition of OISST daily data from NCEI through the creation of daily climatologies and anomaly timeseries. From these daily datasets we then derived monthly averages to match the time-steps of CMIP6 and SODA data.</p>
+<p>1c. Bottom temperature, sea surface salinity and bottom salinity. We used the SODA product for these other environmental variables. We downloaded annual, monthly NetCDF files from the <a href="https://www2.atmos.umd.edu/~ocean/index_files/soda3.4.2_mn_download_b.htm">University of Maryland</a> server using their linux wget commands.</p></li>
+<li><p>Downloading and processing global climate model CMIP6 projected environmental conditions data. The process and associated code for downloading and processing projected environmental conditions data is in the <a href="https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing">CMIP6_processing folder</a>, which includes an associated <a href="https://github.com/gulfofmaine/sdm_workflow/blob/main/CMIP6_processing/README.md">README file</a> to guide interested folks through our approach.</p></li>
+<li><p>Calculating reference climatologies and bias correcting CMIP6 projected data. The process and associated code for downloading and processing projected environmental conditions data is also in the <a href="https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing">CMIP6_processing folder</a>.</p></li>
+</ol>
+</div>
+<div id="output-1" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Output<a href="environmental-data-collection.html#output-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The products from these three steps include a raster layer of bottom depth, raster stacks for each of the historical environmental covariates (sea surface temperature, bottom temperature, sea surface salinity, bottom salinity), and then raster stacks for the bias corrected CMIP6 ensemble 5th percentile, mean, and 95th percentile of each of the environmental covariates.</p>
+</div>
+<div id="next-stages-1" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Next stages<a href="environmental-data-collection.html#next-stages-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The depth and historical environmental covariate rasters are transferred into the TargetsSDM workflow repository within the <code>data/covariates/static</code> and <code>data/covariates/dynamic</code> folders, while the bias corrected CMIP6 ensemble rasters are transferred to the <code>data/predict/raw</code> folders within the TargetsSDM workflow repository. Ultimately, these rasters are then used to <a href="enhancing-biological-data-with-environmental-data.html#enhancing-biological-data-with-environmental-data">enhance the tow data</a> by extracting environmental variables at each unique tow location to use as potential covariates in the species distribution models.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="biological-data-collection.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="enhancing-biological-data-with-environmental-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

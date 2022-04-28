@@ -1,0 +1,19 @@
+# References
+
+Amante, C; Eakins, B W (2009): ETOPO1 Global Relief Model converted to PanMap layer format. NOAA-National Geophysical Data Center, PANGAEA, https://doi.org/10.1594/PANGAEA.769615
+Carton, J.A., G. Chepurin, X. Cao, B. Giese, 2000: A Simple Ocean Data Assimilation Analysis of the Global Upper Ocean 1950–95. Part I: Methodology. J. Phys. Oceanogr. 30, 294–309.
+
+Carton, J.A. and B. Giese, 2008: A Reanalysis of Ocean Climate Using Simple Ocean Data Assimilation (SODA. Mon. Weath. Rev. 136, 2999-3017.
+
+Carton, J.A., G.A. Chepurin, and L. Chen, 2018: SODA3: a new ocean climate reanalysis, J. Clim. 31, 6967-6983, DOI:10.1175/JCLI-D-18-0149.1.
+
+Huang, B., C. Liu, V. Banzon, E. Freeman, G. Graham, B. Hankins, T. Smith, and H.-M. Zhang, 2020: Improvements of the Daily Optimum Interpolation Sea Surface Temperature (DOISST) Version 2.1, Journal of Climate, 34, 2923-2939. doi: 10.1175/JCLI-D-20-0166.1
+
+NOAA National Geophysical Data Center. 2009: ETOPO1 1 Arc-Minute Global Relief Model. NOAA National Centers for Environmental Information. Accessed [date].
+
+Riahi, K., Van Vuuren, D.P., Kriegler, E., Edmonds, J., O’neill, B.C., Fujimori, S., Bauer, N., Calvin, K., Dellink, R., Fricko, O. and Lutz, W., 2017. The shared socioeconomic pathways and their energy, land use, and greenhouse gas emissions implications: an overview. Global environmental change, 42, pp.153-168.
+
+Thorson, J.T., Barnett, L.A.K., 2017. Comparing estimates of abundance trends and distribution shifts using single- and multispecies models of fishes and biogenic habitat. ICES J. Mar. Sci. 74, 1311–1321. https://doi.org/10.1093/icesjms/fsw193
+
+Thorson, J.T., 2019. Guidance for decisions using the Vector Autoregressive Spatio-Temporal (VAST) package in stock, ecosystem, habitat and climate assessments. Fish. Res. 210, 143–161. https://doi.org/10.1016/j.fishres.2018.10.013
+

@@ -1,3 +1,38 @@
-# About the Project {#intro}
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Project Overview {#intro}
 
-The aim of this project is to use the projected future climate states, as forecast by an ensemble of CMIP6 models, to predict shifts in the distribution and abundances of marine species along the Northeastern United States.
+The goal of this project is to produce marine species distribution and abundance projections within the northwest Atlantic ocean, following open science principles to make all code and data available. To reach this goal, we
+
+- integrate fisheries-independent bottom trawl data from the NOAA Northeast Fisheries Science Center spring/fall and Department of Fisheries and Oceans Canada spring/summer surveys 
+- fit a seasonal Vector Autoregressive Spatio-Temporal (VAST) model (Thorson and Barnett 2017, Thorson 2019), which accounts for habitat covariates, catchability covariates, persistent spatial variability, ephemeral spatio-temporal variability, and potential temporal correlations in species occurrence across the study domain in successive seasons  
+- make inferences from the fitted model, including evaluating model fit to the data and validating the predictive skill of the model using holdout, testing data  
+- use the fitted model to project species distribution and abundance from 1982 to 2100 with potential environmental conditions estimated from an ensemble of statistically downscaled, biased corrected, CMIP6 global climate models  
+- develop an RShiny application to visualize key findings and provide users easy access to results data
+
+## Repository Orientation
+
+This repository pulls together methods and processes from six different species distribution modeling workflow stages. Given the diverse processes involved in this workflow, and that the different stages will not always be completed together (i.e., lab work may focus on CMIP6 environmental data, with no connection to a distribution modeling effort), some code exists in independent GitHub repositories. Rather than trying to force all the code into one repository or copy code over and risk it becoming outdated, we have decided to instead present the different stages while thoroughly documenting the specific functions used and where they are located.  
+
+1. Biological Data Collection. 
+
+This stage of the workflow is where we collect and process fisheries-independent bottom trawl data from the NOAA Northeast Fisheries Science Center spring/fall surveys and the Department of Oceans Canada spring/summer surveys. The code for this stage is found within the [TargetsSDM GitHub repository](https://github.com/aallyn/TargetsSDM). 
+
+2. Environmental Data Collection.
+
+This stage of the workflow includes our efforts to gather environmental data that describes historical conditions as well as future projected conditions from an ensemble of CMIP6 global climate models. Some of the code for this stage is found in a [repository focused on gathering and processing NOAA OISST data](https://github.com/adamkemberling/oisst_mainstays), while code for working with CMIP6 data are found within this repository and [the CMIP6_Processing folder](https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing).
+
+3. Enhancing Biological Data with Environmental Data. 
+
+This stage of the workflow details how we enhance the biological data observations with environmental data, which will eventually be used as covariates in the species distribution modeling process. The code for this stage is found within the [TargetsSDM GitHub repository](https://github.com/aallyn/TargetsSDM).
+
+4. Species Distribution Model Fitting and Projecting.
+
+This stage of the workflow is where we confront the tidy occupancy model dataframe with a seasonal VAST model. After fitting the model, we then make statistical inferences and use the fitted model to project species distribution and abundance changes under future environmental conditions expected from the CMIP6 global climate models. The code for this stage is found within the [TargetsSDM GitHub repository](https://github.com/aallyn/TargetsSDM).
+
+5. Results Visualization and Communication. 
+
+The final stage of the workflow generates an RShiny application to visualize species distribution model projection results and provide user access to these results data. The code for this stage is found within the [FishViz repository](https://github.com/gulfofmaine/FishVis).

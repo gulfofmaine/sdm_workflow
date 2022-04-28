@@ -1,0 +1,15 @@
+# Results Visualization and Communication
+
+**About:**
+
+This section of the repository details our process and code for developing the FishViz RShiny application to visualize and communicate key results from our modeling efforts. The code for this stage is available from the [FishViz App](https://github.com/gulfofmaine/FishVis) repository. The application is available [here](https://gmri-isel.shinyapps.io/FishVis/).
+
+## Steps
+
+To run the application, we do some processing of the results from the [SDM Fitting and Projecting stage][Species Distribution Model Fitting and Projecting]. The code for this results processing and preparation is found in the 
+
+## Output
+
+
+
+

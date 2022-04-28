@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Species Distribution Model Fitting and Projecting | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</title>
+  <meta name="description" content="Chapter 5 Species Distribution Model Fitting and Projecting | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Species Distribution Model Fitting and Projecting | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Species Distribution Model Fitting and Projecting | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  
+  
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2022-04-27" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="enhancing-biological-data-with-environmental-data.html"/>
+<link rel="next" href="results-visualization-and-communication.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="index.html#preface">Preface<span></span></a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Project Overview<span></span></a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#repository-orientation"><i class="fa fa-check"></i><b>1.1</b> Repository Orientation<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="biological-data-collection.html"><a href="biological-data-collection.html"><i class="fa fa-check"></i><b>2</b> Biological Data Collection<span></span></a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="biological-data-collection.html"><a href="biological-data-collection.html#steps"><i class="fa fa-check"></i><b>2.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="2.2" data-path="biological-data-collection.html"><a href="biological-data-collection.html#output"><i class="fa fa-check"></i><b>2.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="2.3" data-path="biological-data-collection.html"><a href="biological-data-collection.html#next-stages"><i class="fa fa-check"></i><b>2.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html"><i class="fa fa-check"></i><b>3</b> Environmental Data Collection<span></span></a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#steps-1"><i class="fa fa-check"></i><b>3.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="3.2" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#output-1"><i class="fa fa-check"></i><b>3.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="3.3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#next-stages-1"><i class="fa fa-check"></i><b>3.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html"><i class="fa fa-check"></i><b>4</b> Enhancing Biological Data With Environmental Data<span></span></a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#steps-2"><i class="fa fa-check"></i><b>4.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="4.2" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#output-2"><i class="fa fa-check"></i><b>4.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="4.3" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#next-stages-2"><i class="fa fa-check"></i><b>4.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html"><i class="fa fa-check"></i><b>5</b> Species Distribution Model Fitting and Projecting<span></span></a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#steps-3"><i class="fa fa-check"></i><b>5.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#output-3"><i class="fa fa-check"></i><b>5.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="5.3" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#next-stages-3"><i class="fa fa-check"></i><b>5.3</b> Next stages<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html"><i class="fa fa-check"></i><b>6</b> Results Visualization and Communication<span></span></a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#output-4"><i class="fa fa-check"></i><b>6.2</b> Output<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a></li>
+<li class="chapter" data-level="8" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>8</b> References<span></span></a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="species-distribution-model-fitting-and-projecting" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Species Distribution Model Fitting and Projecting<a href="species-distribution-model-fitting-and-projecting.html#species-distribution-model-fitting-and-projecting" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p><strong>About:</strong></p>
+<p>This stage of the workflow is where we fit the seasonal VAST model. After fitting the model, we then make statistical inferences and use the fitted model to project species distribution and abundance changes under future environmental conditions expected from the CMIP6 global climate models. The code for this stage is found within the <a href="https://github.com/aallyn/TargetsSDM">TargetsSDM GitHub repository</a> and the <a href="https://github.com/aallyn/TargetsSDM/blob/main/R/vast_functions.R">vast_functions.R</a> script. Importantly, to leverage these functions, you will want to have defined a few core objects, including: a habitat formula governing the species environmental covariates relationship, the field configuration settings to determine whether spatial or spatio-temporal variability will be turned on, and the rho configuration setting that define if there is an autoregressive structure on the intercepts or the spatio-temporal variability component. You can see <a href="https://github.com/aallyn/TargetsSDM/blob/main/_targets.R">how we have done this</a> at the beginning of our code to implement the workflow using the <a href="https://github.com/ropensci/targets">R Targets</a> functionality.</p>
+<div id="steps-3" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Steps<a href="species-distribution-model-fitting-and-projecting.html#steps-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This is one of the more complicated stages of the workflow and has a variety of different steps. This complexity arises for two reasons. First, there are the complexities related to integrating data from two surveys and fitting a seasonal VAST model that includes habitat covariates, catchability covariates, persistent spatial variability, ephemeral spatio-temporal variability, and potential temporal correlations in species occurrence across the study domain in successive seasons. Second, we tried to break down the entire modeling cycle into incremental steps.</p>
+<ol style="list-style-type: decimal">
+<li><p>VAST objects. There are a variety of objects that we create which define how the VAST model is constructed.</p>
+<p>1a. Make VAST extrapolation grid. We create a user-specific extrapolation grid that encompasses the survey domain for both the NOAA NEFSC bottom trawl survey and the DFO bottom trawl survey. We do this by providing a shapefile that covers this domain and then use our <code>vast_make_extrap_grid</code> function.</p>
+<p>1b. Make VAST settings. We use our <code>vast_make_settings</code> function that leverages <code>FishStatsUtils::make_settings</code> and has a bit more flexibility to accommodate our own extrapolation grid while also requiring us to be a bit more explicit about the setting passed to the VAST modeling engine. For example, we could specify <code>purpose = "index2"</code> within the a <code>FishStatsUtils::make_settings</code> call or a <code>FishStatsUtils::fit_model</code> call and this would trigger a specific model configuration for spatial (omega), spatio-temporal variability (epsilon) and other model parameters. Rather than using those defaults, we define these before hand then pass them into our <code>vast_make_settings</code> function as shown <a href="https://github.com/aallyn/TargetsSDM/blob/main/_targets.R">here</a>.</p>
+<p>1c. Make VAST spatial lists. After creating the extrapolation grid and then the settings, we create a “spatial list” object with the <code>vast_make_spatial_lists</code> function. This function is a warapper around the <code>FishStatsUtils::make_extrapolation_info</code> and <code>FishStatsUtils::make_spatial_info</code> functions. We use it to generate the extrapolation information and the spatial information, which includes information about the INLA mesh and its relationship to the observations and extrapolation grid cells.</p>
+<p>1d. Make VAST covariate effect list. With the VAST seasonal model, we need to make some adjustment to how “season” (and potentially “year”) covariates are modeled. In particular, we specify that these are going to be estimated as spatially-varying coefficients with corner constraints to ensure estimability. We use the <code>vast_make_coveff</code> function to do this.</p></li>
+<li><p>VAST dataframes. Before fitting the seasonal VAST model, we generate a few dataframes that are then passed to the main VAST model fitting function.</p>
+<p>2a. Make VAST seasonal dataframe. The standard behavior of a single species VAST species distribution model assumes that we have observations that occur annually. In turn, before fitting the VAST seasonal model, we need to do some reformatting. Specifically, we need to create a new vector that we can use as the “year” vector, but, that actually represents the season-year increments. We also want to make sure that there is a dummy observation for every season-year of interest, even those where we may not have survey data. To accomplish both of these goals, we use the <code>vast_make_seasonal_data</code> function. We also encourage interested people to look at the <a href="https://github.com/James-Thorson-NOAA/VAST/wiki/Seasonal-model">Wiki example in the VAST GitHub repository</a> for additional details.</p>
+<p>2b. Make VAST sample dataframe. After creating the VAST seasonal dataframe, we then subset it into three different dataframes. The first is a sample dataframe, which includes the biological catch data information. This is accomplished using the <code>make_vast_sample_data</code> function.</p>
+<p>2c. Make VAST covariate dataframe. This is the second dataframe we create from the VAST seasonal dataframe, and includes the information for habitat covariates at each of the tow locations. We make this dataframe using the <code>make_vast_covariate_data</code> function.</p>
+<p>2d. Make VAST catchability dataframe. The final dataframe we create is a catchability dataframe, this includes information for the survey that each observation was collected.</p></li>
+<li><p>Fitting the VAST seasonal model. To fit the VAST seasonal model, we first fit a base model, setting <code>run_model = FALSE</code> and then we make some adjustments to accommodate the seasonal structure.</p>
+<p>3a. Fitting VAST base model. After creating the dataframes, the extrapolation grid, and the model settings, we fit a base VAST model. While you could certainly do this with the <code>VAST::fit_model</code> function, we use a function we wrote, <code>vast_build_sdm</code>. Along with fitting nicely within our workflow and the objects we have created, this function also allows us to use sf multipolygon shapefiles to specify different regions/strata.</p>
+<p>3b. Making adjustments to accommodate the seasonal model. After fitting the base model, we make some modifications to facilitate fitting the seasonal VAST model. Specifically, this requires adjusting the mapping the variance components for the season and year terms so that they are pooled and that we are not estimating an individual variance for each level of season and year. We so this using the <code>vast_make_adjustments</code> function.</p>
+<p>3c. Fitting VAST seasonal model. With the adjustments made, we then use the <code>vast_fit_sdm</code> function to fit the model. When doing this, we pass in the adjusted <code>fit_model</code> object with the correct parameter mapping.</p></li>
+<li><p>Making inferences from the fitted VAST seasonal model</p>
+<p>4a. Visualizing covariate effects</p>
+<p>4b. Making projections</p></li>
+</ol>
+</div>
+<div id="output-3" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Output<a href="species-distribution-model-fitting-and-projecting.html#output-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The output from this stage includes the model fitted object, and then some results associated with inferences we hope to make from the fitted model – including marginal effect plots of fitted covariate smooth functions, maps of predicted density, and time series of total estimated biomass within spatial regions of interest. Most relevant to our specific project goals, one of the outputs from this stage is the projected species density at grid locations within the DFO/NOAA NEFSC spatial domain for fall-summer-spring seasons from 1985-2100.</p>
+</div>
+<div id="next-stages-3" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> Next stages<a href="species-distribution-model-fitting-and-projecting.html#next-stages-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The output from this stage is then summarized and used to produce the data and visualizations for the <a href="results-visualization-and-communication.html#results-visualization-and-communication">FishViz RShiny application</a>.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="enhancing-biological-data-with-environmental-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="results-visualization-and-communication.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

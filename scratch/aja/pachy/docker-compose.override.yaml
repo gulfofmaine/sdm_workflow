@@ -1,6 +1,0 @@
-services:
-  samp_dat_prep:
-    # Here is where we could have mountings for user-specific file paths, like Box
-    #volumes:
-        #- ~/Box/Mills Lab/Projects/NASA_UNSDG19/Data:/home/rstudio/box_data
-     

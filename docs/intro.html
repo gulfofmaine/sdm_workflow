@@ -4,27 +4,26 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 1 About the Project | Navigating the SDM Workflow Repository</title>
-  <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
-  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+  <title>Chapter 1 Project Overview | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</title>
+  <meta name="description" content="Chapter 1 Project Overview | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 1 About the Project | Navigating the SDM Workflow Repository" />
+  <meta property="og:title" content="Chapter 1 Project Overview | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
   <meta property="og:type" content="book" />
   
   
-  <meta property="og:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
   <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 1 About the Project | Navigating the SDM Workflow Repository" />
+  <meta name="twitter:title" content="Chapter 1 Project Overview | A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic" />
   
-  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  
   
 
 <meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
 
 
-<meta name="date" content="2021-09-21" />
+<meta name="date" content="2022-04-27" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,8 +31,7 @@
   
   
 <link rel="prev" href="index.html"/>
-<link rel="next" href="cmip6-data.html"/>
-<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<link rel="next" href="biological-data-collection.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -51,73 +49,11 @@
 
 
 
-<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
-<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
 
 
-<style type="text/css">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-</style>
 
 
 </head>
@@ -132,32 +68,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
-<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> About the Project</a></li>
-<li class="chapter" data-level="2" data-path="cmip6-data.html"><a href="cmip6-data.html"><i class="fa fa-check"></i><b>2</b> CMIP6 Data</a>
+<li><a href="index.html#preface">Preface<span></span></a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Project Overview<span></span></a>
 <ul>
-<li class="chapter" data-level="2.1" data-path="cmip6-data.html"><a href="cmip6-data.html#support-function-sources"><i class="fa fa-check"></i><b>2.1</b> Support Function Sources:</a></li>
-<li class="chapter" data-level="2.2" data-path="cmip6-data.html"><a href="cmip6-data.html#accessing-data"><i class="fa fa-check"></i><b>2.2</b> Accessing Data</a></li>
-<li class="chapter" data-level="2.3" data-path="cmip6-data.html"><a href="cmip6-data.html#preparing-date-keys-for-cmip6-models"><i class="fa fa-check"></i><b>2.3</b> Preparing Date Keys for CMIP6 Models</a></li>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#repository-orientation"><i class="fa fa-check"></i><b>1.1</b> Repository Orientation<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="oisstv2-data.html"><a href="oisstv2-data.html"><i class="fa fa-check"></i><b>3</b> OISSTv2 Data</a>
+<li class="chapter" data-level="2" data-path="biological-data-collection.html"><a href="biological-data-collection.html"><i class="fa fa-check"></i><b>2</b> Biological Data Collection<span></span></a>
 <ul>
-<li class="chapter" data-level="3.1" data-path="oisstv2-data.html"><a href="oisstv2-data.html#accessing-data-1"><i class="fa fa-check"></i><b>3.1</b> Accessing Data</a></li>
-<li class="chapter" data-level="3.2" data-path="oisstv2-data.html"><a href="oisstv2-data.html#data-preparation"><i class="fa fa-check"></i><b>3.2</b> Data Preparation</a></li>
+<li class="chapter" data-level="2.1" data-path="biological-data-collection.html"><a href="biological-data-collection.html#steps"><i class="fa fa-check"></i><b>2.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="2.2" data-path="biological-data-collection.html"><a href="biological-data-collection.html#output"><i class="fa fa-check"></i><b>2.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="2.3" data-path="biological-data-collection.html"><a href="biological-data-collection.html#next-stages"><i class="fa fa-check"></i><b>2.3</b> Next stages<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="soda-reanalysis-data.html"><a href="soda-reanalysis-data.html"><i class="fa fa-check"></i><b>4</b> SODA Reanalysis Data</a>
+<li class="chapter" data-level="3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html"><i class="fa fa-check"></i><b>3</b> Environmental Data Collection<span></span></a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="soda-reanalysis-data.html"><a href="soda-reanalysis-data.html#accessing-data-2"><i class="fa fa-check"></i><b>4.1</b> Accessing Data</a></li>
-<li class="chapter" data-level="4.2" data-path="soda-reanalysis-data.html"><a href="soda-reanalysis-data.html#data-preparation-1"><i class="fa fa-check"></i><b>4.2</b> Data Preparation</a></li>
+<li class="chapter" data-level="3.1" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#steps-1"><i class="fa fa-check"></i><b>3.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="3.2" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#output-1"><i class="fa fa-check"></i><b>3.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="3.3" data-path="environmental-data-collection.html"><a href="environmental-data-collection.html#next-stages-1"><i class="fa fa-check"></i><b>3.3</b> Next stages<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="preparing-climatologies.html"><a href="preparing-climatologies.html"><i class="fa fa-check"></i><b>5</b> Preparing Climatologies</a>
+<li class="chapter" data-level="4" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html"><i class="fa fa-check"></i><b>4</b> Enhancing Biological Data With Environmental Data<span></span></a>
 <ul>
-<li class="chapter" data-level="5.1" data-path="preparing-climatologies.html"><a href="preparing-climatologies.html#climatology-preparation"><i class="fa fa-check"></i><b>5.1</b> Climatology Preparation</a></li>
+<li class="chapter" data-level="4.1" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#steps-2"><i class="fa fa-check"></i><b>4.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="4.2" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#output-2"><i class="fa fa-check"></i><b>4.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="4.3" data-path="enhancing-biological-data-with-environmental-data.html"><a href="enhancing-biological-data-with-environmental-data.html#next-stages-2"><i class="fa fa-check"></i><b>4.3</b> Next stages<span></span></a></li>
 </ul></li>
-<li class="chapter" data-level="6" data-path="bias-corrections.html"><a href="bias-corrections.html"><i class="fa fa-check"></i><b>6</b> Bias-Corrections</a>
+<li class="chapter" data-level="5" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html"><i class="fa fa-check"></i><b>5</b> Species Distribution Model Fitting and Projecting<span></span></a>
 <ul>
-<li class="chapter" data-level="6.1" data-path="bias-corrections.html"><a href="bias-corrections.html#performing-bias-corrections"><i class="fa fa-check"></i><b>6.1</b> Performing Bias Corrections</a></li>
+<li class="chapter" data-level="5.1" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#steps-3"><i class="fa fa-check"></i><b>5.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#output-3"><i class="fa fa-check"></i><b>5.2</b> Output<span></span></a></li>
+<li class="chapter" data-level="5.3" data-path="species-distribution-model-fitting-and-projecting.html"><a href="species-distribution-model-fitting-and-projecting.html#next-stages-3"><i class="fa fa-check"></i><b>5.3</b> Next stages<span></span></a></li>
 </ul></li>
+<li class="chapter" data-level="6" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html"><i class="fa fa-check"></i><b>6</b> Results Visualization and Communication<span></span></a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#steps-4"><i class="fa fa-check"></i><b>6.1</b> Steps<span></span></a></li>
+<li class="chapter" data-level="6.2" data-path="results-visualization-and-communication.html"><a href="results-visualization-and-communication.html#output-4"><i class="fa fa-check"></i><b>6.2</b> Output<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="future-work-plans.html"><a href="future-work-plans.html"><i class="fa fa-check"></i><b>7</b> Future Work Plans<span></span></a></li>
+<li class="chapter" data-level="8" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>8</b> References<span></span></a></li>
 </ul>
 
       </nav>
@@ -167,7 +113,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Navigating the SDM Workflow Repository</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic</a>
           </h1>
         </div>
 
@@ -175,10 +121,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="intro" class="section level1" number="1">
-<h1><span class="header-section-number">Chapter 1</span> About the Project</h1>
-<p>The aim of this project is to use the projected future climate states, as forecast by an ensemble of CMIP6 models, to predict shifts in the distribution and abundances of marine species along the Northeastern United States.</p>
+<div id="intro" class="section level1 hasAnchor" number="1">
+<h1><span class="header-section-number">Chapter 1</span> Project Overview<a href="intro.html#intro" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>The goal of this project is to produce marine species distribution and abundance projections within the northwest Atlantic ocean, following open science principles to make all code and data available. To reach this goal, we</p>
+<ul>
+<li>integrate fisheries-independent bottom trawl data from the NOAA Northeast Fisheries Science Center spring/fall and Department of Fisheries and Oceans Canada spring/summer surveys</li>
+<li>fit a seasonal Vector Autoregressive Spatio-Temporal (VAST) model (Thorson and Barnett 2017, Thorson 2019), which accounts for habitat covariates, catchability covariates, persistent spatial variability, ephemeral spatio-temporal variability, and potential temporal correlations in species occurrence across the study domain in successive seasons<br />
+</li>
+<li>make inferences from the fitted model, including evaluating model fit to the data and validating the predictive skill of the model using holdout, testing data<br />
+</li>
+<li>use the fitted model to project species distribution and abundance from 1982 to 2100 with potential environmental conditions estimated from an ensemble of statistically downscaled, biased corrected, CMIP6 global climate models<br />
+</li>
+<li>develop an RShiny application to visualize key findings and provide users easy access to results data</li>
+</ul>
+<div id="repository-orientation" class="section level2 hasAnchor" number="1.1">
+<h2><span class="header-section-number">1.1</span> Repository Orientation<a href="intro.html#repository-orientation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This repository pulls together methods and processes from six different species distribution modeling workflow stages. Given the diverse processes involved in this workflow, and that the different stages will not always be completed together (i.e., lab work may focus on CMIP6 environmental data, with no connection to a distribution modeling effort), some code exists in independent GitHub repositories. Rather than trying to force all the code into one repository or copy code over and risk it becoming outdated, we have decided to instead present the different stages while thoroughly documenting the specific functions used and where they are located.</p>
+<ol style="list-style-type: decimal">
+<li>Biological Data Collection.</li>
+</ol>
+<p>This stage of the workflow is where we collect and process fisheries-independent bottom trawl data from the NOAA Northeast Fisheries Science Center spring/fall surveys and the Department of Oceans Canada spring/summer surveys. The code for this stage is found within the <a href="https://github.com/aallyn/TargetsSDM">TargetsSDM GitHub repository</a>.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Environmental Data Collection.</li>
+</ol>
+<p>This stage of the workflow includes our efforts to gather environmental data that describes historical conditions as well as future projected conditions from an ensemble of CMIP6 global climate models. Some of the code for this stage is found in a <a href="https://github.com/adamkemberling/oisst_mainstays">repository focused on gathering and processing NOAA OISST data</a>, while code for working with CMIP6 data are found within this repository and <a href="https://github.com/gulfofmaine/sdm_workflow/tree/main/CMIP6_processing">the CMIP6_Processing folder</a>.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Enhancing Biological Data with Environmental Data.</li>
+</ol>
+<p>This stage of the workflow details how we enhance the biological data observations with environmental data, which will eventually be used as covariates in the species distribution modeling process. The code for this stage is found within the <a href="https://github.com/aallyn/TargetsSDM">TargetsSDM GitHub repository</a>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Species Distribution Model Fitting and Projecting.</li>
+</ol>
+<p>This stage of the workflow is where we confront the tidy occupancy model dataframe with a seasonal VAST model. After fitting the model, we then make statistical inferences and use the fitted model to project species distribution and abundance changes under future environmental conditions expected from the CMIP6 global climate models. The code for this stage is found within the <a href="https://github.com/aallyn/TargetsSDM">TargetsSDM GitHub repository</a>.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Results Visualization and Communication.</li>
+</ol>
+<p>The final stage of the workflow generates an RShiny application to visualize species distribution model projection results and provide user access to these results data. The code for this stage is found within the <a href="https://github.com/gulfofmaine/FishVis">FishViz repository</a>.</p>
 
+</div>
 </div>
             </section>
 
@@ -186,7 +166,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
         </div>
       </div>
 <a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="cmip6-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="biological-data-collection.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

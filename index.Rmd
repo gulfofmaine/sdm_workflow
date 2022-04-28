@@ -1,5 +1,5 @@
 ---
-title: "Navigating the SDM Workflow Repository"
+title: "A species distribution modeling workflow to project changes in marine species occurrence in the northwest Atlantic"
 author: "Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
@@ -8,7 +8,7 @@ documentclass: book
 biblio-style: apalike
 link-citations: yes
 github-repo: gulfofmaine/sdm_workflow
-description: "This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown"
+description: ""
 ---
 
 ```{r}
@@ -17,21 +17,19 @@ gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 
 # Preface{-}
 
-Welcome to the SDM Workflow Repository documentation. Here you will find documentation detailing the methods used and the processing steps for down-scaling CMIP6 models for use in species distribution modeling and forecasting efforts.
+Welcome to the SDM Workflow Repository documentation. Here you will find documentation detailing the methods we used to project marine species distribution and abundance changes within the northwest Atlantic given future climate conditions from CMIP6 global climate models.
 
-**About:**
-This project and its results are the work of the Integrated Systems Ecology Laboratory at the Gulf of Maine Research Institute led by Dr. Kathy Mills.
+**About**
 
-Funding for this project has been provided by:
+This project and its results are the work of the [Integrated Systems Ecology Laboratory](https://gmri.org/commitments/science/integrated-systems-ecology/) at the Gulf of Maine Research Institute led by [Dr. Kathy Mills](https://gmri.org/our-approach/staff/kathy-mills/).
 
-**Quick Links**
+Funding for this project was provided by a Department of Fisheries and Oceans Canada Ecosystems and Oceans Science Contribution grant and a NOAA Cooperative Institute for the North Atlantic Region grant. 
 
-For quick access to some of the summary reports use these links:
+**Contacts**
 
-[1. CMIP Bias Correction Steps with OISST](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_OISST_bias_corrections.html)
+For questions or more information, [please contact us](mailto:aallyn@gmri.org)!
 
-[2. CMIP Bias Correction Steps with SODA](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/CMIP_SODA_bias_corrections.html)
+**Acknowledging Our Place**
 
-[3. Bias-Corrected Time lines with Reference Data](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/Bias_Correction_Validation.html)
+The Gulf of Maine Research Institute is located in Portland, Maine. For thousands of years, the Abenaki people fished, hunted, farmed, and cared for these lands. The Abenaki people are part of a larger Wabanaki Confederacy, including the Penobscot, Passamaquody, Maliseet and Mi'kmaq sovereign peoples. We now live and do our work on their unceded homelands. As an organization, we are in the process of working with local tribes to strengthen our relationship, and in doing so, co-develop a more formal land acknowledgement statement. 
 
-[4. Bias-Corrected Time Lines for Study Regions](https://gulfofmaine.github.io/sdm_workflow/CMIP6_processing/R/Bias_Correction_Spaghetti.html)
