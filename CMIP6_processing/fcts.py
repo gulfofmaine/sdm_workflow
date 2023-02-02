@@ -6,13 +6,13 @@ import os
 
 # functions
 def path_switch_unix(x, folder, user_name):
-    default = ["/Users/", user_name, "/Box/Mills Lab/Projects/"]
+    default = ["/Users/", user_name, "/Library/CloudStorage/Box-Box/Mills Lab/Projects/"]
     paths = {
-        'RES_Data': "".join(["/Users/", user_name, "/Box/RES_Data/", folder]),
-        'Mills Lab': "".join(["/Users/", user_name, "/Box/Mills Lab/", folder]),
-        'Cliamte Change Ecology Lab': "".join(["Users/", user_name, "/Box/Climate Change Ecology Lab/", folder]),
-        'NSF OKN': "".join(["/Users/", user_name, "/Box/NSF OKN Demo Data/", folder]),
-        'root': "".join(["/Users/", user_name, "/Box/", folder])
+        'RES_Data': "".join(["/Users/", user_name, "/Library/CloudStorage/Box-Box/RES_Data/", folder]),
+        'Mills Lab': "".join(["/Users/", user_name, "/Library/CloudStorage/Box-Box/Mills Lab/", folder]),
+        'Cliamte Change Ecology Lab': "".join(["Users/", user_name, "/Library/CloudStorage/Box-Box/Climate Change Ecology Lab/", folder]),
+        'NSF OKN': "".join(["/Users/", user_name, "/Library/CloudStorage/Box-Box/NSF OKN Demo Data/", folder]),
+        'root': "".join(["/Users/", user_name, "/Library/CloudStorage/Box-Box/", folder])
     }
     return paths.get(x, "".join(default))
 

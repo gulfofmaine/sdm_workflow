@@ -1,3 +1,4 @@
+import matplotlib as plt
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -13,33 +14,34 @@ import glob
 import os
 
 # models we care about
-source_list = ['IPSL-CM6A-LR',
-'CMCC-CM2-SR5',
-'MIROC6',
-'CanESM5',
-'MRI-ESM2-0',
-'HadGEM3-GC31-LL',
-'GFDL-CM4',
-'CESM2',
-'CESM2-WACCM',
-'CIESM',
-'CNRM-CM6-1',
-'CNRM-ESM2-1',
-'CanESM5-CanOE',
-'EC-Earth3',
-'EC-Earth3-Veg',
-'EC-Earth3-Veg-LR',
-'FGOALS-g3',
-'FGOALS-f3-L',
-'FIO-ESM-2-0',
-'GISS-E2-1-G',
-'INM-CM4-8',
-'INM-CM5-0',
-'MIROC-ES2L',
-'NESM3',
-'NorESM2-LM',
-'NorESM2-MM',
-'UKESM1-0-LL']
+source_list = ['CanESM5']
+# source_list = ['IPSL-CM6A-LR',
+# 'CMCC-CM2-SR5',
+# 'MIROC6',
+# 'CanESM5',
+# 'MRI-ESM2-0',
+# 'HadGEM3-GC31-LL',
+# 'GFDL-CM4',
+# # 'CESM2',
+# 'CESM2-WACCM',
+# 'CIESM',
+# 'CNRM-CM6-1',
+# 'CNRM-ESM2-1',
+# 'CanESM5-CanOE',
+# 'EC-Earth3',
+# 'EC-Earth3-Veg',
+# 'EC-Earth3-Veg-LR',
+# 'FGOALS-g3',
+# 'FGOALS-f3-L',
+# 'FIO-ESM-2-0',
+# 'GISS-E2-1-G',
+# 'INM-CM4-8',
+# 'INM-CM5-0',
+# 'MIROC-ES2L',
+# 'NESM3',
+# 'NorESM2-LM',
+# 'NorESM2-MM',
+# 'UKESM1-0-LL']
 
 
 # enter the var of interest {so, thetao, tos}
@@ -49,8 +51,8 @@ variable_id = 'so'
 table_id = 'Omon'
 
 # Enter the experiments of interest {'historical', 'ssp585', 'ssp126'}
-filter_list = ['ssp126']
-experiment_run = 'ssp126'
+filter_list = ['ssp245']
+experiment_run = 'ssp245'
 
 
 grp1 = 'source_id' # used for grouping normally don't need to change
@@ -58,9 +60,9 @@ grp2 = 'member_id' # used for grouping normally don't need to change
 
 
 # save path
-UsrName='mdzaugis'
+UsrName='aallyn'
 Group='RES_Data'
-Folder='CMIP6/SSP1_26/'
+Folder='CMIP6/SSP2_45/'
 
 path = fcts.shared_path(user_name=UsrName, group=Group, folder=Folder)
 # Browse Catalog
