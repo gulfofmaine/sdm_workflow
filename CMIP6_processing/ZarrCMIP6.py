@@ -14,7 +14,7 @@ import glob
 import os
 
 # models we care about
-source_list = ['CanESM5']
+source_list = ['MRI-ESM2-0']
 # source_list = ['IPSL-CM6A-LR',
 # 'CMCC-CM2-SR5',
 # 'MIROC6',
@@ -304,7 +304,7 @@ for file in folder:
 
 folder = glob.glob(f'{path}BottomT/StGrid/*')
 variable_id = "thetao"
-minmax = {'name': [name], 'minVal': [minVal], 'maxVal': [maxVal]}
+minmax = {'name': [], 'minVal': [], 'maxVal': []}
 minmaxdf = pd.DataFrame(data=minmax)
 for file in folder:
     df = fcts.checkMinMax(file, variable_id)
